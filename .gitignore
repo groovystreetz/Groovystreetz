@@ -1,0 +1,89 @@
+# =============================================================================
+# General / Universal
+# =============================================================================
+# Ignore Operating System files
+.DS_Store
+Thumbs.db
+._*
+
+# Ignore IDE and editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore log files
+*.log
+*.log.*
+
+# Ignore local environment variables.
+# NEVER commit secret keys, passwords, or credentials.
+# Keep a `.env.example` file in your repo instead.
+.env
+.env.*
+!.env.example
+
+
+# =============================================================================
+# Python / Django Backend
+# =============================================================================
+# Ignore Python virtual environments
+/backend/venv/
+venv/
+env/
+.venv
+
+# Ignore Python compiled files and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ignore Django local database file
+/backend/db.sqlite3
+db.sqlite3
+
+# Ignore testing and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# Ignore package distribution folders
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+
+# =============================================================================
+# Node.js / React / Vite Frontend
+# =============================================================================
+# Ignore Node.js dependency directory
+/frontend/node_modules/
+node_modules/
+
+# Ignore package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ignore frontend build output directory
+/frontend/dist/
+/frontend/.next/
+/frontend/out/
+
+# Ignore Vite-specific cache directory
+/frontend/.vite/
+
+# Lockfiles (optional, but often good to commit for applications)
+# If you want to commit your lockfile for reproducible builds,
+# remove the following line.
+# package-lock.json
