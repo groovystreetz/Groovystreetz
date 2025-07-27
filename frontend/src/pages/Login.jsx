@@ -36,7 +36,7 @@ function Login() {
     setTouched({ email: true, password: true })
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/login/', {
+        await axios.post('http://127.0.0.1:8000/api/login/', {
           email,
           password,
         })
@@ -63,12 +63,12 @@ function Login() {
       scope: 'openid email profile',
       callback: async (tokenResponse) => {
         try {
-          const response = await axios.post('http://127.0.0.1:8000/api/auth/google/', {
+          await axios.post('http://127.0.0.1:8000/api/auth/google/', {
             access_token: tokenResponse.access_token,
           });
           alert('Google login successful!');
           // Optionally: save user info, redirect, etc.
-        } catch (error) {
+        } catch {
           alert('Google login failed.');
         }
       },

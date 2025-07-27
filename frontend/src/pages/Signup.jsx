@@ -48,7 +48,7 @@ function Signup() {
     setTouched({ name: true, email: true, password: true, confirmPassword: true })
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/register/', {
+        await axios.post('http://127.0.0.1:8000/api/register/', {
           username: form.name, // or just 'name' if your backend expects that
           email: form.email,
           password: form.password,
