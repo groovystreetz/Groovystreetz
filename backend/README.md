@@ -74,32 +74,36 @@ docker-compose down
 
 ## 🧪 Testing API Endpoints
 
-You can test the API endpoints using `curl` from your terminal.
+### Local Email/Password Authentication
 
-> **Note:** These commands assume you have just started the servers and have no active session. The `-c cookie.txt` flag saves the session cookie, and `-b cookie.txt` sends it with the next request.
+These endpoints are for traditional username/password login and registration.
 
 **1. Register a New User**
 ```bash
 curl -X POST http://127.0.0.1:8000/api/register/ \
 -H "Content-Type: application/json" \
--d '{"username": "testuser", "email": "test@example.com", "password": "some_strong_password123"}'
+-d '{"username": "localuser", "email": "local@example.com", "password": "a_secure_password"}'
 ```
 
-**2. Log In**```bash
+**2. Log In and Save Session Cookie**
+This command saves the session cookie to `cookie.txt` for use in subsequent requests.
+```bash
 curl -X POST http://127.0.0.1:8000/api/login/ \
 -H "Content-Type: application/json" \
--d '{"username": "testuser", "password": "some_strong_password123"}' \
--c cookie.txt
-```
+-d '{"email": "local@example.com", "password": "a_secure_password"}' \
+-c cookie.txt```
 
-**3. Get Current User (Protected Route)**
+**3. Get Current User Details (Protected)**
+This command uses the saved cookie to authenticate. The endpoint is provided by `dj-rest-auth`.
 ```bash
-curl -X GET http://127.0.0.1:8000/api/user/ -b cookie.txt```
+curl -X GET http://127.0.0.1:8000/api/auth/user/ -b cookie.txt
+```
 
 **4. Log Out**
 ```bash
 curl -X POST http://127.0.0.1:8000/api/logout/ -b cookie.txt
 ```
+
 ---
 
 ## 🔧 Troubleshooting
@@ -134,3 +138,50 @@ python manage.py createsuperuser
 # Follow the prompts to set a username, email, and password.
 ```
 You can now log in at `http://127.0.0.1:8000/admin/`.
+
+---
+
+### **How to Use**
+
+You can copy these sections and paste them into your `backend/README.md` file, replacing the older content.
+
+---
+
+### **Updated `README.md` Sections**
+
+#### **(Section 1: Add this new section to your README)**
+
+## 🧪 Testing Social Authentication (Google)
+
+This backend is configured to handle Google social logins. You can test the entire flow without a frontend by using the Google OAuth 2.0 Playground.
+
+**Setup:**
+1.  **Google Cloud Console:** Make sure your OAuth 2.0 Client ID has the Playground's redirect URI authorized: `https://developers.google.com/oauthplayground`
+2.  **Run Your Server:** Your Django server must be running (`python manage.py runserver`).
+
+### Testing Steps:
+
+**Step 1: Get an Access Token from Google**
+
+1.  Go to the [Google OAuth Playground](https://developers.google.com/oauthplayground/).
+2.  Click the gear icon ⚙️, check **"Use your own OAuth credentials"**, and enter your `Client ID` and `Client Secret` from your `.env` file.
+3.  In the "Select & authorize APIs" box, enter both of these scopes, separated by a space:
+    `https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`
+4.  Click **"Authorize APIs"** and complete the Google login pop-up.
+5.  Click **"Exchange authorization code for tokens"**.
+6.  A new **`access_token`** will appear. **Copy this entire token string.**
+
+**Step 2: Send the Token to Your Django API**
+
+Open a terminal and use the following `curl` command, pasting the `access_token` you just copied.
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/auth/google/ \
+-H "Content-Type: application/json" \
+-d '{"access_token": "PASTE_YOUR_COPIED_ACCESS_TOKEN_HERE"}'
+```
+
+**Expected Result:**
+You will get a `200 OK` response with a JSON object containing the newly created or logged-in user's details (e.g., `pk`, `email`, `username`, etc.), as defined by your `CustomUserDetailsSerializer`.
+
+---
