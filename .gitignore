@@ -88,3 +88,5 @@ pnpm-debug.log*
 # If you want to commit your lockfile for reproducible builds,
 # remove the following line.
 # package-lock.json
+
+/backend/plan.md 
