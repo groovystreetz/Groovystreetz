@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
+import axios from 'axios'
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -28,15 +29,52 @@ function Login() {
     setTouched({ ...touched, [e.target.name]: true })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const validationErrors = validate()
     setErrors(validationErrors)
     setTouched({ email: true, password: true })
     if (Object.keys(validationErrors).length === 0) {
-      alert('Login successful (mock)')
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/login/', {
+          email,
+          password,
+        })
+        // Save token/session if returned, e.g. localStorage.setItem('token', response.data.key)
+        alert('Login successful!')
+        // Optionally redirect to dashboard/home
+      } catch (error) {
+        if (error.response && error.response.data) {
+          setErrors({ api: error.response.data.detail || 'Login failed.' })
+        } else {
+          setErrors({ api: 'Login failed. Please try again.' })
+        }
+      }
     }
   }
+
+  const handleGoogleLogin = () => {
+    if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+      alert('Google API not loaded. Please try again in a moment.');
+      return;
+    }
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, // <-- Replace with your real client ID
+      scope: 'openid email profile',
+      callback: async (tokenResponse) => {
+        try {
+          const response = await axios.post('http://127.0.0.1:8000/api/auth/google/', {
+            access_token: tokenResponse.access_token,
+          });
+          alert('Google login successful!');
+          // Optionally: save user info, redirect, etc.
+        } catch (error) {
+          alert('Google login failed.');
+        }
+      },
+    });
+    client.requestAccessToken();
+  };
 
   return (
     <div className="flex items-center justify-center ">
@@ -82,6 +120,9 @@ function Login() {
               />
               {errors.email && touched.email && (
                 <p className="text-red-500 text-xs mt-1  left-0 text-left">{errors.email}</p>
+              )}
+              {errors.api && (
+                <p className="text-red-500 text-xs mt-1 text-left">{errors.api}</p>
               )}
             </div>
             <div className="relative">
@@ -129,8 +170,15 @@ function Login() {
             <div className="flex-grow h-px bg-gray-200" />
           </div>
           <div className="flex space-x-4 mb-6">
-            <button className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50">
-              <span className="mr-2 text-lg"><img className='w-6 h-6' src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="google" /></span> Google
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50"
+              onClick={handleGoogleLogin}
+            >
+              <span className="mr-2 text-lg">
+                <img className='w-6 h-6' src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="google" />
+              </span>
+              Google
             </button>
             <button className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50">
               <span className="mr-2 text-lg"><img className='w-6 h-6' src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/2048px-Facebook_f_logo_%282019%29.svg.png" alt="facebook" /></span> Facebook
