@@ -30,6 +30,7 @@ class LoginView(views.APIView):
         serializer = LoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             user = serializer.validated_data
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
             # Use the CustomUserDetailsSerializer here as well for a consistent response
             return response.Response(CustomUserDetailsSerializer(user).data, status=status.HTTP_200_OK)
