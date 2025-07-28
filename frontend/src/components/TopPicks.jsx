@@ -110,19 +110,19 @@ const TopPicks = () => {
         <button
           onClick={handlePrev}
           disabled={startIdx === 0}
-          className={`absolute left-0 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
+          className={`absolute left-10 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
             startIdx === 0 ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          <FiChevronLeft className="text-3xl" />
+          <FiChevronLeft className="text-5xl" />
         </button>
 
         {/* Cards + Text */}
-        <div className="flex gap-10 mx-10 w-full justify-center">
+        <div className="flex gap-11 mx-10 w-full justify-center">
           {visibleProducts.map((product, index) => (
             <div
               key={product.id}
-              className="relative flex flex-col items-start overflow-visible min-w-[200px]"
+              className="relative flex flex-col items-start overflow-visible min-w-[250px]"
             >
               {/* Number partially behind the card */}
               <span
@@ -137,11 +137,11 @@ const TopPicks = () => {
               </span>
 
               {/* Image Card */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-[-5px_5px_5px_rgba(0,0,0,0.5)] overflow-visible transform transition-transform duration-500 hover:scale-105">
+              <div className="bg-white border border-black shadow-[-5px_5px_5px_rgba(0,0,0,0.5)] overflow-visible transform transition-transform duration-500 hover:scale-105">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-48 h-60 object-cover rounded-lg"
+                  className="w-56 h-60 object-cover rounded-lg"
                 />
               </div>
 
@@ -165,13 +165,13 @@ const TopPicks = () => {
         <button
           onClick={handleNext}
           disabled={startIdx >= products.length - cardCount}
-          className={`absolute right-0 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
+          className={`absolute right-10 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
             startIdx >= products.length - cardCount
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}
         >
-          <FiChevronRight className="text-3xl" />
+          <FiChevronRight className="text-5xl" />
         </button>
       </div>
     </div>

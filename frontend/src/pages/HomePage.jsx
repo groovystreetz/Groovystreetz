@@ -9,27 +9,32 @@ import SpotlightProducts from "../components/SpotlightProducts";
 import Banners from "../components/BannerSection"; // Assuming you have a Banners component
 import VideoSection from "../components/VideoSection"; // Assuming you have a VideoSection component
 import NoPrint from "../components/NoPrint";
+import ShopFor from "../components/ShopFor";
 import SellingPartners from "../components/SellingPartners";
+import Slogan from "../components/Slogan";
+import BackToTop from "../components/BackToTop";
 import Footer from "../components/Footer"; 
 
 const HomePage = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4">
         <HeroSlider />
+      <div className="container mx-auto px-4">
         <NewArrivals />
         <SpotlightProducts />
         <Categories />
         <TopPicks />
         <ShopByGroovy />
-        <SpotlightProducts />
         <Banners />
         <VideoSection />
         <NoPrint />
+        <ShopFor />
+        <Slogan />    
       </div>
       <SellingPartners />
       <Footer />
+      <BackToTop />
     </>
   );
 };

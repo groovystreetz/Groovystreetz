@@ -24,7 +24,7 @@ const ShopByGroovy = () => (
                 alt={product.name}
                 className="w-32 h-32 object-cover rounded-lg mb-4"
               />
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 {product.name}
               </h3>
               <p className="text-orange-400 font-bold">{product.price}</p>

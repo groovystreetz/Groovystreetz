@@ -40,7 +40,7 @@ function HeroSlider() {
   };
 
   return (
-    <div className="relative mt-20 max-w-6xl mx-auto overflow-hidden border border-black shadow-lg">
+    <div className="relative mt-[66px] w-full overflow-hidden border border-black shadow-lg">
       {/* Slider wrapper */}
       <div
         className="flex transition-transform duration-700 ease-in-out"
