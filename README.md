@@ -7,15 +7,15 @@ Welcome to the Groovystreetz E-Commerce project! This is a modern, full-stack we
 
 The application is designed to provide a seamless shopping experience, from browsing products to secure checkout. The backend is a robust Django REST API, and the frontend is a dynamic single-page application built with React.
 
-### Core Features
+## Documentation
 
-*   **Decoupled Architecture:** A separate Django backend and React frontend allow for independent development, scaling, and maintenance.
-*   **User Authentication:** Secure user registration, login, and session management.
-*   **Product Catalog:** A comprehensive system for managing products, variants, and categories.
-*   **Shopping Cart & Orders:** Full-featured shopping cart and order creation functionality.
-*   **Admin Dashboard:** A powerful administrative interface for managing users, products, and sales data.
+For detailed information about the project, please refer to the documentation in the `docs/` directory:
 
----
+*   **[Introduction](docs/introduction.md)**: High-level overview of the backend architecture and technologies.
+*   **[Authentication API](docs/authentication.md)**: Detailed documentation for all user authentication endpoints.
+*   **[API Endpoints](docs/api_endpoints.md)**: A comprehensive guide to all API endpoints.
+*   **[Data Models](docs/data_models.md)**: A description of the database models, their fields, and their relationships.
+*   **[Webhooks](docs/webhooks.md)**: Specific documentation for the Printful webhook.
 
 ## Technology Stack
 
@@ -38,8 +38,6 @@ This project leverages a modern and powerful set of technologies for both the ba
 *   **API Communication:** Axios
 *   **Routing:** React Router DOM
 
----
-
 ## Project Structure
 
 The repository is organized into two main directories, keeping a clear separation between the frontend and backend code.
@@ -54,5 +52,7 @@ The repository is organized into two main directories, keeping a clear separatio
 │
 └── README.md       # You are here.
 ```
+
+
 
 For detailed setup instructions and API documentation, please refer to the `README.md` file inside the respective `backend` or `frontend` directory.

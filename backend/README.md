@@ -1,136 +1,162 @@
 # Groovystreetz E-Commerce - Backend API
 
-This directory contains the Django backend for the Groovystreetz project. It provides a RESTful API for handling user authentication, product management, and orders. The project is configured to run with a PostgreSQL database managed by Docker.
-
-### Technology Stack
-
-- Python 3
-- Django & Django REST Framework
-- PostgreSQL (via Docker)
-- Docker Compose
-- `python-dotenv` for environment management
+This directory contains the Django backend for the Groovystreetz project. It provides a RESTful API for handling user authentication, product management, and orders.
 
 ---
 
 ## 🚀 Setup and Installation
 
-Follow these steps to get the development server running on your local machine. **Docker Desktop must be installed and running before you begin.**
+Follow these steps to get the development server running on your local machine.
 
-### 1. Initial Project Setup
+### 1. Prerequisites
 
-If you are setting this project up for the first time:
+*   Python 3.8+
+*   Docker and Docker Compose (for running the PostgreSQL database)
+
+### 2. Initial Setup
 
 ```bash
 # 1. Navigate into the backend directory
 cd backend/
 
-# 2. Create a local environment file by copying the example
-# (This file is ignored by Git and stores your secret credentials)
+# 2. Create a local environment file
 cp .env.example .env
 
 # 3. Create and activate a Python virtual environment
-python3 -m venv venv
-source venv/bin/activate
-# On Windows, use: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
 
-# 4. Install all required Python dependencies
+# 4. Install dependencies
 pip install -r requirements.txt
-```
 
-*Note: You can modify the credentials in your newly created `.env` file if needed. The default values are already configured to work with the `docker-compose.yml` file.*
-
-### 2. Running the Development Environment
-
-This is the standard workflow you will use every day.
-
-```bash
-# 1. Start the PostgreSQL database container in the background
+# 5. Start the PostgreSQL database container
 docker-compose up -d
 
-# 2. IMPORTANT: Wait for the database to be ready
-# The first time you run this, the database needs 10-15 seconds to initialize.
-# If you get a "Connection refused" error, it means you ran the next command too quickly.
-# See the Troubleshooting section for more details.
-
-# 3. Apply any new database migrations
+# 6. Apply database migrations
 python manage.py migrate
 
-# 4. Run the Django development server
+# 7. Create a superuser to access the admin panel
+python manage.py createsuperuser
+```
+
+### 3. Running the Development Server
+
+```bash
 python manage.py runserver
 ```
 
-The backend API will now be available at `http://127.0.0.1:8000/`.
-
-### 3. Stopping the Environment
-
-When you are finished working, you can stop the database container.
-
-```bash
-docker-compose down
-```
-*Your database data is safely stored in a Docker volume and will be available the next time you run `docker-compose up -d`.*
+The API will be available at `http://127.0.0.1:8000/`.
 
 ---
 
-## 🧪 Testing API Endpoints
+##  API Reference
 
-You can test the API endpoints using `curl` from your terminal.
+For more detailed documentation, see the `docs/` directory in the project root.
 
-> **Note:** These commands assume you have just started the servers and have no active session. The `-c cookie.txt` flag saves the session cookie, and `-b cookie.txt` sends it with the next request.
+### Authentication
 
-**1. Register a New User**
-```bash
-curl -X POST http://127.0.0.1:8000/api/register/ \
--H "Content-Type: application/json" \
--d '{"username": "testuser", "email": "test@example.com", "password": "some_strong_password123"}'
-```
+#### `POST /api/register/`
+Registers a new user.
 
-**2. Log In**```bash
-curl -X POST http://127.0.0.1:8000/api/login/ \
--H "Content-Type: application/json" \
--d '{"username": "testuser", "password": "some_strong_password123"}' \
--c cookie.txt
-```
-
-**3. Get Current User (Protected Route)**
-```bash
-curl -X GET http://127.0.0.1:8000/api/user/ -b cookie.txt```
-
-**4. Log Out**
-```bash
-curl -X POST http://127.0.0.1:8000/api/logout/ -b cookie.txt
-```
----
-
-## 🔧 Troubleshooting
-
-### "Connection refused" Error on `migrate`
-
-```
-django.db.utils.OperationalError: ... connection refused
-```
-
-This is the most common issue. It means the PostgreSQL database inside the Docker container hasn't finished starting up yet when Django tries to connect to it.
-
-**Solution:**
-1.  Wait 10-15 seconds after running `docker-compose up -d` before you run `python manage.py migrate`.
-2.  You can check if the database is ready by viewing its logs. When you see `database system is ready to accept connections`, it's safe to proceed.
+*   **Example Request:**
     ```bash
-    docker-compose logs -f db
-    # Press Ctrl+C to exit the logs when ready.
+    curl -X POST http://127.0.0.1:8000/api/register/ \
+    -H "Content-Type: application/json" \
+    -d '{
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "TestPassword123",
+        "password2": "TestPassword123"
+    }'
+    ```
+*   **Success Response:** `201 Created`
+    ```json
+    {
+        "detail": "Verification e-mail sent."
+    }
     ```
 
-### Creating a Superuser
+#### `POST /api/login/`
+Authenticates a user and returns a session cookie.
 
-To access the Django Admin site, you'll need a superuser account.
+*   **Example Request:**
+    ```bash
+    curl -c cookies.txt -X POST http://127.0.0.1:8000/api/login/ \
+    -H "Content-Type: application/json" \
+    -d '{
+        "email": "test@example.com",
+        "password": "TestPassword123"
+    }'
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "pk": 1,
+        "email": "test@example.com",
+        "username": "testuser",
+        "role": "customer"
+    }
+    ```
 
-```bash
-# Make sure your containers are running
-docker-compose up -d
+### Products & Categories
 
-# Create the superuser
-python manage.py createsuperuser
+#### `GET /api/categories/`
+Get a list of all product categories.
 
-# Follow the prompts to set a username, email, and password.
-```
-You can now log in at `http://127.0.0.1:8000/admin/`.
+*   **Example Request:**
+    ```bash
+    curl http://127.0.0.1:8000/api/categories/
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    [
+        {"id": 1, "name": "T-Shirts", "slug": "t-shirts"},
+        {"id": 2, "name": "Hoodies", "slug": "hoodies"}
+    ]
+    ```
+
+#### `GET /api/products/`
+Get a list of all products.
+
+*   **Example Request:**
+    ```bash
+    curl http://127.0.0.1:8000/api/products/
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    [
+        {
+            "id": 1,
+            "name": "Groovy T-Shirt",
+            "price": "25.00",
+            "category": "T-Shirts"
+        }
+    ]
+    ```
+
+### Orders
+
+#### `POST /api/orders/create/`
+Create a new order. (Authentication required)
+
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/orders/create/ \
+    -H "Content-Type: application/json" \
+    -H "X-CSRFToken: <your_csrf_token>" \
+    -d '{
+        "shipping_address": "123 Main St",
+        "total_price": "25.00",
+        "items": [{"product": 1, "quantity": 1, "price": "25.00"}]
+    }'
+    ```
+*   **Success Response:** `201 Created`
+    ```json
+    {
+        "id": 1,
+        "items": [{"product": 1, "quantity": 1, "price": "25.00"}],
+        "total_price": "25.00",
+        "shipping_address": "123 Main St",
+        "status": "pending"
+    }
+    ```

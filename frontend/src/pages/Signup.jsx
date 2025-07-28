@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
+import axios from 'axios'
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false)
@@ -40,14 +41,27 @@ function Signup() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const validationErrors = validate()
     setErrors(validationErrors)
     setTouched({ name: true, email: true, password: true, confirmPassword: true })
     if (Object.keys(validationErrors).length === 0) {
-      // Proceed with signup
-      alert('Signup successful (mock)')
+      try {
+        await axios.post('http://127.0.0.1:8000/api/register/', {
+          username: form.name, // or just 'name' if your backend expects that
+          email: form.email,
+          password: form.password,
+        })
+        alert('Signup successful!')
+        // Optionally redirect to login or home
+      } catch (error) {
+        if (error.response && error.response.data) {
+          setErrors({ api: error.response.data.detail || 'Signup failed.' })
+        } else {
+          setErrors({ api: 'Signup failed. Please try again.' })
+        }
+      }
     }
   }
 
@@ -161,6 +175,9 @@ function Signup() {
                 <p className="text-red-500 text-xs mt-1 text-left">{errors.confirmPassword}</p>
               )}
             </div>
+            {errors.api && (
+              <p className="text-red-500 text-xs mt-1 text-left">{errors.api}</p>
+            )}
             <button
               type="submit"
               className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-3 rounded-lg transition-colors"
