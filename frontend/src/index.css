@@ -4,6 +4,7 @@
 
 /* Your custom styles can go here */
 
+
 /* Your custom styles can go here */
 
 :root {
@@ -32,7 +33,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
+  /* display: flex; */
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
