@@ -1,31 +1,34 @@
 # backend/api/serializers.py
 
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from dj_rest_auth.serializers import UserDetailsSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer as DefaultRegisterSerializer
 
-# Get the custom user model ('api.CustomUser') that we defined in settings.py
+
 User = get_user_model()
 
-
 class RegisterSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user registration. It creates a new CustomUser.
-    """
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = User
-        # We will register using email and password. 'username' is included because
-        # it is still part of the underlying AbstractUser model.
-        fields = ('id', 'username', 'email', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ('id', 'username', 'email', 'password', 'password2')
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
 
     def create(self, validated_data):
-        # This will now correctly create an instance of our CustomUser model
-        user = User.objects.create_user(
+        user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password']
         )
+        user.set_password(validated_data['password'])
+        user.save()
         return user
 
 
@@ -59,6 +62,84 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
         model = User
         # Define the specific fields to include in the API response.
         # This gives us full control over what user data is exposed.
-        fields = ('pk', 'email', 'username', 'first_name', 'last_name')
-        # You can add any custom fields from your CustomUser model here, e.g.:
-        # fields = ('pk', 'email', 'first_name', 'last_name', 'profile_picture_url')
+        fields = ('pk', 'email', 'username', 'first_name', 'last_name', 'role')
+        # Added 'role' field to expose the user's role in API responses
+
+
+# ==============================================================================
+# E-COMMERCE SERIALIZERS
+# ==============================================================================
+from .models import Category, Product
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'name', 'slug')
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    # To display the category name instead of its ID
+    category = serializers.StringRelatedField()
+
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'description', 'price', 'image', 'category')
+
+
+from .models import Design
+
+class DesignSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Design
+        fields = ('id', 'user', 'image_url', 'created_at')
+        read_only_fields = ('created_at',)
+
+
+from .models import Order, OrderItem
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ('product', 'quantity', 'price')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Order
+        fields = ('id', 'user', 'items', 'total_price', 'shipping_address', 'created_at', 'status')
+        read_only_fields = ('created_at', 'status')
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        order = Order.objects.create(**validated_data)
+        for item_data in items_data:
+            OrderItem.objects.create(order=order, **item_data)
+        return order
+
+
+# ==============================================================================
+# USER PROFILE SERIALIZERS
+# ==============================================================================
+from .models import Address
+
+class AddressSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Address
+        fields = '__all__'
+
+
+from .models import Wishlist
+
+class WishlistSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Wishlist
+        fields = ('user', 'products')

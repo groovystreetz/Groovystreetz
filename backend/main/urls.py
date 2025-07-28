@@ -6,6 +6,7 @@ from django.urls import path, include
 # Imports for the custom Google Login View
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from api.views import UserAccountView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from rest_framework.response import Response
 from rest_framework import status
@@ -47,7 +48,10 @@ urlpatterns = [
     # Your custom API endpoints for email/password registration
     path('api/', include('api.urls')),
     
-    # Standard dj-rest-auth endpoints (for password reset, user details etc.)
+    # Override the default user details view to add DELETE functionality
+    path('api/auth/user/', UserAccountView.as_view(), name='rest_user_details'),
+    
+    # Standard dj-rest-auth endpoints (for password reset, etc.)
     path('api/auth/', include('dj_rest_auth.urls')),
     
     # dj-rest-auth endpoint for email/password registration

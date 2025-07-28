@@ -148,6 +148,7 @@ REST_AUTH = {
     'TOKEN_MODEL': None,
     'SESSION_LOGIN': True, 
     'USER_DETAILS_SERIALIZER': 'api.serializers.CustomUserDetailsSerializer',
+    'REGISTER_SERIALIZER': 'api.serializers.RegisterSerializer',
 }
 
 
@@ -171,10 +172,13 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']  # Required field
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 # Make email verification optional.
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 # Ensure each email address is unique in the database.
 ACCOUNT_UNIQUE_EMAIL = True
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Suppress remaining dj_rest_auth package warnings (from the package itself)
 import warnings
