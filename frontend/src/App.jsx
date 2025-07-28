@@ -4,7 +4,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import VerifyOTP from './pages/VerifyOTP'
 import ResetPassword from './pages/ResetPassword'
 import Signup from './pages/Signup'
-import HomePage from './pages/Homepage'
+import HomePage from './pages/HomePage'
 import './App.css'
 
 function App() {
