@@ -55,4 +55,6 @@ The repository is organized into two main directories, keeping a clear separatio
 └── README.md       # You are here.
 ```
 
+
+
 For detailed setup instructions and API documentation, please refer to the `README.md` file inside the respective `backend` or `frontend` directory.
