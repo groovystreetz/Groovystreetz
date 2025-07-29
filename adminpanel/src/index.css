@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 24 100% 99%; /* very light orange background */
+    --foreground: 0 0% 3.9%; /* black text for better readability */
+    --card: 0 0% 100%; /* white cards */
+    --card-foreground: 0 0% 3.9%; /* black text on cards */
+    --popover: 0 0% 100%; /* white popovers */
+    --popover-foreground: 0 0% 3.9%; /* black text on popovers */
+    --primary: 24 94% 50%; /* vibrant orange */
+    --primary-foreground: 0 0% 98%; /* white */
+    --secondary: 24 100% 95%; /* light orange secondary */
+    --secondary-foreground: 0 0% 9%; /* black text on secondary */
+    --muted: 24 100% 96%; /* very light orange muted */
+    --muted-foreground: 0 0% 45.1%; /* gray text for muted elements */
+    --accent: 24 100% 92%; /* pale orange accent */
+    --accent-foreground: 0 0% 9%; /* black text on accent */
+    --destructive: 0 84.2% 60.2%; /* keep red for destructive */
+    --destructive-foreground: 0 0% 98%; /* white */
+    --border: 24 94% 85%; /* soft orange border */
+    --input: 24 94% 90%; /* light orange input */
+    --ring: 24 94% 50%; /* vibrant orange ring */
+    --chart-1: 24 94% 50%; /* orange */
+    --chart-2: 24 80% 60%; /* lighter orange */
+    --chart-3: 24 70% 70%; /* even lighter orange */
+    --chart-4: 24 60% 80%; /* very light orange */
+    --chart-5: 24 50% 90%; /* almost white orange */
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 100%; /* white background */
+    --sidebar-foreground: 0 0% 3.9%; /* black text for better readability */
+    --sidebar-primary: 24 94% 50%; /* vibrant orange */
+    --sidebar-primary-foreground: 0 0% 98%; /* white */
+    --sidebar-accent: 24 100% 92%; 
+    --sidebar-accent-foreground: 0 0% 9%; /* black text on accent */
+    --sidebar-border: 24 94% 85%; /* soft orange border */
+    --sidebar-ring: 24 94% 50%; /* vibrant orange ring */
+  }
+  .dark {
+    --background: 24 80% 8%; /* very dark orange background */
+    --foreground: 24 100% 92%; /* light orange text */
+    --card: 24 80% 12%; /* dark orange cards */
+    --card-foreground: 24 100% 92%; /* light orange text */
+    --popover: 24 80% 12%; /* dark orange popovers */
+    --popover-foreground: 24 100% 92%; /* light orange text */
+    --primary: 24 94% 50%; /* vibrant orange */
+    --primary-foreground: 0 0% 100%; /* white */
+    --secondary: 24 80% 20%; /* dark orange secondary */
+    --secondary-foreground: 24 100% 88%; /* light orange text */
+    --muted: 24 80% 15%; /* dark orange muted */
+    --muted-foreground: 24 60% 70%; /* medium orange text */
+    --accent: 24 80% 25%; /* deep orange accent */
+    --accent-foreground: 24 100% 92%; /* light orange text */
+    --destructive: 0 62.8% 30.6%; /* keep dark red for destructive */
+    --destructive-foreground: 0 0% 98%; /* white */
+    --border: 24 80% 25%; /* deep orange border */
+    --input: 24 80% 20%; /* dark orange input */
+    --ring: 24 94% 50%; /* vibrant orange ring */
+    --chart-1: 24 94% 50%; /* orange */
+    --chart-2: 24 80% 60%; /* lighter orange */
+    --chart-3: 24 70% 70%; /* even lighter orange */
+    --chart-4: 24 60% 80%; /* very light orange */
+    --chart-5: 24 50% 90%; /* almost white orange */
+    --sidebar-background: 24 80% 15%; /* dark orange background */
+    --sidebar-foreground: 24 100% 92%; /* light orange text */
+    --sidebar-primary: 24 94% 50%; /* vibrant orange */
+    --sidebar-primary-foreground: 0 0% 100%; /* white */
+    --sidebar-accent: 24 80% 25%; /* deep orange accent */
+    --sidebar-accent-foreground: 24 100% 92%; /* light orange text */
+    --sidebar-border: 24 80% 25%; /* deep orange border */
+    --sidebar-ring: 24 94% 50%; /* vibrant orange ring */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
