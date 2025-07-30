@@ -8,9 +8,9 @@ on:
     # Only run for pull requests that target the 'main' branch
     branches:
       - main
-    # Only consider files within the 'frontend' directory
+    # Only consider files within the 'frontend/client' directory
     paths:
-      - 'frontend/**'
+      - 'frontend/client/**'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -22,7 +22,7 @@ jobs:
     # Set the default working directory for all steps in this job
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: ./frontend/client
 
     # A sequence of tasks that will be executed as part of the job
     steps:
@@ -34,13 +34,12 @@ jobs:
       - name: Setup Node.js LTS
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x' # <-- UPDATED from '20.x' to the latest LTS
+          node-version: '22.x'
           # This step caches npm dependencies to speed up subsequent workflow runs
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/client/package-lock.json
 
       # Step 3: Install dependencies using 'npm ci'
-      # 'npm ci' is generally faster and more reliable for CI environments than 'npm install'
       - name: Install Dependencies
         run: npm ci
 
@@ -49,7 +48,6 @@ jobs:
         run: npm run lint
 
       # Step 5: Run the test suite
-      # The '--if-present' flag ensures this step doesn't fail if you have no 'test' script yet
       - name: Run Tests
         run: npm test --if-present
 
