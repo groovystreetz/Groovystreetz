@@ -75,3 +75,17 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+.shine-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+

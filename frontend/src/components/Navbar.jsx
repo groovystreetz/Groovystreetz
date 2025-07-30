@@ -33,7 +33,7 @@ const Navbar = () => {
       {/* Hamburger */}
       <div className="flex items-center">
         <IconButton onClick={() => setDrawerOpen(true)} edge="start">
-          <MenuIcon sx={{ color: "black" }} />
+          <MenuIcon sx={{ color: "white" }} />
         </IconButton>
       </div>
 
@@ -52,10 +52,10 @@ const Navbar = () => {
             className="w-full pl-10 pr-4 py-2 rounded-full border border-black bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
-        <FaShoppingCart className="text-2xl text-black cursor-pointer" />
-        <FaHeart className="text-2xl text-black cursor-pointer" title="Wishlist" />
-        <FaTruck className="text-2xl text-black cursor-pointer" title="Track Your Order" />
-        <FaUserCircle className="text-2xl text-black cursor-pointer" />
+        <FaShoppingCart className="text-2xl text-white cursor-pointer" />
+        <FaHeart className="text-2xl text-white cursor-pointer" title="Wishlist" />
+        <FaTruck className="text-2xl text-white cursor-pointer" title="Track Your Order" />
+        <FaUserCircle className="text-2xl text-white cursor-pointer" />
       </div>
 
       {/* Side Menu */}

@@ -15,16 +15,13 @@ function HeroSlider() {
   const length = banners.length;
   const timeoutRef = useRef(null);
 
-  // Auto-scroll every 4 seconds
   useEffect(() => {
     resetTimeout();
     timeoutRef.current = setTimeout(() => {
       setCurrent((prevIndex) => (prevIndex === length - 1 ? 0 : prevIndex + 1));
     }, 4000);
 
-    return () => {
-      resetTimeout();
-    };
+    return () => resetTimeout();
   }, [current]);
 
   const resetTimeout = () => {
@@ -40,40 +37,35 @@ function HeroSlider() {
   };
 
   return (
-    <div className="relative mt-[66px] w-full overflow-hidden border border-black shadow-lg">
+    <div className="relative w-full mt-[66px] border border-black overflow-hidden shadow-lg">
       {/* Slider wrapper */}
       <div
         className="flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {banners.map(({ id, image, alt }) => (
-          <div
-            key={id}
-            className="min-w-full select-none"
-          >
+          <div key={id} className="min-w-full select-none">
             <img
               src={image}
               alt={alt}
-              className="w-full h-72 md:h-96 object-cover"
+              className="  h-72 md:h-96 object-cover"
               draggable={false}
             />
           </div>
         ))}
       </div>
 
-      {/* Left arrow */}
+      {/* Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-600 hover:border-none bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
+        className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-600 bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
         aria-label="Previous Slide"
       >
         <FiChevronLeft size={32} />
       </button>
-
-      {/* Right arrow */}
       <button
         onClick={nextSlide}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600 hover:border-none bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
+        className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600 bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
         aria-label="Next Slide"
       >
         <FiChevronRight size={32} />
@@ -86,7 +78,7 @@ function HeroSlider() {
             key={idx}
             onClick={() => setCurrent(idx)}
             className={`w-3 h-3 rounded-full transition-colors ${
-              idx === current ? "bg-orange-400" : "bg-white bg-opacity-50"
+              idx === current ? "bg-orange-500" : "bg-gray-300 bg-opacity-50"
             }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
@@ -95,5 +87,6 @@ function HeroSlider() {
     </div>
   );
 }
+
 
 export default HeroSlider;

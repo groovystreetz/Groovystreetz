@@ -1,64 +1,266 @@
-import React from "react";
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import React, { useState } from "react";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaPinterestP,
+  FaYoutube,
+} from "react-icons/fa";
+import { FiMail, FiPhone } from "react-icons/fi"; // Right package
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const Footer = () => {
-  return (
-    <footer className="mt-10 bg-orange-400 text-white w-full pb-0 pt-10">
-      {/* Outer full-width wrapper */}
-      <div className="w-full p-0 m-0">
-        {/* Inner centered grid content */}
-        <div className="grid md:grid-cols-4 gap-8 px-4 md:px-8">
-          {/* Logo & Description */}
-          <div>
-            <img src="/logo.png" alt="Logo" className="h-12 mb-4" />
-            <p className="text-sm text-orange-100">
-              Your go-to destination for quality products and smooth shopping experiences.
-            </p>
-          </div>
+  const [isExpanded, setIsExpanded] = useState(false);
 
-          {/* Quick Links */}
+  return (
+<footer className="w-full pt-10 pb-6 bg-gradient-to-t from-orange-400 to-orange-500 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Sections */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+          {/* Need Help? */}
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-white">Quick Links</h2>
-            <ul className="space-y-2 text-orange-100 text-sm">
-              <li><a href="#" className="hover:text-white">Home</a></li>
-              <li><a href="#" className="hover:text-white">Shop</a></li>
-              <li><a href="#" className="hover:text-white">About Us</a></li>
-              <li><a href="#" className="hover:text-white">Contact</a></li>
+            <h3 className="font-bold mb-3">Need Help?</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Track Order
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Returns & Exchange
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  FAQs
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Shipping
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Cancellation
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Social Media */}
+          {/* Company */}
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-white">Follow Us</h2>
-            <div className="flex space-x-4 text-xl text-orange-100">
-              <a href="#" className="hover:text-white"><FaFacebookF /></a>
-              <a href="#" className="hover:text-white"><FaTwitter /></a>
-              <a href="#" className="hover:text-white"><FaInstagram /></a>
-              <a href="#" className="hover:text-white"><FaLinkedinIn /></a>
-            </div>
+            <h3 className="font-bold mb-3">Company</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Careers
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Collaborations
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Media
+                </a>
+              </li>
+            </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* More Info */}
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-white">Newsletter</h2>
-            <p className="text-orange-100 text-sm mb-3">Subscribe to get the latest updates.</p>
-            <form className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="px-4 py-2 rounded-md text-gray-800 text-sm outline-none w-full"
-              />
-              <button className="bg-white hover:bg-orange-100 text-orange-600 px-4 py-2 rounded-md text-sm w-full sm:w-auto">
-                Subscribe
-              </button>
-            </form>
+            <h3 className="font-bold mb-3">More Info</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Terms & Conditions
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Sitemap
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Popular Categories (Toggle) */}
+          <div>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center justify-between w-full font-bold mb-3 bg-transparent text-white"
+            >
+              Popular Categories
+              {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
+            </button>
+            {isExpanded && (
+              <ul className="space-y-2 text-sm bg-transparent">
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Men's T-Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Women's T-Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Full Sleeve T-Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Hoodies & Sweatshirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Jackets
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Joggers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Shorts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Vests
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Polo T-Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Co-ord Sets
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Plus Size
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:underline">
+                    Boxers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Jeans & Denims
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-white">
+                    Trousers & Pyjamas
+                  </a>
+                </li>
+              </ul>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div>
+            <h3 className="font-bold mb-3">Navigation</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Dummy Link 1
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Dummy Link 2
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white">
+                  Dummy Link 3
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="w-full mt-10 border-t border-orange-300 pt-6 text-sm text-center text-orange-100 px-4 md:px-8">
-        © {new Date().getFullYear()} BrandName. All rights reserved.
+        {/* Divider */}
+        <div className="my-8 border-t border-white"></div>
+
+        {/* Bottom Section */}
+        <div className="text-sm">
+          <h3 className="font-bold mb-3">Connect With Us</h3>
+          <div className="flex space-x-4 text-xl mb-3">
+            <a href="#" className="text-gray-300 hover:text-white">
+              <FaFacebookF />
+            </a>
+            <a href="#" className="text-gray-300 hover:text-white">
+              <FaInstagram />
+            </a>
+            <a href="#" className="text-gray-300 hover:text-white">
+              <FaTwitter />
+            </a>
+            <a href="#" className="text-gray-300 hover:text-white">
+              <FaPinterestP />
+            </a>
+            <a href="#" className="text-gray-300 hover:text-white">
+              <FaYoutube />
+            </a>
+          </div>
+          <div className="space-y-1">
+            <p className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200">
+              <FiMail /> dummy@example.com
+            </p>
+            <p className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200">
+              <FiPhone /> +1 234 567 890 (Dummy Number)
+            </p>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="my-6 border-t border-white"></div>
+
+        {/* Copyright */}
+        <div className="text-center text-xs text-white">
+          © {new Date().getFullYear()} The Souled Store. All Rights Reserved.
+        </div>
       </div>
     </footer>
   );
