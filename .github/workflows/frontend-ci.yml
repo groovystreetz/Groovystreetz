@@ -14,45 +14,160 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # We have a single job called "build-and-test"
-  build-and-test:
-    # The type of runner that the job will run on
+  # Job 1: Detect all projects in the frontend directory
+  detect-projects:
     runs-on: ubuntu-latest
-
-    # Set the default working directory for all steps in this job
-    defaults:
-      run:
-        working-directory: ./frontend
-
-    # A sequence of tasks that will be executed as part of the job
+    outputs:
+      projects: ${{ steps.find-projects.outputs.projects }}
+      has-projects: ${{ steps.find-projects.outputs.has-projects }}
     steps:
-      # Step 1: Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changed files detection
+      
+      # Step 2: Find all projects with package.json files
+      - name: Find Frontend Projects
+        id: find-projects
+        run: |
+          # Find all package.json files in frontend subdirectories (not the root frontend)
+          projects=$(find frontend -name "package.json" -not -path "frontend/package.json" | sed 's|/package.json||' | sort)
+          
+          # If no projects found in subdirectories, check if there's a root frontend project
+          if [ -z "$projects" ] && [ -f "frontend/package.json" ]; then
+            projects="frontend"
+          fi
+          
+          if [ -n "$projects" ]; then
+            # Convert to JSON array format for matrix strategy
+            json_projects=$(echo "$projects" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "projects=$json_projects" >> $GITHUB_OUTPUT
+            echo "has-projects=true" >> $GITHUB_OUTPUT
+            echo "Found projects:"
+            echo "$projects"
+          else
+            echo "projects=[]" >> $GITHUB_OUTPUT
+            echo "has-projects=false" >> $GITHUB_OUTPUT
+            echo "No frontend projects found"
+          fi
 
-      # Step 2: Sets up the latest LTS version of Node.js (v22.x)
+  # Job 2: Build and test each detected project
+  build-and-test:
+    needs: detect-projects
+    # Only run if we found projects
+    if: needs.detect-projects.outputs.has-projects == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      # Run jobs in parallel for each project
+      matrix:
+        project: ${{ fromJson(needs.detect-projects.outputs.projects) }}
+      # Don't cancel other jobs if one fails
+      fail-fast: false
+    
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      # Step 2: Check if this specific project has changes
+      - name: Check for Changes in Project
+        id: changes
+        run: |
+          # Get the list of changed files
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
+          
+          # Check if any changed files are in this project directory
+          if echo "$changed_files" | grep -q "^${{ matrix.project }}/"; then
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in ${{ matrix.project }}"
+          else
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in ${{ matrix.project }}"
+          fi
+      
+      # Step 3: Setup Node.js (only if there are changes)
       - name: Setup Node.js LTS
+        if: steps.changes.outputs.has-changes == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x' # <-- UPDATED from '20.x' to the latest LTS
-          # This step caches npm dependencies to speed up subsequent workflow runs
+          node-version: '22.x'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      # Step 3: Install dependencies using 'npm ci'
-      # 'npm ci' is generally faster and more reliable for CI environments than 'npm install'
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+      
+      # Step 4: Install dependencies
       - name: Install Dependencies
-        run: npm ci
-
-      # Step 4: Run the linter to check code formatting and quality
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: ./${{ matrix.project }}
+        run: |
+          if [ -f "package-lock.json" ]; then
+            npm ci
+          elif [ -f "yarn.lock" ]; then
+            yarn install --frozen-lockfile
+          elif [ -f "pnpm-lock.yaml" ]; then
+            npm install -g pnpm
+            pnpm install --frozen-lockfile
+          else
+            npm install
+          fi
+      
+      # Step 5: Run linter
       - name: Lint Code
-        run: npm run lint
-
-      # Step 5: Run the test suite
-      # The '--if-present' flag ensures this step doesn't fail if you have no 'test' script yet
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: ./${{ matrix.project }}
+        run: |
+          # Check if lint script exists before running
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script found, skipping..."
+          fi
+      
+      # Step 6: Run tests
       - name: Run Tests
-        run: npm test --if-present
-
-      # Step 6: Create a production build to catch any build-time errors
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: ./${{ matrix.project }}
+        run: |
+          # Check if test script exists before running
+          if npm run | grep -q "test"; then
+            npm run test
+          else
+            echo "No test script found, skipping..."
+          fi
+      
+      # Step 7: Build the project
       - name: Build Production App
-        run: npm run build
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: ./${{ matrix.project }}
+        run: |
+          # Check if build script exists before running
+          if npm run | grep -q "build"; then
+            npm run build
+          else
+            echo "No build script found, skipping..."
+          fi
+      
+      # Step 8: Skip message for unchanged projects
+      - name: Skip Unchanged Project
+        if: steps.changes.outputs.has-changes == 'false'
+        run: |
+          echo "⏭️ Skipping ${{ matrix.project }} - no changes detected"
+
+  # Job 3: Summary job that depends on all builds
+  summary:
+    needs: [detect-projects, build-and-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check Results
+        run: |
+          if [ "${{ needs.detect-projects.outputs.has-projects }}" == "false" ]; then
+            echo "✅ No frontend projects found to build"
+          elif [ "${{ needs.build-and-test.result }}" == "success" ]; then
+            echo "✅ All frontend projects built successfully"
+          elif [ "${{ needs.build-and-test.result }}" == "skipped" ]; then
+            echo "⏭️ All frontend projects were skipped (no changes)"
+          else
+            echo "❌ Some frontend projects failed to build"
+            exit 1
+          fi
