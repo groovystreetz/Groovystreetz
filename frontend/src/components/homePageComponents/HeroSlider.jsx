@@ -48,7 +48,7 @@ function HeroSlider() {
             <img
               src={image}
               alt={alt}
-              className="  h-72 md:h-96 object-cover"
+              className="  h-[350px] md:h-[500px] object-cover"
               draggable={false}
             />
           </div>

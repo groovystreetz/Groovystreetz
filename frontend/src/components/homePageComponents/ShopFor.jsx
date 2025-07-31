@@ -2,9 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 
 // Replace with actual image paths
-import tshirtImg from "../assets/men.jpg";
-import menImg from "../assets/men.jpg";
-import kidsImg from "../assets/men.jpg";
+import tshirtImg from "../../assets/men.jpg";
+import menImg from "../../assets/men.jpg";
+import kidsImg from "../../assets/men.jpg";
 
 const categories = [
   { id: 1, name: "Women", image: tshirtImg },
