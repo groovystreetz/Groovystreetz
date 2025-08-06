@@ -6,6 +6,7 @@ import ResetPassword from './pages/ResetPassword'
 import Signup from './pages/Signup'
 import HomePage from './pages/HomePage'
 import './App.css'
+import Dashboard from './pages/dashboard'
 
 function App() {
 
@@ -17,7 +18,10 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<div className='w-screen h-screen overflow-x-hidden'>
+          <Dashboard />
+        </div>} />
       </Routes>
     </Router>
   )
