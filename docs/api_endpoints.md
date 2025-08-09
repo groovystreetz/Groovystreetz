@@ -46,16 +46,18 @@ These endpoints are publicly accessible and do not require authentication.
             "name": "Groovy T-Shirt",
             "description": "A cool t-shirt",
             "price": "25.00",
-            "image": "",
-            "category": "T-Shirts"
+            "image": "/media/products/t-shirt.jpg",
+            "category": "T-Shirts",
+            "stock": 100
         },
         {
             "id": 2,
             "name": "Cozy Hoodie",
             "description": "A warm hoodie",
             "price": "50.00",
-            "image": "",
-            "category": "Hoodies"
+            "image": "/media/products/hoodie.jpg",
+            "category": "Hoodies",
+            "stock": 50
         }
     ]
     ```
@@ -172,5 +174,42 @@ These endpoints are restricted to users with the `admin` role.
     {
         "total_sales": 150.00,
         "total_orders": 2
+    }
+    ```
+
+### Manage Products
+
+This endpoint provides full CRUD (Create, Read, Update, Delete) functionality for products.
+
+*   **List All Products:** `GET /api/admin/products/`
+*   **Create a Product:** `POST /api/admin/products/`
+*   **Retrieve a Product:** `GET /api/admin/products/{id}/`
+*   **Update a Product:** `PUT /api/admin/products/{id}/` or `PATCH /api/admin/products/{id}/`
+*   **Delete a Product:** `DELETE /api/admin/products/{id}/`
+
+*   **Example: Create a Product**
+    Since this is a `multipart/form-data` request (for the image upload), it's best to use a tool like `curl` with the `-F` flag.
+
+    ```bash
+    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/products/ \
+    -H "X-CSRFToken: <your_admin_csrf_token>" \
+    -F "name=New Awesome T-Shirt" \
+    -F "description=This is the best t-shirt ever." \
+    -F "price=29.99" \
+    -F "category=1" \
+    -F "stock=150" \
+    -F "image=@/path/to/your/image.jpg"
+    ```
+
+*   **Success Response:** `201 Created`
+    ```json
+    {
+        "id": 3,
+        "name": "New Awesome T-Shirt",
+        "description": "This is the best t-shirt ever.",
+        "price": "29.99",
+        "image": "/media/products/image.jpg",
+        "category": 1,
+        "stock": 150
     }
     ```

@@ -28,7 +28,8 @@ Represents a product for sale.
 *   `name`: `CharField` - The name of the product.
 *   `description`: `TextField` - A description of the product.
 *   `price`: `DecimalField` - The price of the product.
-*   `image`: `URLField` - A URL to the product image.
+*   `image`: `ImageField` - An uploaded image file for the product.
+*   `stock`: `PositiveIntegerField` - The number of items in stock.
 
 ### `Design`
 
@@ -45,7 +46,6 @@ Represents a customer's order.
 *   `status`: `CharField` - The status of the order (`pending`, `shipped`, `delivered`, `cancelled`).
 *   `total_price`: `DecimalField` - The total price of the order.
 *   `shipping_address`: `TextField` - The shipping address for the order.
-*   `printful_order_id`: `CharField` - The ID of the order in the Printful system.
 *   `tracking_number`: `CharField` - The tracking number for the shipment.
 
 ### `OrderItem`

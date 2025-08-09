@@ -27,4 +27,3 @@ The backend provides a comprehensive set of features to support the Groovystreet
 *   **E-commerce**: Core e-commerce functionality, including product and category management, order processing, and inventory tracking.
 *   **User Profiles**: User-specific features such as order history, address book, and wishlists.
 *   **Admin Dashboard**: A set of admin-only endpoints for managing users, orders, and viewing sales reports.
-*   **Printful Integration**: A webhook for receiving order status updates from Printful.

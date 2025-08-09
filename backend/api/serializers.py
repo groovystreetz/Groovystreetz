@@ -83,7 +83,15 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'image', 'category')
+        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock')
+
+
+class AdminProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock')
+
+
 
 
 from .models import Design

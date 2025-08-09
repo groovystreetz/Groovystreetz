@@ -69,11 +69,13 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.URLField(blank=True)  # URL to product image from Printful
+    image = models.ImageField(upload_to='products/', blank=True, null=True)  # Local image upload
+    stock = models.PositiveIntegerField(default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -103,7 +105,6 @@ class Order(models.Model):
     shipping_address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    printful_order_id = models.CharField(max_length=255, blank=True, null=True)
     tracking_number = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):

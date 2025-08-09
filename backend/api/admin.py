@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser, Product, Category, Order, OrderItem
 
 class CustomUserAdmin(UserAdmin):
     # Use the default UserAdmin configuration but for our CustomUser model
@@ -15,3 +15,7 @@ class CustomUserAdmin(UserAdmin):
 
 # Register your CustomUser model with the custom admin class
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Product)
+admin.site.register(Category)
+admin.site.register(Order)
+admin.site.register(OrderItem)

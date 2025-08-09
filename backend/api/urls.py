@@ -5,16 +5,17 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RegisterView, LoginView, LogoutView,
     CategoryListView, ProductListView, ProductDetailView,
-    DesignListCreateView, OrderCreateView, PrintfulWebhookView,
+    DesignListCreateView, OrderCreateView,
     OrderListView, OrderDetailView, AddressViewSet,
     WishlistView, WishlistAddView, WishlistRemoveView,
     AdminUserListView, AdminUserDetailView, AdminOrderListView,
-    AdminSalesReportView
+    AdminSalesReportView, AdminProductViewSet
 )
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'addresses', AddressViewSet, basename='address')
+router.register(r'admin/products', AdminProductViewSet, basename='admin-product')
 
 urlpatterns = [
     # Auth endpoints
@@ -44,7 +45,4 @@ urlpatterns = [
 
     # User Profile endpoints (handled by the router)
     path('', include(router.urls)),
-
-    # Webhooks
-    path('webhooks/printful/', PrintfulWebhookView.as_view(), name='printful-webhook'),
 ]
