@@ -15,7 +15,7 @@ import { orders } from "@/lib/orders"
 
 const OrderHistory = () => {
   const [selectedOrder, setSelectedOrder] = useState(null)
-  const [open, setOpen] = useState(false)
+  // const [open, setOpen] = useState(false)
 
   return (
     <Card className="glassmorphism rounded-2xl">
@@ -48,7 +48,6 @@ const OrderHistory = () => {
                       className="rounded-xl bg-transparent"
                       onClick={() => {
                         setSelectedOrder(order)
-                        setOpen(true)
                       }}
                     >
                       <Eye className="h-4 w-4 mr-1" />
