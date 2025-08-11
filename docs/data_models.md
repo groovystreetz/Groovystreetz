@@ -10,7 +10,10 @@ Stores user account information.
 
 *   `username`: `CharField` - The user's username.
 *   `email`: `EmailField` - The user's email address (used for login).
-*   `role`: `CharField` - The user's role (`customer` or `admin`).
+*   `role`: `CharField` - The user's role with three tiers:
+    *   `customer` - Default role for regular users
+    *   `admin` - Limited admin access for operations management
+    *   `superadmin` - Full system access for complete administration
 *   `is_active`: `BooleanField` - Designates whether the user's account is active.
 
 ### `Category`

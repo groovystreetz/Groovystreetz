@@ -2,6 +2,29 @@
 
 This document details the endpoints related to user authentication and account management.
 
+## Role-Based Access Control
+
+The authentication system implements a three-tier role hierarchy:
+
+*   **`customer`** - Default role assigned to all new users
+    *   Access to public endpoints
+    *   Can manage own profile, orders, designs, and wishlist
+    
+*   **`admin`** - Limited administrative access for operations
+    *   All customer permissions
+    *   View and manage all orders
+    *   Access to sales reports
+    *   Product catalog management
+    *   Cannot manage users or change roles
+    
+*   **`superadmin`** - Complete system administrator
+    *   All admin permissions  
+    *   Full user management capabilities
+    *   Can assign and change user roles
+    *   Access to all system features
+
+**Note:** Role assignments can only be changed by users with the `superadmin` role.
+
 ---
 
 ## User Registration

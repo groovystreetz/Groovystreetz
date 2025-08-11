@@ -127,17 +127,41 @@ These endpoints require authentication.
 
 ---
 
-## Admin Endpoints
+## Role-Based Access Control
 
-These endpoints are restricted to users with the `admin` role.
+The API implements a three-tier role system:
+
+*   **`customer`** - Access to public endpoints + own data (orders, wishlist, designs)
+*   **`admin`** - Limited admin access for operations (orders, sales reports, product management)
+*   **`superadmin`** - Full system access (everything admin can do + user management + role changes)
+
+---
+
+## Admin Endpoints (Limited Access)
+
+These endpoints are accessible to users with `admin` or `superadmin` roles.
+
+### Get All Orders
+
+*   **Endpoint:** `GET /api/admin/orders/`
+*   **Required Role:** `admin` or `superadmin`
+*   **Description:** List all orders in the system for management and fulfillment.
+
+---
+
+## SuperAdmin Endpoints (Full Access)
+
+These endpoints are restricted to users with the `superadmin` role only.
 
 ### Get All Users
 
 *   **Endpoint:** `GET /api/admin/users/`
+*   **Required Role:** `superadmin`
+*   **Description:** View all users in the system for user management.
 *   **Example Request:**
     ```bash
-    curl -b admin_cookies.txt -X GET http://127.0.0.1:8000/api/admin/users/ \
-    -H "X-CSRFToken: <your_admin_csrf_token>"
+    curl -b superadmin_cookies.txt -X GET http://127.0.0.1:8000/api/admin/users/ \
+    -H "X-CSRFToken: <your_superadmin_csrf_token>"
     ```
 *   **Success Response:** `200 OK`
     ```json
@@ -157,13 +181,53 @@ These endpoints are restricted to users with the `admin` role.
             "first_name": "",
             "last_name": "",
             "role": "admin"
+        },
+        {
+            "pk": 3,
+            "email": "superadmin@example.com",
+            "username": "superuser",
+            "first_name": "",
+            "last_name": "",
+            "role": "superadmin"
         }
     ]
     ```
 
+### Update User Details & Roles
+
+*   **Endpoint:** `PUT /api/admin/users/{id}/` or `PATCH /api/admin/users/{id}/`
+*   **Required Role:** `superadmin`
+*   **Description:** Update user information including role changes.
+*   **Example: Promote user to admin:**
+    ```bash
+    curl -b superadmin_cookies.txt -X PATCH http://127.0.0.1:8000/api/admin/users/2/ \
+    -H "Content-Type: application/json" \
+    -H "X-CSRFToken: <your_superadmin_csrf_token>" \
+    -d '{"role": "admin"}'
+    ```
+
+### Remove User (Soft Delete)
+
+*   **Endpoint:** `DELETE /api/admin/users/{id}/`
+*   **Required Role:** `superadmin`
+*   **Description:** Deactivate a user account (soft delete - preserves data integrity).
+*   **Example Request:**
+    ```bash
+    curl -b superadmin_cookies.txt -X DELETE http://127.0.0.1:8000/api/admin/users/2/ \
+    -H "X-CSRFToken: <your_superadmin_csrf_token>"
+    ```
+*   **Success Response:** `204 No Content`
+
+---
+
+## Shared Admin Endpoints
+
+These endpoints are accessible to both `admin` and `superadmin` roles.
+
 ### Get Sales Report
 
 *   **Endpoint:** `GET /api/admin/sales-report/`
+*   **Required Role:** `admin` or `superadmin`
 *   **Example Request:**
     ```bash
     curl -b admin_cookies.txt -X GET http://127.0.0.1:8000/api/admin/sales-report/ \
@@ -181,6 +245,7 @@ These endpoints are restricted to users with the `admin` role.
 
 This endpoint provides full CRUD (Create, Read, Update, Delete) functionality for products.
 
+*   **Required Role:** `admin` or `superadmin`
 *   **List All Products:** `GET /api/admin/products/`
 *   **Create a Product:** `POST /api/admin/products/`
 *   **Retrieve a Product:** `GET /api/admin/products/{id}/`

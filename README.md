@@ -15,7 +15,6 @@ For detailed information about the project, please refer to the documentation in
 *   **[Authentication API](docs/authentication.md)**: Detailed documentation for all user authentication endpoints.
 *   **[API Endpoints](docs/api_endpoints.md)**: A comprehensive guide to all API endpoints.
 *   **[Data Models](docs/data_models.md)**: A description of the database models, their fields, and their relationships.
-*   **[Webhooks](docs/webhooks.md)**: Specific documentation for the Printful webhook.
 
 ## Technology Stack
 
