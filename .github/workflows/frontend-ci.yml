@@ -69,6 +69,8 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changed files detection
       
       # Step 2: Check if this specific project has changes
       - name: Check for Changes in Project
