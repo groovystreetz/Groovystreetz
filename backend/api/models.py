@@ -6,10 +6,11 @@ from allauth.account.signals import user_signed_up
 from django.dispatch import receiver
 import uuid
 
-# Define the choices for the new role field
+# Define the choices for the role field
 ROLE_CHOICES = (
     ('customer', 'Customer'),
     ('admin', 'Admin'),
+    ('superadmin', 'SuperAdmin'),
 )
 
 class CustomUser(AbstractUser):
@@ -20,10 +21,10 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
 
-    # --- NEW FIELD ---
-    # This field will store the user's role.
-    # It defaults to 'customer' for all new users.
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='customer')
+    # --- ROLE FIELD ---
+    # This field will store the user's role with three tiers:
+    # customer (default), admin (limited), superadmin (full access)
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='customer')
 
     USERNAME_FIELD = 'email'  # Use email for authentication
     REQUIRED_FIELDS = ['username']  # Username is required but not used for login

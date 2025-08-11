@@ -10,7 +10,7 @@ from .serializers import (
 from .models import (
     Category, Product, Design, Order, Address, Wishlist
 )
-from .permissions import IsAdminUser
+from .permissions import IsAdminUser, IsSuperAdminUser, IsAdminOrSuperAdmin
 import requests
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -231,44 +231,57 @@ class WishlistRemoveView(views.APIView):
 class AdminProductViewSet(viewsets.ModelViewSet):
     """
     Admin endpoint for managing products.
+    Both admin and superadmin can manage products.
     """
     queryset = Product.objects.all()
     serializer_class = AdminProductSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
 
 
 class AdminUserListView(generics.ListAPIView):
     """
-    Admin endpoint for listing all users.
+    SuperAdmin endpoint for listing all users.
+    Only superadmin can view all users.
     """
     queryset = User.objects.all()
     serializer_class = CustomUserDetailsSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdminUser]
 
 
-class AdminUserDetailView(generics.RetrieveUpdateAPIView):
+class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Admin endpoint for retrieving and updating a single user.
+    SuperAdmin endpoint for retrieving, updating, and deleting users.
+    Only superadmin can manage users, change roles, and remove users.
     """
     queryset = User.objects.all()
     serializer_class = CustomUserDetailsSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdminUser]
+
+    def perform_destroy(self, instance):
+        """
+        Soft delete user by setting is_active to False instead of hard delete.
+        This preserves data integrity for orders and other related records.
+        """
+        instance.is_active = False
+        instance.save()
 
 
 class AdminOrderListView(generics.ListAPIView):
     """
     Admin endpoint for listing all orders.
+    Both admin and superadmin can view all orders.
     """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
 
 
 class AdminSalesReportView(views.APIView):
     """
     Admin endpoint for generating a sales report.
+    Both admin and superadmin can view sales reports.
     """
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
 
     def get(self, request):
         total_sales = Order.objects.aggregate(total_sales=Sum('total_price'))['total_sales'] or 0
