@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 import axios from 'axios'
 
@@ -9,6 +9,7 @@ function Login() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
+  const navigate = useNavigate()
 
   const validate = () => {
     const newErrors = {}
@@ -36,13 +37,21 @@ function Login() {
     setTouched({ email: true, password: true })
     if (Object.keys(validationErrors).length === 0) {
       try {
-        await axios.post('http://127.0.0.1:8000/api/login/', {
+        const response = await axios.post('http://127.0.0.1:8000/api/login/', {
           email,
           password,
         })
-        // Save token/session if returned, e.g. localStorage.setItem('token', response.data.key)
+        // Save token/session if returned
+        if (response.data && response.data.key) {
+          localStorage.setItem('token', response.data.key)
+        } else if (response.data && response.data.token) {
+          localStorage.setItem('token', response.data.token)
+        } else {
+          // fallback: just set a flag
+          localStorage.setItem('token', 'dummy')
+        }
         alert('Login successful!')
-        // Optionally redirect to dashboard/home
+        navigate('/')
       } catch (error) {
         if (error.response && error.response.data) {
           setErrors({ api: error.response.data.detail || 'Login failed.' })
@@ -68,6 +77,7 @@ function Login() {
           });
           alert('Google login successful!');
           // Optionally: save user info, redirect, etc.
+          navigate('/')
         } catch {
           alert('Google login failed.');
         }
