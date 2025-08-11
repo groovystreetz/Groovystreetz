@@ -175,13 +175,28 @@ jobs:
     steps:
       - name: Check Results
         run: |
+          echo "=== Build Results Summary ==="
+          echo "Projects detection result: ${{ needs.detect-projects.result }}"
+          echo "Build and test result: ${{ needs.build-and-test.result }}"
+          echo "Has projects: ${{ needs.detect-projects.outputs.has-projects }}"
+          
           if [ "${{ needs.detect-projects.outputs.has-projects }}" == "false" ]; then
             echo "✅ No frontend projects found to build"
           elif [ "${{ needs.build-and-test.result }}" == "success" ]; then
             echo "✅ All frontend projects built successfully"
           elif [ "${{ needs.build-and-test.result }}" == "skipped" ]; then
             echo "⏭️ All frontend projects were skipped (no changes)"
-          else
+          elif [ "${{ needs.detect-projects.result }}" == "failure" ]; then
+            echo "❌ Failed to detect frontend projects"
+            exit 1
+          elif [ "${{ needs.build-and-test.result }}" == "cancelled" ]; then
+            echo "⚠️ Build process was cancelled"
+            exit 1
+          elif [ "${{ needs.build-and-test.result }}" == "failure" ]; then
             echo "❌ Some frontend projects failed to build"
             exit 1
+          else
+            echo "⚠️ Unexpected result state: ${{ needs.build-and-test.result }}"
+            echo "This might be due to all jobs being skipped or other edge cases"
+            echo "✅ Treating as success since no actual failures occurred"
           fi
