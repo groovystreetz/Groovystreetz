@@ -76,8 +76,20 @@ jobs:
       - name: Check for Changes in Project
         id: changes
         run: |
-          # Get the list of changed files
-          changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
+          # Get the list of changed files using a more reliable method
+          # Use the merge base to find the common ancestor
+          if git rev-parse --verify refs/remotes/origin/${{ github.base_ref }} >/dev/null 2>&1; then
+            # If origin/base_ref exists, use it
+            changed_files=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
+          elif git rev-parse --verify ${{ github.base_ref }} >/dev/null 2>&1; then
+            # If base_ref exists locally, use it
+            changed_files=$(git diff --name-only ${{ github.base_ref }}..HEAD)
+          else
+            # Fallback: compare with the merge base of HEAD and origin/main
+            git fetch origin ${{ github.base_ref }} || git fetch origin main || true
+            merge_base=$(git merge-base HEAD origin/${{ github.base_ref }} 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null || echo "HEAD~1")
+            changed_files=$(git diff --name-only ${merge_base}..HEAD)
+          fi
           
           # Check if any changed files are in this project directory
           if echo "$changed_files" | grep -q "^${{ matrix.project }}/"; then
