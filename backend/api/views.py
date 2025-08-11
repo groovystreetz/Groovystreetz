@@ -1,14 +1,18 @@
 # backend/api/views.py
 
 from django.contrib.auth import login, logout, get_user_model
-from rest_framework import generics, views, response, status, permissions
+from rest_framework import generics, views, response, status, permissions, viewsets
+from django.utils import timezone
+from django.db import models
 from .serializers import (
     RegisterSerializer, LoginSerializer, CustomUserDetailsSerializer,
     CategorySerializer, ProductSerializer, OrderSerializer, DesignSerializer,
-    AddressSerializer, WishlistSerializer, AdminProductSerializer
+    AddressSerializer, WishlistSerializer, AdminProductSerializer,
+    CouponSerializer, AdminCouponSerializer, CouponUsageSerializer,
+    CouponValidationSerializer, ApplyCouponSerializer
 )
 from .models import (
-    Category, Product, Design, Order, Address, Wishlist
+    Category, Product, Design, Order, Address, Wishlist, Coupon, CouponUsage
 )
 from .permissions import IsAdminUser, IsSuperAdminUser, IsAdminOrSuperAdmin
 import requests
@@ -291,3 +295,192 @@ class AdminSalesReportView(views.APIView):
             'total_orders': total_orders,
         }
         return response.Response(report, status=status.HTTP_200_OK)
+
+
+# ==============================================================================
+# COUPON SYSTEM VIEWS
+# ==============================================================================
+
+class CouponValidationView(views.APIView):
+    """
+    Public endpoint for validating coupon codes before applying to order
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = CouponValidationSerializer(data=request.data)
+        if serializer.is_valid():
+            from .coupon_utils import CouponValidator
+            
+            coupon_code = serializer.validated_data['coupon_code']
+            order_total = serializer.validated_data['order_total']
+            
+            # Use anonymous user for public validation
+            user = request.user if request.user.is_authenticated else None
+            if not user:
+                return response.Response(
+                    {"error": "Authentication required to validate coupons"}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            validator = CouponValidator(coupon_code, user, order_total=order_total)
+            is_valid, errors, coupon = validator.validate()
+
+            if is_valid:
+                from .coupon_utils import CouponCalculator
+                discount_amount, final_total = CouponCalculator.calculate_discount(
+                    coupon, order_total
+                )
+                
+                return response.Response({
+                    'valid': True,
+                    'coupon': {
+                        'code': coupon.code,
+                        'name': coupon.name,
+                        'discount_type': coupon.discount_type,
+                        'discount_value': coupon.discount_value,
+                        'no_return_policy': coupon.no_return_policy
+                    },
+                    'discount_amount': discount_amount,
+                    'final_total': final_total
+                }, status=status.HTTP_200_OK)
+            else:
+                return response.Response({
+                    'valid': False,
+                    'errors': errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplyCouponView(views.APIView):
+    """
+    Apply coupon to user's current order/cart
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ApplyCouponSerializer(data=request.data)
+        if serializer.is_valid():
+            # This is a simplified version - in a real app, you'd apply to a cart/session
+            # For now, we'll just validate and return the discount info
+            coupon_code = serializer.validated_data['coupon_code']
+            
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                return response.Response({
+                    'message': f'Coupon {coupon_code} is ready to be applied to your order',
+                    'coupon': CouponSerializer(coupon).data
+                }, status=status.HTTP_200_OK)
+            except Coupon.DoesNotExist:
+                return response.Response({
+                    'error': 'Invalid coupon code'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ==============================================================================
+# ADMIN COUPON MANAGEMENT VIEWS
+# ==============================================================================
+
+class AdminCouponViewSet(viewsets.ModelViewSet):
+    """
+    Admin endpoint for managing coupons (CRUD operations)
+    Both admin and superadmin can manage coupons
+    """
+    queryset = Coupon.objects.all()
+    serializer_class = AdminCouponSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by active status if requested
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        
+        # Filter by discount type if requested
+        discount_type = self.request.query_params.get('discount_type')
+        if discount_type:
+            queryset = queryset.filter(discount_type=discount_type)
+        
+        return queryset
+
+
+class AdminCouponUsageView(generics.ListAPIView):
+    """
+    Admin endpoint for viewing coupon usage statistics
+    """
+    serializer_class = CouponUsageSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
+
+    def get_queryset(self):
+        coupon_id = self.kwargs.get('coupon_id')
+        queryset = CouponUsage.objects.all()
+        
+        if coupon_id:
+            queryset = queryset.filter(coupon_id=coupon_id)
+        
+        # Filter by date range if provided
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+        
+        if date_from:
+            queryset = queryset.filter(used_at__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(used_at__lte=date_to)
+        
+        return queryset
+
+
+class AdminCouponStatsView(views.APIView):
+    """
+    Admin endpoint for coupon analytics and statistics
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
+
+    def get(self, request):
+        # Overall coupon statistics
+        total_coupons = Coupon.objects.count()
+        active_coupons = Coupon.objects.filter(is_active=True).count()
+        expired_coupons = Coupon.objects.filter(
+            valid_until__lt=timezone.now()
+        ).count()
+        
+        # Usage statistics
+        total_usage = CouponUsage.objects.count()
+        total_discount_given = CouponUsage.objects.aggregate(
+            total=models.Sum('discount_amount')
+        )['total'] or 0
+        
+        # Top coupons by usage
+        from django.db import models
+        top_coupons = Coupon.objects.annotate(
+            usage_count=models.Count('coupon_usages')
+        ).order_by('-usage_count')[:5]
+        
+        top_coupons_data = [
+            {
+                'code': coupon.code,
+                'name': coupon.name,
+                'usage_count': coupon.usage_count,
+                'discount_type': coupon.discount_type
+            }
+            for coupon in top_coupons
+        ]
+
+        stats = {
+            'total_coupons': total_coupons,
+            'active_coupons': active_coupons,
+            'expired_coupons': expired_coupons,
+            'total_usage': total_usage,
+            'total_discount_given': float(total_discount_given),
+            'top_coupons': top_coupons_data
+        }
+        
+        return response.Response(stats, status=status.HTTP_200_OK)

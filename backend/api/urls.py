@@ -9,13 +9,17 @@ from .views import (
     OrderListView, OrderDetailView, AddressViewSet,
     WishlistView, WishlistAddView, WishlistRemoveView,
     AdminUserListView, AdminUserDetailView, AdminOrderListView,
-    AdminSalesReportView, AdminProductViewSet
+    AdminSalesReportView, AdminProductViewSet,
+    # Coupon views
+    CouponValidationView, ApplyCouponView, AdminCouponViewSet,
+    AdminCouponUsageView, AdminCouponStatsView
 )
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'addresses', AddressViewSet, basename='address')
 router.register(r'admin/products', AdminProductViewSet, basename='admin-product')
+router.register(r'admin/coupons', AdminCouponViewSet, basename='admin-coupon')
 
 urlpatterns = [
     # Auth endpoints
@@ -37,11 +41,18 @@ urlpatterns = [
     path('wishlist/add/<int:product_id>/', WishlistAddView.as_view(), name='wishlist-add'),
     path('wishlist/remove/<int:product_id>/', WishlistRemoveView.as_view(), name='wishlist-remove'),
 
+    # Coupon endpoints
+    path('coupons/validate/', CouponValidationView.as_view(), name='coupon-validate'),
+    path('coupons/apply/', ApplyCouponView.as_view(), name='coupon-apply'),
+
     # Admin endpoints
     path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
     path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
     path('admin/orders/', AdminOrderListView.as_view(), name='admin-order-list'),
     path('admin/sales-report/', AdminSalesReportView.as_view(), name='admin-sales-report'),
+    path('admin/coupon-usage/', AdminCouponUsageView.as_view(), name='admin-coupon-usage-list'),
+    path('admin/coupon-usage/<int:coupon_id>/', AdminCouponUsageView.as_view(), name='admin-coupon-usage'),
+    path('admin/coupon-stats/', AdminCouponStatsView.as_view(), name='admin-coupon-stats'),
 
     # User Profile endpoints (handled by the router)
     path('', include(router.urls)),

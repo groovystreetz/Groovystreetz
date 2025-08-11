@@ -26,6 +26,7 @@ The backend provides a comprehensive set of features to support the Groovystreet
 *   **User Authentication**: A complete authentication system with support for email/password and Google social login.
 *   **Role-Based Access Control**: Three-tier role hierarchy (customer, admin, superadmin) with granular permissions.
 *   **E-commerce**: Core e-commerce functionality, including product and category management, order processing, and inventory tracking.
+*   **Coupon System**: Comprehensive discount management with flexible pricing, policy controls, and usage tracking.
 *   **User Profiles**: User-specific features such as order history, address book, and wishlists.
 *   **Admin Dashboard**: Multi-level admin system with limited admin access for operations and full superadmin access for complete system management.
 
@@ -59,3 +60,33 @@ The API implements a comprehensive three-tier role system designed for scalable 
 *   **Hierarchical permissions**: Higher-level roles inherit all permissions from lower levels.
 *   **Secure role management**: Only SuperAdmins can modify user roles, preventing privilege escalation.
 *   **Granular access control**: Separate permission classes for different admin levels ensure precise access control.
+
+## Coupon System
+
+The platform features a sophisticated coupon and discount management system designed for maximum flexibility and control:
+
+### Discount Types
+*   **Percentage Discounts** - Apply percentage-based reductions (e.g., 20% off)
+*   **Fixed Amount Discounts** - Apply fixed dollar amounts (e.g., $10 off)
+*   **Free Shipping** - Waive shipping costs for qualifying orders
+*   **Buy X Get Y** - Complex promotional offers (e.g., Buy 2 Get 1 Free)
+
+### Business Logic & Controls
+*   **Usage Limits** - Control total uses and per-user limits
+*   **Time Constraints** - Set validity periods with start/end dates
+*   **Minimum Order Values** - Require minimum purchase amounts
+*   **Product/Category Restrictions** - Target specific items or categories
+*   **User Restrictions** - Create user-specific or role-based offers
+
+### Policy Management
+*   **No Return Policy** - Certain high-discount coupons void return rights
+*   **Stacking Controls** - Allow or prevent multiple coupon usage
+*   **Real-time Validation** - Comprehensive validation before application
+*   **Usage Tracking** - Complete audit trail for analytics and compliance
+
+### Key Features
+*   **Flexible Pricing Logic** - Supports complex discount calculations
+*   **Admin Management** - Full CRUD operations for coupon management
+*   **Analytics Dashboard** - Usage statistics and performance metrics
+*   **Policy Enforcement** - Automatic application of business rules
+*   **Fraud Prevention** - Usage limits and validation prevent abuse

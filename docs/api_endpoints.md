@@ -278,3 +278,159 @@ This endpoint provides full CRUD (Create, Read, Update, Delete) functionality fo
         "stock": 150
     }
     ```
+
+---
+
+## Coupon System Endpoints
+
+### Validate Coupon Code
+
+*   **Endpoint:** `POST /api/coupons/validate/`
+*   **Required Role:** Authenticated user
+*   **Description:** Validate a coupon code and calculate potential discount before applying to order
+*   **Request Body:**
+    ```json
+    {
+        "coupon_code": "SAVE20",
+        "order_total": "100.00"
+    }
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "valid": true,
+        "coupon": {
+            "code": "SAVE20",
+            "name": "20% Off Everything",
+            "discount_type": "percentage",
+            "discount_value": "20.00",
+            "no_return_policy": false
+        },
+        "discount_amount": "20.00",
+        "final_total": "80.00"
+    }
+    ```
+*   **Error Response:** `400 Bad Request`
+    ```json
+    {
+        "valid": false,
+        "errors": ["This coupon has expired", "Minimum order value of $50.00 required"]
+    }
+    ```
+
+### Apply Coupon to Order
+
+*   **Endpoint:** `POST /api/coupons/apply/`
+*   **Required Role:** Authenticated user
+*   **Description:** Apply a coupon code to user's order/cart
+*   **Request Body:**
+    ```json
+    {
+        "coupon_code": "SAVE20"
+    }
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "message": "Coupon SAVE20 is ready to be applied to your order",
+        "coupon": {
+            "id": 1,
+            "code": "SAVE20",
+            "name": "20% Off Everything",
+            "discount_type": "percentage",
+            "discount_value": "20.00",
+            "no_return_policy": false
+        }
+    }
+    ```
+
+---
+
+## Admin Coupon Management
+
+### Manage Coupons (CRUD)
+
+*   **Required Role:** `admin` or `superadmin`
+*   **Base Endpoint:** `/api/admin/coupons/`
+*   **Operations:**
+    *   **List All Coupons:** `GET /api/admin/coupons/`
+    *   **Create Coupon:** `POST /api/admin/coupons/`
+    *   **Get Coupon:** `GET /api/admin/coupons/{id}/`
+    *   **Update Coupon:** `PUT/PATCH /api/admin/coupons/{id}/`
+    *   **Delete Coupon:** `DELETE /api/admin/coupons/{id}/`
+
+*   **Example: Create Percentage Coupon**
+    ```bash
+    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/coupons/ \
+    -H "Content-Type: application/json" \
+    -H "X-CSRFToken: <your_admin_csrf_token>" \
+    -d '{
+        "code": "SAVE20",
+        "name": "20% Off Everything",
+        "description": "Get 20% off your entire order",
+        "discount_type": "percentage",
+        "discount_value": "20.00",
+        "minimum_order_value": "50.00",
+        "max_uses_total": 1000,
+        "max_uses_per_user": 1,
+        "valid_from": "2025-01-01T00:00:00Z",
+        "valid_until": "2025-12-31T23:59:59Z",
+        "is_active": true,
+        "no_return_policy": false
+    }'
+    ```
+
+*   **Example: Create No-Return Policy Coupon**
+    ```bash
+    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/coupons/ \
+    -H "Content-Type: application/json" \
+    -H "X-CSRFToken: <your_admin_csrf_token>" \
+    -d '{
+        "code": "FINAL50",
+        "name": "50% Off Final Sale",
+        "description": "Massive discount but no returns allowed",
+        "discount_type": "percentage",
+        "discount_value": "50.00",
+        "minimum_order_value": "100.00",
+        "max_uses_total": 500,
+        "max_uses_per_user": 1,
+        "valid_from": "2025-01-01T00:00:00Z",
+        "valid_until": "2025-01-31T23:59:59Z",
+        "is_active": true,
+        "no_return_policy": true
+    }'
+    ```
+
+### Coupon Usage Analytics
+
+*   **Endpoint:** `GET /api/admin/coupon-usage/`
+*   **Required Role:** `admin` or `superadmin`
+*   **Description:** View all coupon usage records
+*   **Optional Filters:**
+    *   `?date_from=2025-01-01`
+    *   `?date_to=2025-01-31`
+    *   `/api/admin/coupon-usage/{coupon_id}/` - Usage for specific coupon
+
+### Coupon Statistics
+
+*   **Endpoint:** `GET /api/admin/coupon-stats/`
+*   **Required Role:** `admin` or `superadmin`
+*   **Description:** Get comprehensive coupon system analytics
+*   **Response Example:**
+    ```json
+    {
+        "total_coupons": 25,
+        "active_coupons": 18,
+        "expired_coupons": 3,
+        "total_usage": 1250,
+        "total_discount_given": 15750.00,
+        "top_coupons": [
+            {
+                "code": "SAVE20",
+                "name": "20% Off Everything",
+                "usage_count": 450,
+                "discount_type": "percentage"
+            }
+        ]
+    }
+    ```
