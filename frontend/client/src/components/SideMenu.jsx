@@ -48,7 +48,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
             <img src="/logo.png" alt="Logo" className="h-10" />
             {!isLoggedIn ? (
               <button
-                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-orange-500 transition-colors duration-300 ease-in-out"
+                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-white transition-colors duration-300 ease-in-out"
                 onClick={() => {
                   onClose();
                   navigate("/login");
@@ -58,7 +58,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
               </button>
             ) : (
               <button
-                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-orange-500 transition-colors duration-300 ease-in-out"
+                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-white transition-colors duration-300 ease-in-out"
                 onClick={() => {
                   onClose();
                   navigate("/signup");
@@ -83,7 +83,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
             </button>
           </div>
 
-          {/* Categories with spin-upwards hover animation */}
+          {/* Categories with 3D rotation on hover */}
           {categories.map((cat) => (
             <div
               key={cat}
@@ -102,7 +102,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = "rotateX(-360deg) translateY(-5px)";
-                  e.currentTarget.style.color = "#f97316"; // orange on hover
+                  e.currentTarget.style.color = "#ffffff"; // white on hover
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = "none";
@@ -135,7 +135,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = "rotateX(-360deg) translateY(-5px)";
-                  e.currentTarget.style.color = "#f97316";
+                  e.currentTarget.style.color = "#ffffff";
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = "none";
