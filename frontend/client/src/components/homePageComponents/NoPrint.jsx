@@ -73,7 +73,7 @@ function NoPrint() {
       <button
         onClick={handlePrev}
         disabled={startIndex === 0}
-        className={`absolute left-10 top-[200px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
+        className={`absolute left-16 top-[225px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
           startIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
@@ -83,7 +83,7 @@ function NoPrint() {
       <button
         onClick={handleNext}
         disabled={startIndex >= noPrintItems.length - cardsPerPage}
-        className={`absolute right-10 top-[200px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
+        className={`absolute right-12 top-[225px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
           startIndex >= noPrintItems.length - cardsPerPage ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
@@ -104,7 +104,7 @@ function NoPrint() {
         {visibleItems.map((item) => (
           <motion.div
             key={item.id}
-            className="group overflow-hidden border border-black h-72 transform transition-transform duration-500 hover:scale-105 origin-bottom"
+            className="group overflow-hidden border border-black h-[310px] transform transition-transform duration-500 hover:scale-105 origin-bottom"
             variants={cardVariants}
           >
             <div className="flex h-full">

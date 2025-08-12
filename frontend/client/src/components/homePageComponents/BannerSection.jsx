@@ -26,7 +26,7 @@ const Banners = () => {
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-32 object-cover mb-2 transition-all duration-500"
+              className="w-full h-40 object-cover mb-2 transition-all duration-500"
             />
             <p className="text-sm font-semibold text-black">{product.name}</p>
           </div>

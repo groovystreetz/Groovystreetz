@@ -114,7 +114,7 @@ const TopPicks = () => {
             startIdx === 0 ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          <FiChevronLeft className="text-5xl" />
+          <FiChevronLeft className="text-4xl" />
         </button>
 
         {/* Cards + Text */}
@@ -141,7 +141,7 @@ const TopPicks = () => {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-56 h-60 object-cover rounded-lg"
+                  className="w-56 h-64 object-cover rounded-lg"
                 />
               </div>
 
@@ -171,7 +171,7 @@ const TopPicks = () => {
               : ""
           }`}
         >
-          <FiChevronRight className="text-5xl" />
+          <FiChevronRight className="text-4xl" />
         </button>
       </div>
     </div>

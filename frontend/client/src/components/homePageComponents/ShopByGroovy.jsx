@@ -10,11 +10,11 @@ const products = [
 const ShopByGroovy = () => (
   <div className="w-full max-w-6xl mx-auto py-8">
     <h2 className="text-2xl font-bold mb-6 text-center text-black">Shop by Groovy</h2>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
       {products.map((product) => (
         <div
           key={product.id}
-          className="relative w-full h-64 [perspective:1000px]"
+          className="relative w-full h-72 [perspective:1000px]"
         >
           <div className="w-full h-full relative transition-transform duration-700 [transform-style:preserve-3d] hover:[transform:rotateY(180deg)]">
             {/* Front Side */}
@@ -22,7 +22,7 @@ const ShopByGroovy = () => (
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-32 h-32 object-cover rounded-lg mb-4"
+                className="w-32 h-44 object-cover rounded-lg mb-4"
               />
               <h3 className="text-lg font-semibold text-black mb-2">
                 {product.name}

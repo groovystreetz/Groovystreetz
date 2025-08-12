@@ -50,7 +50,7 @@ const SpotlightProducts = () => {
             <motion.img
               src={product.image}
               alt={product.name}
-              className="w-36 h-36 object-cover mb-5 shadow-md"
+              className="w-36 h-48 object-cover mb-5 shadow-md"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             />
