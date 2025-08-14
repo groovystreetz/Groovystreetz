@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const products = [
   { id: 1, name: "Spotlight 1", image: "/images/spotlight1.jpg", price: "₹1,299" },
@@ -26,7 +26,7 @@ const cardVariants = {
 const SpotlightProducts = () => {
   return (
     <div className="w-full max-w-6xl mx-auto py-16 px-4">
-      <motion.h2
+      <Motion.h2
         className="text-3xl font-extrabold mb-10 text-center text-black"
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -34,11 +34,11 @@ const SpotlightProducts = () => {
         viewport={{ once: true }}
       >
         🌟 Spotlight Products
-      </motion.h2>
+      </Motion.h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {products.map((product, index) => (
-          <motion.div
+          <Motion.div
             key={product.id}
             className="bg-white border border-black shadow-lg flex flex-col items-center p-6"
             custom={index * 0.5} // Delay: 0s, 0.5s, 1s
@@ -47,7 +47,7 @@ const SpotlightProducts = () => {
             variants={cardVariants}
             viewport={{ once: true, amount: 0.3 }}
           >
-            <motion.img
+            <Motion.img
               src={product.image}
               alt={product.name}
               className="w-36 h-48 object-cover mb-5 shadow-md"
@@ -56,7 +56,7 @@ const SpotlightProducts = () => {
             />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
             <p className="text-orange-500 text-lg font-bold tracking-wide">{product.price}</p>
-          </motion.div>
+          </Motion.div>
         ))}
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const categoryImages = [
   { src: "/images/urban-monk.jpg", alt: "OVERSIZED T-SHIRT" },
@@ -26,7 +26,7 @@ const Categories = () => (
 
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
       {categoryImages.map((img, index) => (
-        <motion.div
+        <Motion.div
           key={`${img.alt}-${index}`}
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
@@ -44,7 +44,7 @@ const Categories = () => (
             />
           </div>
           <span className="mt-2 text-base text-gray-800 text-left">{img.alt}</span>
-        </motion.div>
+        </Motion.div>
       ))}
     </div>
   </div>

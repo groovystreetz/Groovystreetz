@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion as Motion, useAnimation } from "framer-motion";
 
 const DURATION = 2500; // 2.5s
 
@@ -66,9 +66,9 @@ const LoadingPage = () => {
           </text>
 
           {/* Animated wave fill */}
-          <motion.g mask="url(#text-mask)">
+          <Motion.g mask="url(#text-mask)">
             {/* Background fill (gray) rising up */}
-            <motion.rect
+            <Motion.rect
               x="0"
               width="100%"
               height="200"
@@ -78,7 +78,7 @@ const LoadingPage = () => {
             />
 
             {/* First Wave (orange) */}
-            <motion.path
+            <Motion.path
               d="M0 130 Q 100 110 200 130 T 400 130 T 600 130 T 800 130 V200 H0 Z"
               fill="#f97316"
               animate={{ x: [0, -100, 0] }}
@@ -90,7 +90,7 @@ const LoadingPage = () => {
             />
 
             {/* Second Wave (orange, offset) */}
-            <motion.path
+            <Motion.path
               d="M0 80 Q 100 60 200 80 T 400 80 T 600 80 T 800 80 V200 H0 Z"
               fill="#f97316" // orange
               initial={{ scaleY: 0, originY: 1 }} // Start squished at bottom
@@ -105,7 +105,7 @@ const LoadingPage = () => {
                 repeat: Infinity,
               }}
             />
-          </motion.g>
+          </Motion.g>
         </svg>
       </div>
 

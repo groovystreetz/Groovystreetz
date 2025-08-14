@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 import Login from './pages/Login'
@@ -11,6 +11,7 @@ import LoadingPage from './pages/LoadingPage' // 👈 import it
 
 import './App.css'
 import Dashboard from './pages/dashboard'
+import ProductPage from './pages/productpage'
 
 function RequireAuth({ children }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -36,6 +37,7 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductPage />} />
         <Route path="/dashboard" element={
           <RequireAuth>
             <div className='w-screen h-screen overflow-x-hidden'>
