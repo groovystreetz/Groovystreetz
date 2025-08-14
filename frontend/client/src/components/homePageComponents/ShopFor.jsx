@@ -25,7 +25,7 @@ function ShopFor() {
 
 function AnimatedCard({ category }) {
   const ref = useRef();
-  const [isVisible, setIsVisible] = useState(false);
+  // const [isVisible, setIsVisible] = useState(false);
   const [style, setStyle] = useState({
     transform: "scaleY(0)",
     transformOrigin: "top",
@@ -36,7 +36,7 @@ function AnimatedCard({ category }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          // setIsVisible(true);
           setStyle((prev) => ({
             ...prev,
             transform: "scaleY(1)",

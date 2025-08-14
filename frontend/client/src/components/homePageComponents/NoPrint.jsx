@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const noPrintItems = [
   { id: 1, image: "/images/noprint1.jpg", label: "OVERSIZED T-SHIRTS" },
@@ -91,7 +91,7 @@ function NoPrint() {
       </button>
 
       {/* Card Grid with animation triggered on arrow click and scroll */}
-      <motion.div
+      <Motion.div
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
         variants={containerVariants}
         initial="hidden"
@@ -102,7 +102,7 @@ function NoPrint() {
         viewport={{ once: false, amount: 0.3 }}
       >
         {visibleItems.map((item) => (
-          <motion.div
+          <Motion.div
             key={item.id}
             className="group overflow-hidden border border-black h-[310px] transform transition-transform duration-500 hover:scale-105 origin-bottom"
             variants={cardVariants}
@@ -121,9 +121,9 @@ function NoPrint() {
               {/* Image */}
               <img src={item.image} alt={item.label} className="w-full h-full object-cover" />
             </div>
-          </motion.div>
+          </Motion.div>
         ))}
-      </motion.div>
+      </Motion.div>
     </div>
   );
 }

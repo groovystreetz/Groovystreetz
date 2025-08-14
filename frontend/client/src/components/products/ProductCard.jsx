@@ -1,5 +1,5 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip"
@@ -12,7 +12,7 @@ const ProductCard = ({ product, onQuickView }) => {
 	const discount = Math.max(5, Math.min(60, Math.round(100 - (product.price / originalPrice) * 100)))
 
 	return (
-		<motion.div
+		<Motion.div
 			layout
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ const ProductCard = ({ product, onQuickView }) => {
 					</div>
 				</CardFooter>
 			</Card>
-		</motion.div>
+		</Motion.div>
 	)
 }
 export default ProductCard
