@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import men from "../../assets/men.jpg"; //
+import men from "../../assets/men.jpg";
 import menhover from "../../assets/menhover.jpg";
 
 const newArrivals = [
@@ -9,8 +9,8 @@ const newArrivals = [
     title: "Sketchy Panda",
     category: "Oversized T-Shirts",
     price: "₹999",
-    image: men,
-    hoverImage: menhover,
+    image: "https://weezy.in/cdn/shop/files/BE1.jpg?v=1716644946&width=1500",
+    hoverImage: "https://weezy.in/cdn/shop/files/BE1.jpg?v=1716644946&width=1500",
     labels: [],
   },
   {
@@ -18,8 +18,8 @@ const newArrivals = [
     title: "Disney: Need Caffeine",
     category: "Oversized T-Shirts",
     price: "₹999",
-    image: "/images/arrivals2.jpg",
-    hoverImage: "/images/arrivals2-hover.jpg",
+    image: "https://strongsoul.in/cdn/shop/products/mockup-of-someone-holding-a-t-shirt-on-a-hanger-m19023-r-el2_2_914f4bea-6ce8-40c7-82c7-f67e7774511c.png?v=1678641644&width=1080",
+    hoverImage: "https://strongsoul.in/cdn/shop/products/mockup-of-someone-holding-a-t-shirt-on-a-hanger-m19023-r-el2_2_914f4bea-6ce8-40c7-82c7-f67e7774511c.png?v=1678641644&width=1080",
     labels: ["PREMIUM"],
   },
   {
@@ -27,17 +27,17 @@ const newArrivals = [
     title: "Fumes NX: Storm",
     category: "Men's Low Top Sneakers",
     price: "₹2999",
-    image: "/images/arrivals3.jpg",
-    hoverImage: "/images/arrivals3-hover.jpg",
+    image: "https://blog.redbubble.com/wp-content/uploads/2017/07/2-1.jpg",
+    hoverImage: "https://blog.redbubble.com/wp-content/uploads/2017/07/2-1.jpg",
     labels: [],
   },
-    {
+  {
     id: 4,
     title: "Polo Sweater: Pulse",
     category: "Oversized Pullovers",
     price: "₹1999",
-    image: "/images/arrivals4.jpg",
-    hoverImage: "/images/arrivals4-hover.jpg",
+    image: "https://pronk.in/cdn/shop/files/558_98a1b4ea-8bd5-4386-bf56-659fabdee293.jpg?v=1722322834",
+    hoverImage: "https://pronk.in/cdn/shop/files/558_98a1b4ea-8bd5-4386-bf56-659fabdee293.jpg?v=1722322834",
     labels: ["OVERSIZED FIT"],
   },
   {
@@ -135,8 +135,9 @@ function NewArrivals() {
 
   return (
     <div className="mt-20 bg-white">
-      <div className="container mx-auto px-4 relative">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
+      <div className="max-w-7xl mx-auto px-4 relative">
+        {/* Heading */}
+        <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-wide">
           NEW ARRIVALS
         </h2>
 
@@ -144,62 +145,61 @@ function NewArrivals() {
         <button
           onClick={handlePrev}
           disabled={startIndex === 0}
-          className={`absolute left-10 top-1/2 -translate-y-1/2 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
-            startIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`absolute left-2 md:left-10 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed`}
         >
-          <FiChevronLeft className="text-3xl" />
+          <FiChevronLeft className="text-2xl text-gray-800" />
         </button>
 
         <button
           onClick={handleNext}
           disabled={startIndex >= newArrivals.length - cardsPerPage}
-          className={`absolute right-10 top-1/2 -translate-y-1/2 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
-            startIndex >= newArrivals.length - cardsPerPage
-              ? "opacity-50 cursor-not-allowed"
-              : ""
-          }`}
+          className={`absolute right-2 md:right-10 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed`}
         >
-          <FiChevronRight className="text-3xl" />
+          <FiChevronRight className="text-2xl text-gray-800" />
         </button>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {visibleArrivals.map((item) => (
-            <div key={item.id}>
-              <div className="relative w-full h-72 overflow-hidden border border-black group">
-                {/* Original Image - fades out in 1s on hover, fades in 1s when unhovered */}
+            <div
+              key={item.id}
+              className="group cursor-pointer"
+            >
+              <div className="relative w-full h-80 overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition duration-300">
+                {/* Default Image */}
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out opacity-100 group-hover:opacity-0"
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out opacity-100 group-hover:opacity-0"
                 />
 
-                {/* Hover Image - fades in on hover over 1s, zooms in smoothly over 3s */}
+                {/* Hover Image */}
                 <img
                   src={item.hoverImage || item.image}
                   alt={`${item.title} hover`}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-[3000ms] ease-in-out"
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition duration-700 ease-in-out"
                 />
 
                 {/* Labels */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
                   {item.labels.map((label, idx) => (
                     <span
                       key={idx}
-                      className="bg-black text-white text-xs px-2 py-0.5 rounded-sm font-semibold"
+                      className="bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide"
                     >
                       {label}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="mt-3 text-left">
-                <h3 className="text-sm text-gray-800 font-semibold">
+
+              {/* Text */}
+              <div className="mt-4 text-left px-1">
+                <h3 className="text-base text-gray-900 font-semibold line-clamp-1">
                   {item.title}
                 </h3>
-                <p className="text-xs text-gray-500">{item.category}</p>
-                <p className="text-sm text-gray-700 font-bold mt-0.5">
+                <p className="text-sm text-gray-500">{item.category}</p>
+                <p className="text-base text-gray-800 font-bold mt-1">
                   {item.price}
                 </p>
               </div>
