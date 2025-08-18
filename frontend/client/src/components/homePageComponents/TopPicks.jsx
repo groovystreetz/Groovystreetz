@@ -94,11 +94,14 @@ const TopPicks = () => {
 
   const handleNext = () => {
     setStartIdx((prev) =>
-      Math.min(prev + cardCount, products.length - cardCount)
+      Math.min(prev + cardCount, products.length - 1)
     );
   };
 
-  const visibleProducts = products.slice(startIdx, startIdx + cardCount);
+  const visibleProducts = products.slice(
+    startIdx,
+    Math.min(startIdx + cardCount, products.length)
+  );
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8">
@@ -110,50 +113,50 @@ const TopPicks = () => {
         <button
           onClick={handlePrev}
           disabled={startIdx === 0}
-          className={`absolute left-10 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
+          className={`absolute left-10 z-10 p-2 hover:text-orange-600 bg-white rounded-full shadow-md transition ${
             startIdx === 0 ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          <FiChevronLeft className="text-4xl" />
+          <FiChevronLeft className="text-2xl" />
         </button>
 
-        {/* Cards + Text */}
-        <div className="flex gap-11 mx-10 w-full justify-center">
+        {/* Cards */}
+        <div className="flex gap-11 mx-10 w-full justify-center transition-transform duration-500 ease-out">
           {visibleProducts.map((product, index) => (
             <div
               key={product.id}
               className="relative flex flex-col items-start overflow-visible min-w-[250px]"
             >
-              {/* Number partially behind the card */}
+              {/* Number behind */}
               <span
                 className="absolute -left-8 top-32 text-7xl font-extrabold text-white select-none pointer-events-none"
                 style={{
                   zIndex: -1,
                   textShadow:
-                    "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+                    "0px 0px 8px rgba(0,0,0,0.6)",
                 }}
               >
                 {startIdx + index + 1}
               </span>
 
-              {/* Image Card */}
-              <div className="bg-white border border-black shadow-[-5px_5px_5px_rgba(0,0,0,0.5)] overflow-visible transform transition-transform duration-500 hover:scale-105">
+              {/* Premium Card */}
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:shadow-2xl">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-56 h-64 object-cover rounded-lg"
+                  className="w-56 h-64 object-cover rounded-2xl"
                 />
               </div>
 
-              {/* Text outside the card - left aligned */}
-              <div className="mt-2 w-full text-left">
-                <h3 className="text-lg font-semibold text-gray-800">
+              {/* Text */}
+              <div className="mt-3 w-full text-left">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {product.name}
                 </h3>
                 <span className="text-sm text-gray-500 font-medium">
                   {product.category}
                 </span>
-                <span className="text-gray-600 font-bold block">
+                <span className="text-gray-800 font-bold block">
                   {product.price}
                 </span>
               </div>
@@ -164,14 +167,14 @@ const TopPicks = () => {
         {/* Right Arrow */}
         <button
           onClick={handleNext}
-          disabled={startIdx >= products.length - cardCount}
-          className={`absolute right-10 z-10 p-2 hover:text-orange-600 bg-transparent border-none transition-colors ${
-            startIdx >= products.length - cardCount
+          disabled={startIdx >= products.length - 1}
+          className={`absolute right-10 z-10 p-2 hover:text-orange-600 bg-white rounded-full shadow-md transition ${
+            startIdx >= products.length - 1
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}
         >
-          <FiChevronRight className="text-4xl" />
+          <FiChevronRight className="text-2xl" />
         </button>
       </div>
     </div>

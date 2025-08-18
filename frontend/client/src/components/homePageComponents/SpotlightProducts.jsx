@@ -2,9 +2,9 @@ import React from "react";
 import { motion as Motion } from "framer-motion";
 
 const products = [
-  { id: 1, name: "Spotlight 1", image: "/images/spotlight1.jpg", price: "₹1,299" },
-  { id: 2, name: "Spotlight 2", image: "/images/spotlight2.jpg", price: "₹1,099" },
-  { id: 3, name: "Spotlight 3", image: "/images/spotlight3.jpg", price: "₹899" },
+  { id: 1, name: "Spotlight 1", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNDkLjf19j08ppcvTiDElR3W8NP1ahDZWXpA&s", price: "₹1,299" },
+  { id: 2, name: "Spotlight 2", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNDkLjf19j08ppcvTiDElR3W8NP1ahDZWXpA&s", price: "₹1,099" },
+  { id: 3, name: "Spotlight 3", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNDkLjf19j08ppcvTiDElR3W8NP1ahDZWXpA&s", price: "₹899" },
 ];
 
 // Animation settings
@@ -17,8 +17,8 @@ const cardVariants = {
     transition: {
       delay,
       type: "spring",
-      stiffness: 80,
-      damping: 12,
+      stiffness: 90,
+      damping: 15,
     },
   }),
 };
@@ -36,21 +36,27 @@ const SpotlightProducts = () => {
         🌟 Spotlight Products
       </Motion.h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {products.map((product, index) => (
           <Motion.div
             key={product.id}
-            className="bg-white border border-black shadow-lg flex flex-col items-center p-6"
-            custom={index * 0.5} // Delay: 0s, 0.5s, 1s
+            className="bg-white border border-black shadow-lg rounded-2xl flex flex-col items-center p-6 cursor-pointer"
+            custom={index * 0.2} // faster cascade: 0s, 0.2s, 0.4s
             initial="hidden"
             whileInView="visible"
             variants={cardVariants}
             viewport={{ once: true, amount: 0.3 }}
+            whileHover={{
+              y: -8,
+              scale: 1.03,
+              boxShadow: "0px 12px 20px rgba(0,0,0,0.15)",
+            }}
+            transition={{ type: "spring", stiffness: 200, damping: 10 }}
           >
             <Motion.img
               src={product.image}
               alt={product.name}
-              className="w-36 h-48 object-cover mb-5 shadow-md"
+              className="w-36 h-48 object-cover mb-5 rounded-xl shadow-md"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             />

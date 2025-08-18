@@ -1,4 +1,5 @@
 import React from "react";
+import { motion as Motion } from "framer-motion";
 
 const products = [
   { id: 1, name: "Groovy 1", image: "/images/groovy1.jpg", price: "₹999" },
@@ -8,39 +9,42 @@ const products = [
 ];
 
 const ShopByGroovy = () => (
-  <div className="w-full max-w-6xl mx-auto py-8">
-    <h2 className="text-2xl font-bold mb-6 text-center text-black">Shop by Groovy</h2>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-      {products.map((product) => (
-        <div
-          key={product.id}
-          className="relative w-full h-72 [perspective:1000px]"
-        >
-          <div className="w-full h-full relative transition-transform duration-700 [transform-style:preserve-3d] hover:[transform:rotateY(180deg)]">
-            {/* Front Side */}
-            <div className="absolute w-full h-full bg-white shadow-md border border-black flex flex-col items-center p-4 [backface-visibility:hidden]">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-32 h-44 object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-lg font-semibold text-black mb-2">
-                {product.name}
-              </h3>
-              <p className="text-orange-400 font-bold">{product.price}</p>
-            </div>
+  <div className="w-full max-w-6xl mx-auto py-12">
+    <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-tight">
+      Shop by Groovy
+    </h2>
 
-            {/* Back Side */}
-            <div className="absolute w-full h-full bg-orange-100 shadow-md border border-black flex flex-col items-center justify-center p-4 [transform:rotateY(180deg)] [backface-visibility:hidden] rounded-md">
-              <p className="text-gray-700 text-sm mb-2 text-center">
-                Discover more about <strong>{product.name}</strong>
-              </p>
-              <button className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600">
-                Shop Now
-              </button>
-            </div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {products.map((product, index) => (
+        <Motion.div
+          key={product.id}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
+          whileHover={{ scale: 1.05 }}
+          className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition overflow-hidden"
+        >
+          <div className="overflow-hidden rounded-t-2xl">
+            <motion.img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-56 object-cover"
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.4 }}
+            />
           </div>
-        </div>
+          <div className="p-4 flex flex-col items-center text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {product.name}
+            </h3>
+            <p className="text-lg font-bold bg-gradient-to-r from-orange-500 to-pink-500 text-transparent bg-clip-text mb-4">
+              {product.price}
+            </p>
+            <button className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition">
+              Shop Now
+            </button>
+          </div>
+        </Motion.div>
       ))}
     </div>
   </div>

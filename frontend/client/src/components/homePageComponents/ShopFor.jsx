@@ -14,7 +14,7 @@ function ShopFor() {
     <div className="w-full max-w-6xl py-16 mx-auto">
       <h2 className="text-3xl font-bold mb-10 text-center text-black">Shop For</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {categories.map((category) => (
           <AnimatedCard key={category.id} category={category} />
         ))}
@@ -25,22 +25,13 @@ function ShopFor() {
 
 function AnimatedCard({ category }) {
   const ref = useRef();
-  // const [isVisible, setIsVisible] = useState(false);
-  const [style, setStyle] = useState({
-    transform: "scaleY(0)",
-    transformOrigin: "top",
-    transition: "transform 0.6s ease-out",
-  });
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // setIsVisible(true);
-          setStyle((prev) => ({
-            ...prev,
-            transform: "scaleY(1)",
-          }));
+          setIsVisible(true);
           observer.disconnect();
         }
       },
@@ -54,25 +45,24 @@ function AnimatedCard({ category }) {
   return (
     <div
       ref={ref}
-      style={style}
-      className="relative bg-white border border-black cursor-pointer shadow-lg overflow-hidden"
+      className={`relative bg-white cursor-pointer shadow-lg overflow-hidden rounded-2xl transform transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      } hover:scale-105 hover:shadow-2xl`}
+      style={{ height: "380px" }}
     >
-      <div className="w-full h-full relative" style={{ height: "350px" }}>
-        <img
-          src={category.image}
-          alt={category.name}
-          className="absolute top-0 left-0 w-full h-full object-cover"
-          draggable={false}
-        />
+      {/* Image */}
+      <img
+        src={category.image}
+        alt={category.name}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        draggable={false}
+      />
 
-        {/* Optional static shine overlay */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="w-full h-full" />
-        </div>
-      </div>
+      {/* Dark Overlay on Hover */}
+      <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
 
       {/* Category Name */}
-      <h3 className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-white px-4 py-1 text-black text-lg font-semibold">
+      <h3 className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-6 py-2 text-black text-lg font-semibold rounded-full shadow-md transition-all duration-500">
         {category.name}
       </h3>
     </div>
