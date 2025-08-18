@@ -24,8 +24,6 @@ source .venv/bin/activate
 # 4. Install dependencies
 pip install -r requirements.txt
 
-# 5. Run automated setup (starts database + creates sample data)
-python setup_database.py
 ```
 
 This creates:
@@ -95,7 +93,7 @@ The API will be available at `http://127.0.0.1:8000/`.
 To start fresh:
 
 ```bash
-python setup_database.py --reset
+docker compose down -v && docker compose up -d
 ```
 
 ---

@@ -131,7 +131,7 @@ class SimpleAPITester:
         self.log(f"\n{Colors.CYAN}=== Testing Admin Endpoints ==={Colors.END}")
         
         # Login as admin (use default dev data admin)
-        admin_login_cmd = f'''curl -s -w "\\n%{{http_code}}" -c /tmp/admin_cookies.txt -X POST {self.base_url}/api/login/ \\
+        admin_login_cmd = f'''curl -s -w "%{{http_code}}" -c /tmp/admin_cookies.txt -X POST {self.base_url}/api/login/ \\
             -H "Content-Type: application/json" \\
             -d '{{"email": "admin@groovystreetz.com", "password": "admin123"}}'
         '''
