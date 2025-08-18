@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import men from "../../assets/men.jpg";
-import menhover from "../../assets/menhover.jpg";
+// import men from "../../assets/men.jpg";
+// import menhover from "../../assets/menhover.jpg";
 
 const newArrivals = [
   {

@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const products = [
   { id: 1, name: "Groovy 1", image: "/images/groovy1.jpg", price: "₹999" },
@@ -16,7 +16,7 @@ const ShopByGroovy = () => (
 
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {products.map((product, index) => (
-        <motion.div
+        <Motion.div
           key={product.id}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,7 +44,7 @@ const ShopByGroovy = () => (
               Shop Now
             </button>
           </div>
-        </motion.div>
+        </Motion.div>
       ))}
     </div>
   </div>
