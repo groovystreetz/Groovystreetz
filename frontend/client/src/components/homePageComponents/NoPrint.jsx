@@ -26,12 +26,11 @@ const containerVariants = {
 const cardVariants = {
   hidden: {
     opacity: 0,
-    scaleY: 0,
-    originY: 1,
+    scale: 0.9,
   },
   show: {
     opacity: 1,
-    scaleY: 1,
+    scale: 1,
     transition: {
       duration: 0.6,
       ease: "easeOut",
@@ -47,8 +46,8 @@ function NoPrint() {
   const visibleItems = noPrintItems.slice(startIndex, startIndex + cardsPerPage);
 
   const triggerAnimation = () => {
-    setAnimate(false); // reset animation
-    setTimeout(() => setAnimate(true), 10); // small delay to restart
+    setAnimate(false);
+    setTimeout(() => setAnimate(true), 10);
   };
 
   const handleNext = () => {
@@ -67,32 +66,36 @@ function NoPrint() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 mt-20 relative">
-      <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">NO PRINTS</h2>
+      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-900 tracking-wide">
+        NO PRINTS
+      </h2>
 
       {/* Arrows */}
       <button
         onClick={handlePrev}
         disabled={startIndex === 0}
-        className={`absolute left-16 top-[225px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
-          startIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
+        className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full shadow-lg bg-white/70 backdrop-blur-sm hover:bg-white text-gray-800 hover:text-orange-600 transition ${
+          startIndex === 0 ? "opacity-40 cursor-not-allowed" : ""
         }`}
       >
-        <FiChevronLeft />
+        <FiChevronLeft size={28} />
       </button>
 
       <button
         onClick={handleNext}
         disabled={startIndex >= noPrintItems.length - cardsPerPage}
-        className={`absolute right-12 top-[225px] -translate-y-1/2 z-10 p-2 text-4xl bg-transparent hover:text-orange-600 ${
-          startIndex >= noPrintItems.length - cardsPerPage ? "opacity-50 cursor-not-allowed" : ""
+        className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full shadow-lg bg-white/70 backdrop-blur-sm hover:bg-white text-gray-800 hover:text-orange-600 transition ${
+          startIndex >= noPrintItems.length - cardsPerPage
+            ? "opacity-40 cursor-not-allowed"
+            : ""
         }`}
       >
-        <FiChevronRight />
+        <FiChevronRight size={28} />
       </button>
 
-      {/* Card Grid with animation triggered on arrow click and scroll */}
+      {/* Card Grid */}
       <Motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
         variants={containerVariants}
         initial="hidden"
         animate={animate ? "show" : "hidden"}
@@ -104,12 +107,12 @@ function NoPrint() {
         {visibleItems.map((item) => (
           <Motion.div
             key={item.id}
-            className="group overflow-hidden border border-black h-[310px] transform transition-transform duration-500 hover:scale-105 origin-bottom"
+            className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transform transition duration-500"
             variants={cardVariants}
           >
-            <div className="flex h-full">
-              {/* Left Vertical Label */}
-              <div className="w-10 pt-5 bg-black flex items-start justify-center text-white text-md tracking-widest font-bold uppercase">
+            <div className="flex h-[320px] relative">
+              {/* Vertical Label */}
+              <div className="w-12 bg-black flex items-center justify-center text-white text-xs font-bold tracking-wider uppercase">
                 <span
                   className="transform rotate-180 whitespace-nowrap"
                   style={{ writingMode: "vertical-rl" }}
@@ -119,7 +122,11 @@ function NoPrint() {
               </div>
 
               {/* Image */}
-              <img src={item.image} alt={item.label} className="w-full h-full object-cover" />
+              <img
+                src={item.image}
+                alt={item.label}
+                className="w-full h-full object-cover transform transition duration-500 group-hover:scale-110 group-hover:brightness-110"
+              />
             </div>
           </Motion.div>
         ))}

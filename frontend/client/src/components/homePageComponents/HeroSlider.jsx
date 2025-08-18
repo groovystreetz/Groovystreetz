@@ -1,167 +1,109 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import React, { useEffect, useRef, useState } from "react";
 
 const banners = [
-  { id: 1, image: "/images/banner1.jpg", alt: "Banner 1" },
-  { id: 2, image: "/images/banner2.jpg", alt: "Banner 2" },
-  { id: 3, image: "/images/banner3.jpg", alt: "Banner 3" },
-  { id: 4, image: "/images/banner4.jpg", alt: "Banner 4" },
-  { id: 5, image: "/images/banner5.jpg", alt: "Banner 5" },
-  { id: 6, image: "/images/banner6.jpg", alt: "Banner 6" },
+  {
+    id: 1,
+    image: "https://images.vexels.com/media/users/3/335953/raw/5c79d20959005bc26ba1cc2d586a584e-landscape-travelling-t-shirt-design.jpg",
+    alt: "Groovy Orange Hero",
+    headline: "Express Yourself with Groovy Orange",
+    subheadline:
+      "Discover unique, retro-inspired t-shirts that let your personality shine. Shop our latest collection and find your perfect fit.",
+    cta: "Shop Now",
+  },
+  {
+    id: 2,
+    image:  "https://images.vexels.com/media/users/3/241040/raw/0d5c7177d13864849f82960d718cc150-yosemite-painting-landscape-t-shirt-design.jpg",
+    alt: "Groovy Orange Hero 2",
+    headline: "Retro Vibes, Modern Style",
+    subheadline:
+      "Step into a world of bold colors and groovy designs. Find your new favorite tee today!",
+    cta: "Browse Collection",
+  },
 ];
 
-const DURATION = 2500; // 2.5 seconds
+const DURATION = 5000;
 
 function HeroSlider() {
   const [current, setCurrent] = useState(0);
-  const length = banners.length;
-
   const timeoutRef = useRef(null);
-  const animationFrameRef = useRef(null);
+  const [fade, setFade] = useState(true);
 
-  // Progress state (0 to 100)
-  const [progress, setProgress] = useState(0);
-  const startTimeRef = useRef(null);
-
-  // Slide auto change effect
   useEffect(() => {
-    resetTimeout();
-    setProgress(0);
-    startTimeRef.current = performance.now();
-
-    // Animate progress ring smoothly
-    const animate = (time) => {
-      if (!startTimeRef.current) startTimeRef.current = time;
-      const elapsed = time - startTimeRef.current;
-      const newProgress = Math.min((elapsed / DURATION) * 100, 100);
-      setProgress(newProgress);
-
-      if (elapsed < DURATION) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
-    };
-    animationFrameRef.current = requestAnimationFrame(animate);
-
-    // Set timeout for slide change
+    setFade(false);
+    const fadeTimeout = setTimeout(() => setFade(true), 100);
     timeoutRef.current = setTimeout(() => {
-      setCurrent((prev) => (prev === length - 1 ? 0 : prev + 1));
+      setFade(false);
+      setTimeout(() => {
+        setCurrent((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+        setFade(true);
+      }, 400);
     }, DURATION);
-
     return () => {
-      resetTimeout();
-      cancelAnimationFrame(animationFrameRef.current);
+      clearTimeout(timeoutRef.current);
+      clearTimeout(fadeTimeout);
     };
-  }, [current, length]);
+  }, [current]);
 
-  const resetTimeout = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  };
-
-  // Navigation handlers
-  const handleDotClick = (index) => {
-    setCurrent(index);
-  };
-
-  const prevSlide = () => {
-    setCurrent(current === 0 ? length - 1 : current - 1);
-  };
-
-  const nextSlide = () => {
-    setCurrent(current === length - 1 ? 0 : current + 1);
-  };
-
-  // Circle params
-  const radius = 9;
-  const circumference = 2 * Math.PI * radius;
+  const { image, alt, headline, subheadline, cta } = banners[current];
 
   return (
-    <div className="relative w-full mt-[66px] border border-black overflow-hidden shadow-lg">
-      {/* Slider wrapper */}
+    <section
+      className="relative w-full mt-16 h-screen flex items-center justify-center overflow-hidden bg-[#fcfaf8] font-['Plus Jakarta Sans','Noto Sans',sans-serif]"
+    >
+      {/* Background Image with overlay */}
       <div
-        className="flex transition-transform duration-700 ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {banners.map(({ id, image, alt }) => (
-          <div key={id} className="min-w-full select-none">
-            <img
-              src={image}
-              alt={alt}
-              className="h-[350px] md:h-[500px] object-cover"
-              draggable={false}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-600 bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
-        aria-label="Previous Slide"
-      >
-        <FiChevronLeft size={32} />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600 bg-transparent bg-opacity-40 p-2 hover:text-orange-500 transition"
-        aria-label="Next Slide"
-      >
-        <FiChevronRight size={32} />
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
-        {banners.map((_, idx) => {
-          const isActive = idx === current;
-          const dashOffset = isActive
-            ? ((100 - progress) / 100) * circumference
-            : circumference;
-
-          return (
-            <div
+        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${
+          fade ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%), url(${image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: 1,
+        }}
+        aria-label={alt}
+      />
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center text-center px-4">
+        <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-[-0.033em] drop-shadow-lg animate-fade-in-up">
+          {headline}
+        </h1>
+        <h2 className="mt-4 text-white text-base md:text-xl font-normal leading-normal drop-shadow-md animate-fade-in-up delay-150">
+          {subheadline}
+        </h2>
+        <button
+          className="mt-8 flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#f48225] text-[#1c140d] text-base font-bold leading-normal tracking-[0.015em] shadow-lg transition-transform duration-300 hover:scale-105 animate-fade-in-up delay-300"
+        >
+          <span className="truncate">{cta}</span>
+        </button>
+        {/* Dots */}
+        <div className="flex space-x-3 mt-8">
+          {banners.map((_, idx) => (
+            <button
               key={idx}
-              onClick={() => handleDotClick(idx)}
-              className="relative w-6 h-6 cursor-pointer"
+              onClick={() => setCurrent(idx)}
+              className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                idx === current ? "bg-[#f48225] border-[#f48225] scale-125" : "border-white bg-transparent"
+              }`}
               aria-label={`Go to slide ${idx + 1}`}
-            >
-              {/* Base circle border */}
-              <div
-                className={`w-full h-full rounded-full border-2 ${
-                  isActive ? "border-none" : "border-gray-300"
-                }`}
-              />
-
-              {/* Filled inner circle */}
-              {isActive && (
-                <div className="absolute top-1.5 left-1.5 w-3 h-3 rounded-full bg-orange-500 pointer-events-none" />
-              )}
-
-              {/* Animated progress ring */}
-              {isActive && (
-                <svg
-                  className="absolute top-0 left-0 w-full h-full rotate-[-90deg] pointer-events-none"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r={radius}
-                    fill="transparent"
-                    stroke="#f97316"
-                    strokeWidth="2"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={dashOffset}
-                  />
-                </svg>
-              )}
-            </div>
-          );
-        })}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+      {/* Navbar overlay (optional, can be moved to layout) */}
+      {/*
+      <header className="absolute top-0 left-0 w-full flex items-center justify-between px-10 py-4 z-20">
+        ...
+      </header>
+      */}
+    </section>
   );
 }
 
 export default HeroSlider;
+
+// Animations (add to global CSS or Tailwind config)
+// .animate-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(.39,.575,.565,1) both; }
+// .delay-150 { animation-delay: 150ms; }
+// .delay-300 { animation-delay: 300ms; }
+// @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: none; } }

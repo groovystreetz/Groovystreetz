@@ -1,6 +1,7 @@
 import React from "react";
 import Drawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
+import { FaShoppingCart, FaUserAlt } from "react-icons/fa";
 
 const categories = [
   "Urban Monk",
@@ -35,117 +36,93 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
         sx: { overflow: "hidden" },
       }}
     >
-      <div
-        className="w-64 h-full flex flex-col overflow-y-auto p-4"
-        style={{
-          background: "linear-gradient(135deg, #f97316, #c2410c)", // orange gradient bg
-          color: "black",
-        }}
-      >
-        <div className="flex-grow">
-          {/* Logo and Auth Button */}
-          <div className="flex flex-row items-center justify-between mb-3">
-            <img src="/logo.png" alt="Logo" className="h-10" />
-            {!isLoggedIn ? (
-              <button
-                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-white transition-colors duration-300 ease-in-out"
-                onClick={() => {
-                  onClose();
-                  navigate("/login");
-                }}
-              >
-                Login
-              </button>
-            ) : (
-              <button
-                className="px-4 py-1 rounded bg-black text-orange-400 font-semibold hover:bg-gray-800 hover:text-white transition-colors duration-300 ease-in-out"
-                onClick={() => {
-                  onClose();
-                  navigate("/signup");
-                }}
-              >
-                Signup
-              </button>
-            )}
-          </div>
-
-          {/* Categories and Cart on same line */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="font-bold text-lg">Categories</div>
+      <div className="w-64 h-full flex flex-col bg-white text-gray-800">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <img src="/logo.png" alt="Logo" className="h-10" />
+          {!isLoggedIn ? (
             <button
-              className="font-semibold text-black hover:text-orange-500 transition-colors duration-300 ease-in-out hover:scale-105 transform"
+              className="px-4 py-1 rounded-full bg-black text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              onClick={() => {
+                onClose();
+                navigate("/login");
+              }}
+            >
+              Login
+            </button>
+          ) : (
+            <button
+              className="px-4 py-1 rounded-full bg-black text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              onClick={() => {
+                onClose();
+                navigate("/signup");
+              }}
+            >
+              Signup
+            </button>
+          )}
+        </div>
+
+        {/* Categories */}
+        <div className="flex-grow p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-lg">Categories</h3>
+            <button
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black transition-colors"
               onClick={() => {
                 onClose();
                 navigate("/cart");
               }}
             >
-              🤍 Cart
+              <FaShoppingCart className="text-base" />
+              Cart
             </button>
           </div>
 
-          {/* Categories with 3D rotation on hover */}
-          {categories.map((cat) => (
-            <div
-              key={cat}
-              className="mb-2 cursor-pointer transition-transform duration-500 ease-in-out"
-              onClick={() => {
-                onClose();
-                navigate(`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`);
-              }}
-              style={{ perspective: "400px" }} // needed for 3D rotation
-            >
-              <span
-                className="inline-block text-black"
-                style={{
-                  display: "inline-block",
-                  transition: "transform 0.5s ease-in-out, color 0.3s ease",
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <div
+                key={cat}
+                onClick={() => {
+                  onClose();
+                  navigate(`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`);
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = "rotateX(-360deg) translateY(-5px)";
-                  e.currentTarget.style.color = "#ffffff"; // white on hover
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.color = "black";
-                }}
+                className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-black transition-all duration-200"
               >
                 {cat}
-              </span>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-8 border-t border-black pt-4 text-sm">
-          {/* Lower links with spin-upwards hover animation */}
-          {lowerLinks.map((link) => (
-            <div
-              key={link}
-              className="mb-2 cursor-pointer transition-transform duration-500 ease-in-out"
-              onClick={() => {
-                onClose();
-                navigate(`/${link.toLowerCase().replace(/\s+/g, "-")}`);
-              }}
-              style={{ perspective: "400px" }}
-            >
-              <span
-                className="inline-block text-black"
-                style={{
-                  display: "inline-block",
-                  transition: "transform 0.5s ease-in-out, color 0.3s ease",
+        {/* Footer Links */}
+        <div className="border-t border-gray-200 p-4 text-sm">
+          <div className="space-y-2">
+            {lowerLinks.map((link) => (
+              <div
+                key={link}
+                onClick={() => {
+                  onClose();
+                  navigate(`/${link.toLowerCase().replace(/\s+/g, "-")}`);
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = "rotateX(-360deg) translateY(-5px)";
-                  e.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.color = "black";
-                }}
+                className="cursor-pointer px-2 py-1 rounded hover:bg-gray-100 hover:text-black transition-all duration-200"
               >
                 {link}
-              </span>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Profile button at bottom */}
+          <button
+            className="mt-6 flex items-center gap-2 px-3 py-2 rounded-md bg-black text-white w-full justify-center font-medium hover:bg-gray-800 transition-colors"
+            onClick={() => {
+              onClose();
+              navigate("/account");
+            }}
+          >
+            <FaUserAlt className="text-sm" />
+            My Profile
+          </button>
         </div>
       </div>
     </Drawer>

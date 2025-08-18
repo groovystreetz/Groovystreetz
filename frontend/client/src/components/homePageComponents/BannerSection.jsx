@@ -10,25 +10,33 @@ const Banners = () => {
   const [hoveredIndex, setHoveredIndex] = useState(1); // Middle one big by default
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-8">
-      <h2 className="text-2xl font-bold mb-6 text-center text-black">Banners</h2>
+    <div className="w-full mx-auto py-12">
+      <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-tight">
+        Banners
+      </h2>
 
-      <div className="flex gap-4 items-center transition-all duration-500">
+      <div className="flex gap-6 w-[100%] items-center transition-all duration-500">
         {products.map((product, idx) => (
           <div
             key={product.id}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(1)} // Reset to middle on leave
-            className={`transition-all duration-500 cursor-pointer border border-black shadow-md bg-white p-4 flex flex-col items-center ${
-              hoveredIndex === idx ? "flex-[2]" : "flex-[1]"
+            className={`transition-all duration-500 cursor-pointer rounded-2xl bg-white shadow-lg overflow-hidden flex flex-col items-center ${
+              hoveredIndex === idx ? "flex-[2] scale-105 shadow-2xl" : "flex-[1] scale-95"
             }`}
           >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-40 object-cover mb-2 transition-all duration-500"
-            />
-            <p className="text-sm font-semibold text-black">{product.name}</p>
+            <div className="overflow-hidden w-full h-56">
+              <img
+                src={product.image}
+                alt={product.name}
+                className={`w-full h-full object-cover transition-transform duration-700 ${
+                  hoveredIndex === idx ? "scale-110" : "scale-100"
+                }`}
+              />
+            </div>
+            <p className="text-sm font-medium text-gray-800 py-3">
+              {product.name}
+            </p>
           </div>
         ))}
       </div>
