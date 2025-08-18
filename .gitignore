@@ -91,3 +91,7 @@ pnpm-debug.log*
 
 /backend/plan.md 
 /backend/api/migrations/
+
+
+admin_cookies.txt
+cookies.txt
