@@ -8,7 +8,11 @@ import subprocess
 import json
 import sys
 import time
+import os
+import tempfile
+import platform
 from datetime import datetime
+from pathlib import Path
 
 class Colors:
     GREEN = '\033[92m'
@@ -24,9 +28,25 @@ class SimpleAPITester:
     def __init__(self, base_url: str = "http://127.0.0.1:8000"):
         self.base_url = base_url
         self.results = []
+        self.temp_dir = tempfile.gettempdir()
+        self.is_windows = platform.system().lower() == 'windows'
+        self.dev_null = 'nul' if self.is_windows else '/dev/null'
         
     def log(self, message: str, color: str = Colors.WHITE):
         print(f"{color}{message}{Colors.END}")
+        
+    def extract_csrf_token(self, cookie_file):
+        """Extract CSRF token from cookie file - cross platform"""
+        try:
+            with open(cookie_file, 'r') as f:
+                for line in f:
+                    if 'csrftoken' in line:
+                        parts = line.strip().split('\t')
+                        if len(parts) >= 7:
+                            return parts[6]
+            return ""
+        except (FileNotFoundError, IOError):
+            return ""
         
     def run_curl(self, command: str, expected_status: int = 200, description: str = ""):
         """Run curl command and check response"""
@@ -83,13 +103,15 @@ class SimpleAPITester:
         """Test public endpoints"""
         self.log(f"\n{Colors.CYAN}=== Testing Public Endpoints ==={Colors.END}")
         
+        temp_response = os.path.join(self.temp_dir, 'response.json')
+        
         self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o /tmp/response.json {self.base_url}/api/categories/',
+            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/categories/',
             200, "GET /api/categories/"
         )
         
         self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o /tmp/response.json {self.base_url}/api/products/',
+            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/products/',
             200, "GET /api/products/"
         )
     
@@ -107,22 +129,25 @@ class SimpleAPITester:
         self.run_curl(register_cmd, 201, "POST /api/register/")
         
         # Test login and save cookies
-        login_cmd = f'''curl -s -w "%{{http_code}}" -c /tmp/cookies.txt -X POST {self.base_url}/api/login/ \\
+        cookies_file = os.path.join(self.temp_dir, 'cookies.txt')
+        login_cmd = f'''curl -s -w "%{{http_code}}" -c "{cookies_file}" -X POST {self.base_url}/api/login/ \\
             -H "Content-Type: application/json" \\
             -d '{{"email": "test_{timestamp}@example.com", "password": "TestPassword123!"}}'
         '''
         response, status = self.run_curl(login_cmd, 200, "POST /api/login/")
         
         if status == 200:
+            csrf_token = self.extract_csrf_token(cookies_file)
+            
             # Test authenticated user endpoint
-            user_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/cookies.txt -X GET {self.base_url}/api/auth/user/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/cookies.txt | cut -f7)"
+            user_cmd = f'''curl -s -w "%{{http_code}}" -b "{cookies_file}" -X GET {self.base_url}/api/auth/user/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(user_cmd, 200, "GET /api/auth/user/")
             
             # Test logout
-            logout_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/cookies.txt -X POST {self.base_url}/api/logout/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/cookies.txt | cut -f7)"
+            logout_cmd = f'''curl -s -w "%{{http_code}}" -b "{cookies_file}" -X POST {self.base_url}/api/logout/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(logout_cmd, 200, "POST /api/logout/")
     
@@ -131,26 +156,29 @@ class SimpleAPITester:
         self.log(f"\n{Colors.CYAN}=== Testing Admin Endpoints ==={Colors.END}")
         
         # Login as admin (use default dev data admin)
-        admin_login_cmd = f'''curl -s -w "%{{http_code}}" -c /tmp/admin_cookies.txt -X POST {self.base_url}/api/login/ \\
+        admin_cookies_file = os.path.join(self.temp_dir, 'admin_cookies.txt')
+        admin_login_cmd = f'''curl -s -w "%{{http_code}}" -c "{admin_cookies_file}" -X POST {self.base_url}/api/login/ \\
             -H "Content-Type: application/json" \\
             -d '{{"email": "admin@groovystreetz.com", "password": "admin123"}}'
         '''
         response, status = self.run_curl(admin_login_cmd, 200, "Admin login")
         
         if status == 200:
+            csrf_token = self.extract_csrf_token(admin_cookies_file)
+            
             # Test admin endpoints
-            users_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/admin_cookies.txt -X GET {self.base_url}/api/admin/users/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/admin_cookies.txt | cut -f7)"
+            users_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/users/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(users_cmd, 200, "GET /api/admin/users/")
             
-            orders_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/admin_cookies.txt -X GET {self.base_url}/api/admin/orders/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/admin_cookies.txt | cut -f7)"
+            orders_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/orders/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(orders_cmd, 200, "GET /api/admin/orders/")
             
-            sales_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/admin_cookies.txt -X GET {self.base_url}/api/admin/sales-report/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/admin_cookies.txt | cut -f7)"
+            sales_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/sales-report/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(sales_cmd, 200, "GET /api/admin/sales-report/")
         else:
@@ -233,16 +261,19 @@ class SimpleAPITester:
         self.run_curl(register_cmd, 201, "Register customer for order test")
         
         # Login customer
-        login_cmd = f'''curl -s -w "%{{http_code}}" -c /tmp/customer_cookies.txt -X POST {self.base_url}/api/login/ \\
+        customer_cookies_file = os.path.join(self.temp_dir, 'customer_cookies.txt')
+        login_cmd = f'''curl -s -w "%{{http_code}}" -c "{customer_cookies_file}" -X POST {self.base_url}/api/login/ \\
             -H "Content-Type: application/json" \\
             -d '{{"email": "customer_{timestamp}@example.com", "password": "TestPassword123!"}}'
         '''
         response, status = self.run_curl(login_cmd, 200, "Customer login for orders")
         
         if status == 200:
+            csrf_token = self.extract_csrf_token(customer_cookies_file)
+            
             # Test getting customer orders (should be empty initially)
-            orders_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/customer_cookies.txt -X GET {self.base_url}/api/orders/ \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/customer_cookies.txt | cut -f7)"
+            orders_cmd = f'''curl -s -w "%{{http_code}}" -b "{customer_cookies_file}" -X GET {self.base_url}/api/orders/ \\
+                -H "X-CSRFToken: {csrf_token}"
             '''
             self.run_curl(orders_cmd, 200, "GET /api/orders/ (customer)")
             
@@ -260,9 +291,9 @@ class SimpleAPITester:
                     "items": []
                 }
             
-            order_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/customer_cookies.txt -X POST {self.base_url}/api/orders/create/ \\
+            order_cmd = f'''curl -s -w "%{{http_code}}" -b "{customer_cookies_file}" -X POST {self.base_url}/api/orders/create/ \\
                 -H "Content-Type: application/json" \\
-                -H "X-CSRFToken: $(grep csrftoken /tmp/customer_cookies.txt | cut -f7)" \\
+                -H "X-CSRFToken: {csrf_token}" \\
                 -d '{json.dumps(order_data)}'
             '''
             self.run_curl(order_cmd, expected_status, "POST /api/orders/create/")
@@ -274,13 +305,15 @@ class SimpleAPITester:
         self.log(f"\n{Colors.CYAN}=== Testing Unauthorized Access ==={Colors.END}")
         
         # These should return 403 (Forbidden) or 401 (Unauthorized)
+        temp_response = os.path.join(self.temp_dir, 'response.json')
+        
         self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o /tmp/response.json {self.base_url}/api/admin/users/',
+            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/admin/users/',
             403, "GET /api/admin/users/ (no auth)"
         )
         
         self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o /tmp/response.json {self.base_url}/api/admin/orders/',
+            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/admin/orders/',
             403, "GET /api/admin/orders/ (no auth)"
         )
     
@@ -319,7 +352,7 @@ class SimpleAPITester:
         
         # Check if server is running
         try:
-            result = subprocess.run(['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', f'{self.base_url}/api/categories/'], 
+            result = subprocess.run(['curl', '-s', '-o', self.dev_null, '-w', '%{http_code}', f'{self.base_url}/api/categories/'], 
                                   capture_output=True, timeout=5, text=True)
             if result.stdout.strip() != "200":
                 raise Exception(f"Server returned status: {result.stdout.strip()}")
@@ -338,8 +371,20 @@ class SimpleAPITester:
         # Generate report
         self.generate_report()
         
-        # Cleanup
-        subprocess.run('rm -f /tmp/cookies.txt /tmp/admin_cookies.txt /tmp/customer_cookies.txt /tmp/response.json', shell=True)
+        # Cleanup - cross platform
+        cleanup_files = [
+            os.path.join(self.temp_dir, 'cookies.txt'),
+            os.path.join(self.temp_dir, 'admin_cookies.txt'), 
+            os.path.join(self.temp_dir, 'customer_cookies.txt'),
+            os.path.join(self.temp_dir, 'response.json')
+        ]
+        
+        for file_path in cleanup_files:
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except OSError:
+                pass  # Ignore cleanup errors
 
 def main():
     tester = SimpleAPITester()
