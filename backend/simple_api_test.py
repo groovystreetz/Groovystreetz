@@ -48,10 +48,41 @@ class SimpleAPITester:
         except (FileNotFoundError, IOError):
             return ""
         
-    def run_curl(self, command: str, expected_status: int = 200, description: str = ""):
+    def build_curl_command(self, method: str, url: str, headers: dict = None, data: str = None, cookies_file: str = None, output_file: str = None, save_cookies: bool = False):
+        """Build cross-platform curl command"""
+        cmd_parts = ['curl', '-s', '-w', '%{http_code}']
+        
+        if output_file:
+            cmd_parts.extend(['-o', output_file])
+            
+        if cookies_file:
+            # Read cookies if file exists
+            if os.path.exists(cookies_file):
+                cmd_parts.extend(['-b', cookies_file])
+            # Save cookies for login requests
+            if save_cookies or (method == 'POST' and 'login' in url):
+                cmd_parts.extend(['-c', cookies_file])
+                
+        if method != 'GET':
+            cmd_parts.extend(['-X', method])
+            
+        if headers:
+            for key, value in headers.items():
+                cmd_parts.extend(['-H', f'{key}: {value}'])
+                
+        if data:
+            cmd_parts.extend(['-d', data])
+            
+        cmd_parts.append(url)
+        return cmd_parts
+
+    def run_curl(self, command, expected_status: int = 200, description: str = ""):
         """Run curl command and check response"""
         try:
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
+            if isinstance(command, list):
+                result = subprocess.run(command, capture_output=True, text=True, timeout=30)
+            else:
+                result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
             
             # Extract status code from the end of curl output (using -w flag)
             output_lines = result.stdout.strip().split('\n') if result.stdout else ['']
@@ -105,82 +136,128 @@ class SimpleAPITester:
         
         temp_response = os.path.join(self.temp_dir, 'response.json')
         
-        self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/categories/',
-            200, "GET /api/categories/"
+        cmd = self.build_curl_command(
+            method='GET',
+            url=f'{self.base_url}/api/categories/',
+            output_file=temp_response
         )
+        self.run_curl(cmd, 200, "GET /api/categories/")
         
-        self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/products/',
-            200, "GET /api/products/"
+        cmd = self.build_curl_command(
+            method='GET', 
+            url=f'{self.base_url}/api/products/',
+            output_file=temp_response
         )
+        self.run_curl(cmd, 200, "GET /api/products/")
     
     def test_authentication(self):
         """Test authentication endpoints"""
         self.log(f"\n{Colors.CYAN}=== Testing Authentication ==={Colors.END}")
         
         timestamp = int(time.time())
+        cookies_file = os.path.join(self.temp_dir, 'cookies.txt')
         
         # Test registration
-        register_cmd = f'''curl -s -w "%{{http_code}}" -X POST {self.base_url}/api/register/ \\
-            -H "Content-Type: application/json" \\
-            -d '{{"username": "testuser_{timestamp}", "email": "test_{timestamp}@example.com", "password": "TestPassword123!", "password2": "TestPassword123!"}}'
-        '''
-        self.run_curl(register_cmd, 201, "POST /api/register/")
+        register_data = json.dumps({
+            "username": f"testuser_{timestamp}",
+            "email": f"test_{timestamp}@example.com", 
+            "password": "TestPassword123!",
+            "password2": "TestPassword123!"
+        })
+        
+        cmd = self.build_curl_command(
+            method='POST',
+            url=f'{self.base_url}/api/register/',
+            headers={'Content-Type': 'application/json'},
+            data=register_data
+        )
+        self.run_curl(cmd, 201, "POST /api/register/")
         
         # Test login and save cookies
-        cookies_file = os.path.join(self.temp_dir, 'cookies.txt')
-        login_cmd = f'''curl -s -w "%{{http_code}}" -c "{cookies_file}" -X POST {self.base_url}/api/login/ \\
-            -H "Content-Type: application/json" \\
-            -d '{{"email": "test_{timestamp}@example.com", "password": "TestPassword123!"}}'
-        '''
-        response, status = self.run_curl(login_cmd, 200, "POST /api/login/")
+        login_data = json.dumps({
+            "email": f"test_{timestamp}@example.com",
+            "password": "TestPassword123!"
+        })
+        
+        cmd = self.build_curl_command(
+            method='POST',
+            url=f'{self.base_url}/api/login/',
+            headers={'Content-Type': 'application/json'},
+            data=login_data,
+            cookies_file=cookies_file
+        )
+        response, status = self.run_curl(cmd, 200, "POST /api/login/")
         
         if status == 200:
             csrf_token = self.extract_csrf_token(cookies_file)
             
             # Test authenticated user endpoint
-            user_cmd = f'''curl -s -w "%{{http_code}}" -b "{cookies_file}" -X GET {self.base_url}/api/auth/user/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(user_cmd, 200, "GET /api/auth/user/")
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/auth/user/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=cookies_file
+            )
+            self.run_curl(cmd, 200, "GET /api/auth/user/")
             
             # Test logout
-            logout_cmd = f'''curl -s -w "%{{http_code}}" -b "{cookies_file}" -X POST {self.base_url}/api/logout/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(logout_cmd, 200, "POST /api/logout/")
+            cmd = self.build_curl_command(
+                method='POST',
+                url=f'{self.base_url}/api/logout/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=cookies_file
+            )
+            self.run_curl(cmd, 200, "POST /api/logout/")
     
     def test_admin_endpoints(self):
         """Test admin endpoints"""
         self.log(f"\n{Colors.CYAN}=== Testing Admin Endpoints ==={Colors.END}")
         
-        # Login as admin (use default dev data admin)
         admin_cookies_file = os.path.join(self.temp_dir, 'admin_cookies.txt')
-        admin_login_cmd = f'''curl -s -w "%{{http_code}}" -c "{admin_cookies_file}" -X POST {self.base_url}/api/login/ \\
-            -H "Content-Type: application/json" \\
-            -d '{{"email": "admin@groovystreetz.com", "password": "admin123"}}'
-        '''
-        response, status = self.run_curl(admin_login_cmd, 200, "Admin login")
+        
+        # Login as admin
+        admin_login_data = json.dumps({
+            "email": "admin@groovystreetz.com",
+            "password": "admin123"
+        })
+        
+        cmd = self.build_curl_command(
+            method='POST',
+            url=f'{self.base_url}/api/login/',
+            headers={'Content-Type': 'application/json'},
+            data=admin_login_data,
+            cookies_file=admin_cookies_file,
+            save_cookies=True
+        )
+        response, status = self.run_curl(cmd, 200, "Admin login")
         
         if status == 200:
             csrf_token = self.extract_csrf_token(admin_cookies_file)
             
             # Test admin endpoints
-            users_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/users/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(users_cmd, 200, "GET /api/admin/users/")
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/admin/users/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=admin_cookies_file
+            )
+            self.run_curl(cmd, 200, "GET /api/admin/users/")
             
-            orders_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/orders/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(orders_cmd, 200, "GET /api/admin/orders/")
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/admin/orders/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=admin_cookies_file
+            )
+            self.run_curl(cmd, 200, "GET /api/admin/orders/")
             
-            sales_cmd = f'''curl -s -w "%{{http_code}}" -b "{admin_cookies_file}" -X GET {self.base_url}/api/admin/sales-report/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(sales_cmd, 200, "GET /api/admin/sales-report/")
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/admin/sales-report/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=admin_cookies_file
+            )
+            self.run_curl(cmd, 200, "GET /api/admin/sales-report/")
         else:
             self.log("Skipping admin tests - admin login failed", Colors.YELLOW)
     
@@ -254,28 +331,49 @@ class SimpleAPITester:
         timestamp = int(time.time())
         
         # Register and login a new customer
-        register_cmd = f'''curl -s -w "%{{http_code}}" -X POST {self.base_url}/api/register/ \\
-            -H "Content-Type: application/json" \\
-            -d '{{"username": "customer_{timestamp}", "email": "customer_{timestamp}@example.com", "password": "TestPassword123!", "password2": "TestPassword123!"}}'
-        '''
-        self.run_curl(register_cmd, 201, "Register customer for order test")
+        register_data = json.dumps({
+            "username": f"customer_{timestamp}",
+            "email": f"customer_{timestamp}@example.com",
+            "password": "TestPassword123!",
+            "password2": "TestPassword123!"
+        })
+        
+        cmd = self.build_curl_command(
+            method='POST',
+            url=f'{self.base_url}/api/register/',
+            headers={'Content-Type': 'application/json'},
+            data=register_data
+        )
+        self.run_curl(cmd, 201, "Register customer for order test")
         
         # Login customer
         customer_cookies_file = os.path.join(self.temp_dir, 'customer_cookies.txt')
-        login_cmd = f'''curl -s -w "%{{http_code}}" -c "{customer_cookies_file}" -X POST {self.base_url}/api/login/ \\
-            -H "Content-Type: application/json" \\
-            -d '{{"email": "customer_{timestamp}@example.com", "password": "TestPassword123!"}}'
-        '''
-        response, status = self.run_curl(login_cmd, 200, "Customer login for orders")
+        login_data = json.dumps({
+            "email": f"customer_{timestamp}@example.com",
+            "password": "TestPassword123!"
+        })
+        
+        cmd = self.build_curl_command(
+            method='POST',
+            url=f'{self.base_url}/api/login/',
+            headers={'Content-Type': 'application/json'},
+            data=login_data,
+            cookies_file=customer_cookies_file,
+            save_cookies=True
+        )
+        response, status = self.run_curl(cmd, 200, "Customer login for orders")
         
         if status == 200:
             csrf_token = self.extract_csrf_token(customer_cookies_file)
             
             # Test getting customer orders (should be empty initially)
-            orders_cmd = f'''curl -s -w "%{{http_code}}" -b "{customer_cookies_file}" -X GET {self.base_url}/api/orders/ \\
-                -H "X-CSRFToken: {csrf_token}"
-            '''
-            self.run_curl(orders_cmd, 200, "GET /api/orders/ (customer)")
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/orders/',
+                headers={'X-CSRFToken': csrf_token},
+                cookies_file=customer_cookies_file
+            )
+            self.run_curl(cmd, 200, "GET /api/orders/ (customer)")
             
             # Test creating an order with available products or empty for validation test
             if test_items:
@@ -291,12 +389,14 @@ class SimpleAPITester:
                     "items": []
                 }
             
-            order_cmd = f'''curl -s -w "%{{http_code}}" -b "{customer_cookies_file}" -X POST {self.base_url}/api/orders/create/ \\
-                -H "Content-Type: application/json" \\
-                -H "X-CSRFToken: {csrf_token}" \\
-                -d '{json.dumps(order_data)}'
-            '''
-            self.run_curl(order_cmd, expected_status, "POST /api/orders/create/")
+            cmd = self.build_curl_command(
+                method='POST',
+                url=f'{self.base_url}/api/orders/create/',
+                headers={'Content-Type': 'application/json', 'X-CSRFToken': csrf_token},
+                data=json.dumps(order_data),
+                cookies_file=customer_cookies_file
+            )
+            self.run_curl(cmd, expected_status, "POST /api/orders/create/")
         else:
             self.log("Skipping order tests - customer login failed", Colors.YELLOW)
     
@@ -304,18 +404,22 @@ class SimpleAPITester:
         """Test unauthorized access protection"""
         self.log(f"\n{Colors.CYAN}=== Testing Unauthorized Access ==={Colors.END}")
         
-        # These should return 403 (Forbidden) or 401 (Unauthorized)
         temp_response = os.path.join(self.temp_dir, 'response.json')
         
-        self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/admin/users/',
-            403, "GET /api/admin/users/ (no auth)"
+        # These should return 403 (Forbidden) or 401 (Unauthorized)
+        cmd = self.build_curl_command(
+            method='GET',
+            url=f'{self.base_url}/api/admin/users/',
+            output_file=temp_response
         )
+        self.run_curl(cmd, 403, "GET /api/admin/users/ (no auth)")
         
-        self.run_curl(
-            f'curl -s -w "%{{http_code}}" -o "{temp_response}" {self.base_url}/api/admin/orders/',
-            403, "GET /api/admin/orders/ (no auth)"
+        cmd = self.build_curl_command(
+            method='GET',
+            url=f'{self.base_url}/api/admin/orders/',
+            output_file=temp_response
         )
+        self.run_curl(cmd, 403, "GET /api/admin/orders/ (no auth)")
     
     def generate_report(self):
         """Generate test report"""
@@ -352,8 +456,12 @@ class SimpleAPITester:
         
         # Check if server is running
         try:
-            result = subprocess.run(['curl', '-s', '-o', self.dev_null, '-w', '%{http_code}', f'{self.base_url}/api/categories/'], 
-                                  capture_output=True, timeout=5, text=True)
+            cmd = self.build_curl_command(
+                method='GET',
+                url=f'{self.base_url}/api/categories/',
+                output_file=self.dev_null
+            )
+            result = subprocess.run(cmd, capture_output=True, timeout=5, text=True)
             if result.stdout.strip() != "200":
                 raise Exception(f"Server returned status: {result.stdout.strip()}")
             self.log("✅ Server is running and responding", Colors.GREEN)
