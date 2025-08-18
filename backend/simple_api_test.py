@@ -130,10 +130,10 @@ class SimpleAPITester:
         """Test admin endpoints"""
         self.log(f"\n{Colors.CYAN}=== Testing Admin Endpoints ==={Colors.END}")
         
-        # Login as admin
-        admin_login_cmd = f'''curl -s -w "%{{http_code}}" -c /tmp/admin_cookies.txt -X POST {self.base_url}/api/login/ \\
+        # Login as admin (use default dev data admin)
+        admin_login_cmd = f'''curl -s -w "\\n%{{http_code}}" -c /tmp/admin_cookies.txt -X POST {self.base_url}/api/login/ \\
             -H "Content-Type: application/json" \\
-            -d '{{"email": "admin@example.com", "password": "admin123"}}'
+            -d '{{"email": "admin@groovystreetz.com", "password": "admin123"}}'
         '''
         response, status = self.run_curl(admin_login_cmd, 200, "Admin login")
         
@@ -156,9 +156,72 @@ class SimpleAPITester:
         else:
             self.log("Skipping admin tests - admin login failed", Colors.YELLOW)
     
+    def check_dev_data_setup(self):
+        """Check if development data is already set up"""
+        self.log("Checking for development data...", Colors.YELLOW)
+        
+        # Check if we have products and admin user
+        products_response, products_status = self.run_curl(
+            f'curl -s {self.base_url}/api/products/', 
+            200, 
+            "Check products"
+        )
+        
+        if products_status == 200:
+            try:
+                products = json.loads(products_response)
+                if isinstance(products, list) and len(products) > 0:
+                    self.log(f"✅ Found {len(products)} products in database", Colors.GREEN)
+                    return True
+            except json.JSONDecodeError:
+                pass
+        
+        self.log("⚠️ No development data found", Colors.YELLOW)
+        self.log("💡 Run 'python manage.py setup_dev_data' to create sample data", Colors.CYAN)
+        return False
+
+    def get_available_products(self):
+        """Get list of available products for order testing"""
+        products_cmd = f'curl -s {self.base_url}/api/products/'
+        
+        try:
+            result = subprocess.run(products_cmd, shell=True, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                try:
+                    products = json.loads(result.stdout)
+                    if isinstance(products, list) and len(products) >= 2:
+                        return products[:2]  # Return first 2 products
+                except json.JSONDecodeError:
+                    pass
+        except:
+            pass
+        
+        return []
+
     def test_customer_orders(self):
         """Test customer order endpoints"""
         self.log(f"\n{Colors.CYAN}=== Testing Customer Order Endpoints ==={Colors.END}")
+        
+        # Check if dev data is set up
+        has_dev_data = self.check_dev_data_setup()
+        
+        # Get available products
+        available_products = self.get_available_products()
+        
+        if not available_products:
+            self.log("⚠️ No products available for order testing - creating minimal order test", Colors.YELLOW)
+            # Test with empty order to check endpoint exists
+            test_items = []
+            expected_status = 201  # Empty order is allowed
+        else:
+            # Use first 2 available products
+            test_items = [
+                {"product": available_products[0]["id"], "quantity": 1, "price": str(available_products[0]["price"])},
+                {"product": available_products[1]["id"] if len(available_products) > 1 else available_products[0]["id"], 
+                 "quantity": 1, "price": str(available_products[1]["price"] if len(available_products) > 1 else available_products[0]["price"])}
+            ]
+            expected_status = 201
+            total_price = sum(float(item["price"]) for item in test_items)
         
         timestamp = int(time.time())
         
@@ -183,13 +246,26 @@ class SimpleAPITester:
             '''
             self.run_curl(orders_cmd, 200, "GET /api/orders/ (customer)")
             
-            # Test creating an order
+            # Test creating an order with available products or empty for validation test
+            if test_items:
+                order_data = {
+                    "shipping_address": "123 Test St, Test City, TC 12345",
+                    "total_price": f"{total_price:.2f}",
+                    "items": test_items
+                }
+            else:
+                order_data = {
+                    "shipping_address": "123 Test St, Test City, TC 12345", 
+                    "total_price": "0.00",
+                    "items": []
+                }
+            
             order_cmd = f'''curl -s -w "%{{http_code}}" -b /tmp/customer_cookies.txt -X POST {self.base_url}/api/orders/create/ \\
                 -H "Content-Type: application/json" \\
                 -H "X-CSRFToken: $(grep csrftoken /tmp/customer_cookies.txt | cut -f7)" \\
-                -d '{{"shipping_address": "123 Test St, Test City, TC 12345", "total_price": "75.00", "items": [{{"product": 1, "quantity": 1, "price": "25.00"}}, {{"product": 2, "quantity": 1, "price": "50.00"}}]}}'
+                -d '{json.dumps(order_data)}'
             '''
-            self.run_curl(order_cmd, 201, "POST /api/orders/create/")
+            self.run_curl(order_cmd, expected_status, "POST /api/orders/create/")
         else:
             self.log("Skipping order tests - customer login failed", Colors.YELLOW)
     

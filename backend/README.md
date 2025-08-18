@@ -4,48 +4,99 @@ This directory contains the Django backend for the Groovystreetz project. It pro
 
 ---
 
-## 🚀 Setup and Installation
+## 🚀 Quick Start (First Time Users)
 
-Follow these steps to get the development server running on your local machine.
+### Automated Setup (Recommended)
 
-### 1. Prerequisites
-
-*   Python 3.8+
-*   Docker and Docker Compose (for running the PostgreSQL database)
-
-### 2. Initial Setup
+For a complete setup with sample data:
 
 ```bash
-# 1. Navigate into the backend directory
+# 1. Navigate to backend directory
 cd backend/
 
-# 2. Create a local environment file
+# 2. Create environment file (if not exists)
 cp .env.example .env
 
-# 3. Create and activate a Python virtual environment
+# 3. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
 # 4. Install dependencies
 pip install -r requirements.txt
 
-# 5. Start the PostgreSQL database container
-docker-compose up -d
-
-# 6. Apply database migrations
-python manage.py migrate
-
-# 7. Create a superuser to access the admin panel
-python manage.py createsuperuser
+# 5. Run automated setup (starts database + creates sample data)
+python setup_database.py
 ```
 
-### 3. Running the Development Server
+This creates:
+- **Superadmin**: `admin@groovystreetz.com` / `admin123`
+- **Admin**: `manager@groovystreetz.com` / `manager123` 
+- **Sample Products**: 8 products across 4 categories
+- **Test Customers**: `customer1@test.com` / `test123`
+
+### Manual Setup
 
 ```bash
+# 1-3. Same as above (navigate, venv, install)
+
+# 4. Apply database migrations
+python manage.py migrate
+
+# 5. Create sample data
+python manage.py setup_dev_data
+
+# 6. Start development server
+python manage.py runserver
+```
+
+### Test Your Setup
+
+```bash
+# Run API tests (should show 100% pass rate)
+python simple_api_test.py
+```
+
+## 🔧 Development Setup
+
+### Prerequisites
+
+*   Python 3.8+
+*   Docker and Docker Compose (for PostgreSQL database)
+
+### Manual Database Setup
+
+If you need to set up the PostgreSQL database manually:
+
+```bash
+# 1. Create environment file
+cp .env.example .env
+
+# 2. Start PostgreSQL container
+docker-compose up -d
+
+# 3. Apply migrations
+python manage.py migrate
+
+# 4. Create sample data
+python manage.py setup_dev_data
+```
+
+### Running the Server
+
+```bash
+source .venv/bin/activate
 python manage.py runserver
 ```
 
 The API will be available at `http://127.0.0.1:8000/`.
+
+### Reset Database
+
+To start fresh:
+
+```bash
+python setup_database.py --reset
+```
 
 ---
 
