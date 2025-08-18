@@ -18,7 +18,20 @@ import os
 import sys
 import subprocess
 import argparse
+import shutil
+import platform
 from pathlib import Path
+
+def get_python_executable():
+    """Get the correct Python executable path for the current platform"""
+    venv_path = Path('.venv')
+    
+    if platform.system() == 'Windows':
+        python_exe = venv_path / 'Scripts' / 'python.exe'
+    else:
+        python_exe = venv_path / 'bin' / 'python'
+    
+    return str(python_exe)
 
 def run_command(command, description, check_return=True):
     """Run a shell command and handle errors"""
@@ -52,9 +65,10 @@ def check_requirements():
     """Check if required files exist"""
     print("🔍 Checking requirements...")
     
+    python_exe = get_python_executable()
     required_files = [
         'manage.py',
-        '.venv/bin/python',
+        python_exe,
         'api/management/commands/setup_dev_data.py',
         'docker-compose.yml',
         '.env'
@@ -63,9 +77,12 @@ def check_requirements():
     for file_path in required_files:
         if not Path(file_path).exists():
             print(f"❌ Required file not found: {file_path}")
-            if file_path == '.venv/bin/python':
+            if file_path == python_exe:
                 print("💡 Create virtual environment: python -m venv .venv")
-                print("💡 Activate it: source .venv/bin/activate")
+                if platform.system() == 'Windows':
+                    print("💡 Activate it: .venv\\Scripts\\activate")
+                else:
+                    print("💡 Activate it: source .venv/bin/activate")
                 print("💡 Install requirements: pip install -r requirements.txt")
             elif file_path == '.env':
                 print("💡 Create environment file: cp .env.example .env")
@@ -90,10 +107,11 @@ def main():
     
     # Step 0: Create .env file if it doesn't exist
     if not Path('.env').exists() and Path('.env.example').exists():
-        if not run_command(
-            "cp .env.example .env",
-            "Creating environment file from template"
-        ):
+        try:
+            shutil.copy('.env.example', '.env')
+            print("✅ Creating environment file from template completed")
+        except Exception as e:
+            print(f"❌ Error creating environment file: {e}")
             sys.exit(1)
     
     # Check requirements
@@ -114,21 +132,22 @@ def main():
         time.sleep(5)
     
     # Step 2: Run migrations
+    python_exe = get_python_executable()
     if not run_command(
-        ".venv/bin/python manage.py migrate",
+        f"{python_exe} manage.py migrate",
         "Running database migrations"
     ):
         sys.exit(1)
     
     # Step 2: Collect static files (if needed)
     run_command(
-        ".venv/bin/python manage.py collectstatic --noinput",
+        f"{python_exe} manage.py collectstatic --noinput",
         "Collecting static files",
         check_return=False  # Don't fail if this doesn't work
     )
     
     # Step 3: Setup development data
-    setup_cmd = f".venv/bin/python manage.py setup_dev_data --admin-email '{args.admin_email}' --admin-password '{args.admin_password}'"
+    setup_cmd = f"{python_exe} manage.py setup_dev_data --admin-email '{args.admin_email}' --admin-password '{args.admin_password}'"
     if args.reset:
         setup_cmd += " --reset"
     
@@ -148,7 +167,10 @@ def main():
     print("🎉 GROOVYSTREETZ BACKEND SETUP COMPLETE!")
     print("=" * 60)
     print(f"🔑 Admin Login: {args.admin_email} / {args.admin_password}")
-    print("🌐 Start server: source .venv/bin/activate && python manage.py runserver")
+    if platform.system() == 'Windows':
+        print("🌐 Start server: .venv\\Scripts\\activate && python manage.py runserver")
+    else:
+        print("🌐 Start server: source .venv/bin/activate && python manage.py runserver")
     print("🧪 Run tests: python simple_api_test.py")
     print("📖 API Docs: http://127.0.0.1:8000/api/ (when server running)")
     print("=" * 60)
