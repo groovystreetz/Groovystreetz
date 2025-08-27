@@ -159,10 +159,25 @@ from .models import Wishlist
 
 class WishlistSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
-
+    total_items = serializers.SerializerMethodField()
+    total_value = serializers.SerializerMethodField()
+    
     class Meta:
         model = Wishlist
-        fields = ('user', 'products')
+        fields = ('user', 'products', 'total_items', 'total_value')
+    
+    def get_total_items(self, obj):
+        return obj.products.count()
+    
+    def get_total_value(self, obj):
+        return sum(product.price for product in obj.products.all())
+
+
+class WishlistProductSerializer(serializers.ModelSerializer):
+    """Simplified product serializer for wishlist operations"""
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price', 'image', 'stock')
 
 
 # ==============================================================================

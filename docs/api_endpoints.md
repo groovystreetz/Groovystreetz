@@ -64,6 +64,176 @@ These endpoints are publicly accessible and do not require authentication.
 
 ---
 
+## Wishlist Endpoints
+
+These endpoints require authentication and allow users to manage their wishlists.
+
+### Get User's Wishlist
+
+*   **Endpoint:** `GET /api/wishlist/`
+*   **Required Role:** Authenticated user
+*   **Description:** Retrieve the user's complete wishlist with products and statistics
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "user": 1,
+        "products": [
+            {
+                "id": 1,
+                "name": "Groovy T-Shirt",
+                "description": "A cool t-shirt",
+                "price": "25.00",
+                "image": "/media/products/t-shirt.jpg",
+                "category": "T-Shirts",
+                "stock": 100
+            },
+            {
+                "id": 2,
+                "name": "Cozy Hoodie",
+                "description": "A warm hoodie",
+                "price": "50.00",
+                "image": "/media/products/hoodie.jpg",
+                "category": "Hoodies",
+                "stock": 50
+            }
+        ],
+        "total_items": 2,
+        "total_value": "75.00"
+    }
+    ```
+
+### Add Product to Wishlist
+
+*   **Endpoint:** `POST /api/wishlist/add/<int:product_id>/`
+*   **Required Role:** Authenticated user
+*   **Description:** Add a specific product to the user's wishlist
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/wishlist/add/1/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "message": "Product added to wishlist",
+        "product_id": 1
+    }
+    ```
+*   **Already Exists Response:** `200 OK`
+    ```json
+    {
+        "message": "Product already in wishlist",
+        "product_id": 1
+    }
+    ```
+
+### Remove Product from Wishlist
+
+*   **Endpoint:** `DELETE /api/wishlist/remove/<int:product_id>/`
+*   **Required Role:** Authenticated user
+*   **Description:** Remove a specific product from the user's wishlist
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X DELETE http://127.0.0.1:8000/api/wishlist/remove/1/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "message": "Product removed from wishlist",
+        "product_id": 1
+    }
+    ```
+
+### Toggle Product in Wishlist
+
+*   **Endpoint:** `POST /api/wishlist/toggle/<int:product_id>/`
+*   **Required Role:** Authenticated user
+*   **Description:** Smart toggle - adds product if not in wishlist, removes if already present
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/wishlist/toggle/1/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response (Added):** `200 OK`
+    ```json
+    {
+        "message": "Product added to wishlist",
+        "action": "added",
+        "product_id": 1
+    }
+    ```
+*   **Success Response (Removed):** `200 OK`
+    ```json
+    {
+        "message": "Product removed from wishlist",
+        "action": "removed",
+        "product_id": 1
+    }
+    ```
+
+### Clear Wishlist
+
+*   **Endpoint:** `DELETE /api/wishlist/clear/`
+*   **Required Role:** Authenticated user
+*   **Description:** Remove all products from the user's wishlist
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X DELETE http://127.0.0.1:8000/api/wishlist/clear/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "message": "Cleared 5 products from wishlist"
+    }
+    ```
+
+### Get Wishlist Statistics
+
+*   **Endpoint:** `GET /api/wishlist/stats/`
+*   **Required Role:** Authenticated user
+*   **Description:** Get summary statistics about the user's wishlist
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/stats/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "total_items": 3,
+        "total_value": "125.00",
+        "is_empty": false
+    }
+    ```
+
+### Check Product in Wishlist
+
+*   **Endpoint:** `GET /api/wishlist/check/<int:product_id>/`
+*   **Required Role:** Authenticated user
+*   **Description:** Check if a specific product is in the user's wishlist
+*   **Example Request:**
+    ```bash
+    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/check/1/ \
+    -H "X-CSRFToken: <your_csrf_token>"
+    ```
+*   **Success Response:** `200 OK`
+    ```json
+    {
+        "product_id": 1,
+        "in_wishlist": true,
+        "product_name": "Groovy T-Shirt"
+    }
+    ```
+
+---
+
 ## User Profile Endpoints
 
 These endpoints require authentication.

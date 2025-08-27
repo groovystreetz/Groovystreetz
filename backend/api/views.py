@@ -196,6 +196,37 @@ class WishlistView(generics.RetrieveAPIView):
         return wishlist
 
 
+class WishlistToggleView(views.APIView):
+    """
+    Endpoint for toggling a product in the user's wishlist.
+    If product exists in wishlist, remove it. If not, add it.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, product_id):
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+        try:
+            product = Product.objects.get(id=product_id)
+            if wishlist.products.filter(id=product_id).exists():
+                wishlist.products.remove(product)
+                return response.Response({
+                    "message": "Product removed from wishlist",
+                    "action": "removed",
+                    "product_id": product_id
+                }, status=status.HTTP_200_OK)
+            else:
+                wishlist.products.add(product)
+                return response.Response({
+                    "message": "Product added to wishlist",
+                    "action": "added",
+                    "product_id": product_id
+                }, status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return response.Response({
+                "error": "Product not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
 class WishlistAddView(views.APIView):
     """
     Endpoint for adding a product to the user's wishlist.
@@ -206,10 +237,21 @@ class WishlistAddView(views.APIView):
         wishlist, created = Wishlist.objects.get_or_create(user=request.user)
         try:
             product = Product.objects.get(id=product_id)
+            if wishlist.products.filter(id=product_id).exists():
+                return response.Response({
+                    "message": "Product already in wishlist",
+                    "product_id": product_id
+                }, status=status.HTTP_200_OK)
+            
             wishlist.products.add(product)
-            return response.Response(status=status.HTTP_200_OK)
+            return response.Response({
+                "message": "Product added to wishlist",
+                "product_id": product_id
+            }, status=status.HTTP_200_OK)
         except Product.DoesNotExist:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
+            return response.Response({
+                "error": "Product not found"
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 class WishlistRemoveView(views.APIView):
@@ -222,10 +264,76 @@ class WishlistRemoveView(views.APIView):
         wishlist, created = Wishlist.objects.get_or_create(user=request.user)
         try:
             product = Product.objects.get(id=product_id)
+            if not wishlist.products.filter(id=product_id).exists():
+                return response.Response({
+                    "message": "Product not in wishlist",
+                    "product_id": product_id
+                }, status=status.HTTP_200_OK)
+                
             wishlist.products.remove(product)
-            return response.Response(status=status.HTTP_204_NO_CONTENT)
+            return response.Response({
+                "message": "Product removed from wishlist",
+                "product_id": product_id
+            }, status=status.HTTP_200_OK)
         except Product.DoesNotExist:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
+            return response.Response({
+                "error": "Product not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+class WishlistClearView(views.APIView):
+    """
+    Endpoint for clearing all products from the user's wishlist.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+        product_count = wishlist.products.count()
+        wishlist.products.clear()
+        return response.Response({
+            "message": f"Cleared {product_count} products from wishlist"
+        }, status=status.HTTP_200_OK)
+
+
+class WishlistStatsView(views.APIView):
+    """
+    Endpoint for getting wishlist statistics.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+        total_items = wishlist.products.count()
+        total_value = sum(product.price for product in wishlist.products.all())
+        
+        return response.Response({
+            "total_items": total_items,
+            "total_value": total_value,
+            "is_empty": total_items == 0
+        }, status=status.HTTP_200_OK)
+
+
+class WishlistCheckView(views.APIView):
+    """
+    Endpoint for checking if a product is in the user's wishlist.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, product_id):
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+        try:
+            product = Product.objects.get(id=product_id)
+            is_in_wishlist = wishlist.products.filter(id=product_id).exists()
+            return response.Response({
+                "product_id": product_id,
+                "in_wishlist": is_in_wishlist,
+                "product_name": product.name
+            }, status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return response.Response({
+                "error": "Product not found"
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 # ==============================================================================

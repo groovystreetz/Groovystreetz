@@ -8,6 +8,7 @@ from .views import (
     DesignListCreateView, OrderCreateView,
     OrderListView, OrderDetailView, AddressViewSet,
     WishlistView, WishlistAddView, WishlistRemoveView,
+    WishlistToggleView, WishlistClearView, WishlistStatsView, WishlistCheckView,
     AdminUserListView, AdminUserDetailView, AdminOrderListView,
     AdminSalesReportView, AdminProductViewSet,
     # Coupon views
@@ -37,9 +38,14 @@ urlpatterns = [
     path('orders/create/', OrderCreateView.as_view(), name='order-create'),
     path('orders/', OrderListView.as_view(), name='order-list'),
     path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
+    # Wishlist endpoints
     path('wishlist/', WishlistView.as_view(), name='wishlist-detail'),
     path('wishlist/add/<int:product_id>/', WishlistAddView.as_view(), name='wishlist-add'),
     path('wishlist/remove/<int:product_id>/', WishlistRemoveView.as_view(), name='wishlist-remove'),
+    path('wishlist/toggle/<int:product_id>/', WishlistToggleView.as_view(), name='wishlist-toggle'),
+    path('wishlist/clear/', WishlistClearView.as_view(), name='wishlist-clear'),
+    path('wishlist/stats/', WishlistStatsView.as_view(), name='wishlist-stats'),
+    path('wishlist/check/<int:product_id>/', WishlistCheckView.as_view(), name='wishlist-check'),
 
     # Coupon endpoints
     path('coupons/validate/', CouponValidationView.as_view(), name='coupon-validate'),
