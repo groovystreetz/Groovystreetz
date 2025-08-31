@@ -140,15 +140,12 @@ export function useWishlist() {
     totalValue,
     isLoading: storeLoading,
     setWishlist,
-    addToWishlist: addToWishlistStore,
-    removeFromWishlist: removeFromWishlistStore,
     clearWishlist: clearWishlistStore,
     setLoading,
   } = useWishlistStore();
 
   // Query for wishlist data
   const {
-    data: wishlistData,
     isLoading: isLoadingWishlist,
     isError: isErrorWishlist,
     refetch: refetchWishlist,
@@ -164,7 +161,7 @@ export function useWishlist() {
   // Mutation for adding to wishlist
   const addToWishlistMutation = useMutation({
     mutationFn: wishlistAPI.addToWishlist,
-    onSuccess: (data, productId) => {
+    onSuccess: (data) => {
       // Log the API response to understand the structure
       console.log('Add to wishlist API response:', data);
       
@@ -185,7 +182,7 @@ export function useWishlist() {
   // Mutation for removing from wishlist
   const removeFromWishlistMutation = useMutation({
     mutationFn: wishlistAPI.removeFromWishlist,
-    onSuccess: (data, productId) => {
+    onSuccess: (data) => {
       // Log the API response to understand the structure
       console.log('Remove from wishlist API response:', data);
       
@@ -206,7 +203,7 @@ export function useWishlist() {
   // Mutation for toggling wishlist
   const toggleWishlistMutation = useMutation({
     mutationFn: wishlistAPI.toggleWishlist,
-    onSuccess: (data, productId) => {
+    onSuccess: (data) => {
       // Invalidate and refetch wishlist
       queryClient.invalidateQueries(['wishlist']);
       // Show success message
