@@ -1,9 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import Login from "./pages/login";
+import ProtectedRoute from "./components/ProtectedRoute";
 // Import all page components (to be created)
 import Dashboard from "./pages/dashboard";
 import Orders from "./pages/orders";
+import Customer from "./components/PageComponents/Customers/Customer";
+import Coupon from "./components/PageComponents/Coupon/Coupon";
+import Products from "./pages/Products";
+import Categories from "./pages/catagories";
 // import AllOrders from "./pages/orders-all";
 // import PendingOrders from "./pages/orders-pending";
 // import ShippedOrders from "./pages/orders-shipped";
@@ -36,10 +41,19 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/orders/all" element={<Orders />} />
+          <Route path="/customers" element={<Customer />} />
+          <Route path="/coupons" element={<Coupon />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/categories" element={<Categories />} />
           {/* <Route path="/orders/pending" element={<PendingOrders />} />
           <Route path="/orders/shipped" element={<ShippedOrders />} />
           <Route path="/orders/returns" element={<Returns />} />

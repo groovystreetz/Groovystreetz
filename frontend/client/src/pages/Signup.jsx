@@ -52,6 +52,7 @@ function Signup() {
           username: form.name, // or just 'name' if your backend expects that
           email: form.email,
           password: form.password,
+          password2: form.password,
         })
         alert('Signup successful!')
         // Optionally redirect to login or home

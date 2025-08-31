@@ -2,15 +2,7 @@ import React from "react";
 import Drawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaUserAlt } from "react-icons/fa";
-
-const categories = [
-  "Urban Monk",
-  "Urban Animals",
-  "Rockstar",
-  "Kids",
-  "Women",
-  "Men",
-];
+import { useCategories } from "@/hooks/useCategories";
 
 const lowerLinks = [
   "My Account",
@@ -26,6 +18,7 @@ const lowerLinks = [
 
 const SideMenu = ({ open, onClose, isLoggedIn }) => {
   const navigate = useNavigate();
+  const { categories, isLoading } = useCategories();
 
   return (
     <Drawer
@@ -80,18 +73,22 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
           </div>
 
           <div className="space-y-2">
-            {categories.map((cat) => (
-              <div
-                key={cat}
-                onClick={() => {
-                  onClose();
-                  navigate(`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`);
-                }}
-                className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-black transition-all duration-200"
-              >
-                {cat}
-              </div>
-            ))}
+            {isLoading ? (
+              <div className="text-sm text-gray-500">Loading categories...</div>
+            ) : (
+              categories.map((cat) => (
+                <div
+                  key={cat.slug}
+                  onClick={() => {
+                    onClose();
+                    navigate(`/products?category=${cat.slug}`);
+                  }}
+                  className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-black transition-all duration-200"
+                >
+                  {cat.name}
+                </div>
+              ))
+            )}
           </div>
         </div>
 

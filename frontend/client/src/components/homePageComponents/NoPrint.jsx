@@ -1,18 +1,7 @@
 import React, { useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { motion as Motion } from "framer-motion";
-
-const noPrintItems = [
-  { id: 1, image: "/images/noprint1.jpg", label: "OVERSIZED T-SHIRTS" },
-  { id: 2, image: "/images/noprint2.jpg", label: "OVERSIZED T-SHIRTS" },
-  { id: 3, image: "/images/noprint3.jpg", label: "BOTTOMS" },
-  { id: 4, image: "/images/noprint4.jpg", label: "SHIRTS" },
-  { id: 5, image: "/images/noprint5.jpg", label: "JEANS" },
-  { id: 6, image: "/images/noprint6.jpg", label: "HOODIES" },
-  { id: 7, image: "/images/noprint7.jpg", label: "FORMALS" },
-  { id: 8, image: "/images/noprint8.jpg", label: "SHORTS" },
-  { id: 9, image: "/images/noprint9.jpg", label: "TROUSERS" },
-];
+import { useProducts } from "../../hooks/useProducts";
 
 const containerVariants = {
   hidden: {},
@@ -39,11 +28,17 @@ const cardVariants = {
 };
 
 function NoPrint() {
+  const { products, isLoading, isError } = useProducts();
   const [startIndex, setStartIndex] = useState(0);
   const [animate, setAnimate] = useState(false);
   const cardsPerPage = 3;
 
-  const visibleItems = noPrintItems.slice(startIndex, startIndex + cardsPerPage);
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Failed to load products.</div>;
+
+  // Only use the first 4 products for this section
+  const displayProducts = products.slice(0, 4);
+  const visibleItems = displayProducts.slice(startIndex, startIndex + cardsPerPage);
 
   const triggerAnimation = () => {
     setAnimate(false);
@@ -51,7 +46,7 @@ function NoPrint() {
   };
 
   const handleNext = () => {
-    if (startIndex + cardsPerPage < noPrintItems.length) {
+    if (startIndex + cardsPerPage < displayProducts.length) {
       setStartIndex(startIndex + cardsPerPage);
       triggerAnimation();
     }
@@ -83,9 +78,9 @@ function NoPrint() {
 
       <button
         onClick={handleNext}
-        disabled={startIndex >= noPrintItems.length - cardsPerPage}
+        disabled={startIndex >= displayProducts.length - cardsPerPage}
         className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full shadow-lg bg-white/70 backdrop-blur-sm hover:bg-white text-gray-800 hover:text-orange-600 transition ${
-          startIndex >= noPrintItems.length - cardsPerPage
+          startIndex >= displayProducts.length - cardsPerPage
             ? "opacity-40 cursor-not-allowed"
             : ""
         }`}
@@ -117,14 +112,14 @@ function NoPrint() {
                   className="transform rotate-180 whitespace-nowrap"
                   style={{ writingMode: "vertical-rl" }}
                 >
-                  {item.label}
+                  {item.category || item.name}
                 </span>
               </div>
 
               {/* Image */}
               <img
-                src={item.image}
-                alt={item.label}
+                src={item.image || "/images/noprint1.jpg"}
+                alt={item.name}
                 className="w-full h-full object-cover transform transition duration-500 group-hover:scale-110 group-hover:brightness-110"
               />
             </div>

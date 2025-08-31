@@ -69,9 +69,9 @@ const data = {
       isActive: true,
       items: [
         { title: "All Orders", url: "/orders" },
-        { title: "Pending", url: "/orders?status=pending" },
-        { title: "Shipped", url: "/orders?status=shipped" },
-        { title: "Returns", url: "/orders?status=returns" },
+        // { title: "Pending", url: "/orders?status=pending" },
+        // { title: "Shipped", url: "/orders?status=shipped" },
+        // { title: "Returns", url: "/orders?status=returns" },
       ],
     },
     {
@@ -80,8 +80,8 @@ const data = {
       icon: Package,
       items: [
         { title: "All Products", url: "/products" },
-        { title: "Categories", url: "/products/categories" },
-        { title: "Inventory", url: "/products/inventory" },
+        { title: "Categories", url: "/categories" },
+        // { title: "Inventory", url: "/products/inventory" },
       ],
     },
     {
@@ -90,7 +90,7 @@ const data = {
       icon: BarChart2,
       items: [
         { title: "Overview", url: "/sales/overview" },
-        { title: "Discounts", url: "/sales/discounts" },
+        { title: "Coupons", url: "/coupons" },
         { title: "Invoices", url: "/sales/invoices" },
       ],
     },
