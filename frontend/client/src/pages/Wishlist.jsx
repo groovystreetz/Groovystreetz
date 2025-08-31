@@ -1,10 +1,9 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import { Heart, ShoppingCart, Star, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useWishlist } from '@/hooks/useWishlist'
@@ -100,7 +99,7 @@ const Wishlist = () => {
         </div>
 
         {totalItems === 0 ? (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16"
@@ -116,11 +115,11 @@ const Wishlist = () => {
             >
               Browse Products
             </Button>
-          </motion.div>
+          </Motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {wishlist.map((product, index) => (
-              <motion.div
+              <Motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -213,7 +212,7 @@ const Wishlist = () => {
                     Remove from Wishlist
                   </Button>
                 </div>
-              </motion.div>
+              </Motion.div>
             ))}
           </div>
         )}

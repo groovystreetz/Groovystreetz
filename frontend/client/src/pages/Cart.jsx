@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -116,7 +116,7 @@ const Cart = () => {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item, index) => (
-              <motion.div
+              <Motion.div
                 key={`${item.id}-${item.size}-${item.color}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -196,13 +196,13 @@ const Cart = () => {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             ))}
           </div>
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-lg shadow-sm border p-6 sticky top-24"
@@ -235,13 +235,13 @@ const Cart = () => {
 
               {/* Success Message */}
               {showSuccess && (
-                <motion.div
+                <Motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-center"
                 >
                   Order created successfully! Redirecting...
-                </motion.div>
+                </Motion.div>
               )}
 
               {/* Error Message */}
@@ -250,7 +250,7 @@ const Cart = () => {
                   {orderError}
                 </div>
               )}
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
       </div>

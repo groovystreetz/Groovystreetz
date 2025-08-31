@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import { Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, ChevronLeft, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,11 +25,11 @@ const ProductDetail = () => {
   const [showSuccess, setShowSuccess] = useState(false)
 
   // Cart and order hooks
-  const { addToCart, getCartCount } = useCartStore()
+  const { addToCart } = useCartStore()
   const { createOrder, loading: orderLoading, error: orderError } = useOrders()
   
   // Wishlist hooks
-  const { addToWishlist, removeFromWishlist, toggleWishlist, isInWishlist: checkWishlistStatus } = useWishlist()
+  const { addToWishlist, removeFromWishlist } = useWishlist()
   const { isInWishlist, isLoading: wishlistCheckLoading } = useWishlistCheck(id)
   
   // Local state for immediate UI feedback
@@ -174,7 +174,6 @@ const ProductDetail = () => {
   }
 
   const originalPrice = Number(product.price) + 20
-  const discount = Math.round(((originalPrice - Number(product.price)) / originalPrice) * 100)
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,7 +196,7 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <motion.div 
+            <Motion.div 
               className="aspect-square bg-gray-100 rounded-2xl overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -207,7 +206,7 @@ const ProductDetail = () => {
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
-            </motion.div>
+            </Motion.div>
             
             {/* Thumbnail Gallery */}
             <div className="flex gap-3">
@@ -233,7 +232,7 @@ const ProductDetail = () => {
 
           {/* Product Info */}
           <div className="space-y-6">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -278,12 +277,12 @@ const ProductDetail = () => {
                   {product.stock > 0 ? `${product.stock} units in stock` : 'Out of stock'}
                 </span>
               </div>
-            </motion.div>
+            </Motion.div>
 
             <Separator />
 
             {/* Size Selection */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
@@ -304,10 +303,10 @@ const ProductDetail = () => {
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </Motion.div>
 
             {/* Color Selection */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
@@ -327,10 +326,10 @@ const ProductDetail = () => {
                   />
                 ))}
               </div>
-            </motion.div>
+            </Motion.div>
 
             {/* Quantity */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
@@ -355,12 +354,12 @@ const ProductDetail = () => {
                   +
                 </Button>
               </div>
-            </motion.div>
+            </Motion.div>
 
             <Separator />
 
             {/* Action Buttons */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
@@ -403,14 +402,14 @@ const ProductDetail = () => {
 
               {/* Success Message */}
               {showSuccess && (
-                <motion.div
+                <Motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg"
                 >
                   <Check className="h-5 w-5" />
                   Added to cart successfully!
-                </motion.div>
+                </Motion.div>
               )}
 
               {/* Error Message */}
@@ -419,10 +418,10 @@ const ProductDetail = () => {
                   {orderError}
                 </div>
               )}
-            </motion.div>
+            </Motion.div>
 
             {/* Features */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
@@ -440,7 +439,7 @@ const ProductDetail = () => {
                 <RotateCcw className="h-5 w-5 text-purple-600" />
                 <span>Easy Returns</span>
               </div>
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
       </div>
