@@ -52,7 +52,7 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [, setSelectedProduct] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const headers = useMemo(() => {
