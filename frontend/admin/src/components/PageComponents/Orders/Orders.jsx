@@ -44,7 +44,6 @@ export default function Orders() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [productDetails, setProductDetails] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(false);
 
@@ -144,8 +143,6 @@ export default function Orders() {
 
   // Fetch all product details for an order when sheet opens
   const handleOrderDetailsOpen = async (order) => {
-    setSelectedOrder(order);
-    
     // Fetch product details for all items in the order
     if (order.items && order.items.length > 0) {
       order.items.forEach(item => {
@@ -640,7 +637,6 @@ export default function Orders() {
                               <div className="flex gap-2 pt-4 border-t">
                                 <Button 
                                   variant="outline" 
-                                  onClick={() => setSelectedOrder(null)}
                                   className="flex-1"
                                 >
                                   Close
