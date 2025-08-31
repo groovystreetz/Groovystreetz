@@ -46,7 +46,7 @@ export default function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [, setSelectedCategory] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const headers = useMemo(() => {

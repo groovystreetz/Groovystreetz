@@ -1,7 +1,5 @@
 import { create } from 'zustand';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { getCookie } from '../lib/csrf';
 
 // Zustand store for admin user
 export const useAdminStore = create((set) => ({
