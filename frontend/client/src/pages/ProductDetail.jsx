@@ -173,7 +173,7 @@ const ProductDetail = () => {
     )
   }
 
-  const originalPrice = Number(product.price) + 20
+
 
   return (
     <div className="min-h-screen bg-background">
