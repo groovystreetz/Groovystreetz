@@ -21,8 +21,8 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar-hooks"
 
 export function NavProjects({ projects }) {
   const { isMobile } = useSidebar()
