@@ -31,11 +31,11 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
     >
       <div className="w-64 h-full flex flex-col bg-white text-gray-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <img src="/logo.png" alt="Logo" className="h-10" />
+        <div className="flex items-center justify-between p-4 border-b border-orange-100">
+          <img src="/logo.png" alt="Logo" className="h-10 drop-shadow-[0_1px_0_rgba(234,88,12,0.2)]" />
           {!isLoggedIn ? (
             <button
-              className="px-4 py-1 rounded-full bg-black text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              className="px-4 py-1 rounded-full bg-orange-600 text-white font-semibold text-sm hover:bg-orange-700 transition-colors shadow-sm hover:shadow"
               onClick={() => {
                 onClose();
                 navigate("/login");
@@ -45,7 +45,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
             </button>
           ) : (
             <button
-              className="px-4 py-1 rounded-full bg-black text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              className="px-4 py-1 rounded-full bg-orange-600 text-white font-semibold text-sm hover:bg-orange-700 transition-colors shadow-sm hover:shadow"
               onClick={() => {
                 onClose();
                 navigate("/signup");
@@ -59,9 +59,9 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
         {/* Categories */}
         <div className="flex-grow p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-lg">Categories</h3>
+            <h3 className="font-semibold text-lg text-orange-700">Categories</h3>
             <button
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-orange-700 hover:text-orange-800 transition-colors"
               onClick={() => {
                 onClose();
                 navigate("/cart");
@@ -83,7 +83,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
                     onClose();
                     navigate(`/products?category=${cat.slug}`);
                   }}
-                  className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-black transition-all duration-200"
+                  className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
                 >
                   {cat.name}
                 </div>
@@ -93,7 +93,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
         </div>
 
         {/* Footer Links */}
-        <div className="border-t border-gray-200 p-4 text-sm">
+        <div className="border-t border-orange-100 p-4 text-sm">
           <div className="space-y-2">
             {lowerLinks.map((link) => (
               <div
@@ -102,7 +102,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
                   onClose();
                   navigate(`/${link.toLowerCase().replace(/\s+/g, "-")}`);
                 }}
-                className="cursor-pointer px-2 py-1 rounded hover:bg-gray-100 hover:text-black transition-all duration-200"
+                className="cursor-pointer px-2 py-1 rounded hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
               >
                 {link}
               </div>
@@ -111,7 +111,7 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
 
           {/* Profile button at bottom */}
           <button
-            className="mt-6 flex items-center gap-2 px-3 py-2 rounded-md bg-black text-white w-full justify-center font-medium hover:bg-gray-800 transition-colors"
+            className="mt-6 flex items-center gap-2 px-3 py-2 rounded-md bg-orange-600 text-white w-full justify-center font-medium hover:bg-orange-700 transition-colors shadow-sm hover:shadow"
             onClick={() => {
               onClose();
               navigate("/account");

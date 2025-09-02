@@ -135,7 +135,7 @@ function NewArrivals() {
 
   return (
     <div className="mt-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 relative">
+      <div className=" mx-auto px-4 relative">
         {/* Heading */}
         <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-wide">
           NEW ARRIVALS
@@ -159,13 +159,13 @@ function NewArrivals() {
         </button>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {visibleArrivals.map((item) => (
             <div
               key={item.id}
               className="group cursor-pointer"
             >
-              <div className="relative w-full h-80 overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition duration-300">
+              <div className="relative w-full h-80 overflow-hidden rounded-none shadow-md group-hover:shadow-xl transition duration-300">
                 {/* Default Image */}
                 <img
                   src={item.image}

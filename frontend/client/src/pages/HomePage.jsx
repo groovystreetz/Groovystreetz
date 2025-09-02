@@ -20,7 +20,7 @@ const HomePage = () => {
     <>
       <Navbar />
         <HeroSlider />
-      <div className="container mx-auto px-4">
+      {/* <div className="container mx-auto px-4"> */}
         <NewArrivals />
         <SpotlightProducts />
         <Categories />
@@ -31,7 +31,7 @@ const HomePage = () => {
         <NoPrint />
         <ShopFor />
         <Slogan />    
-      </div>
+      {/* </div> */}
       <SellingPartners />
       <Footer />
       <BackToTop />
