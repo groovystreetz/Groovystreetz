@@ -59,7 +59,7 @@ import SupportAndHelp from "@/components/dashboard/SupportAndHelp"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const NAV_ITEMS = [
-  { key: "cart", label: "Cart", icon: ShoppingCart },
+  // { key: "cart", label: "Cart", icon: ShoppingCart },
   { key: "orders", label: "Orders", icon: Package },
   { key: "tracking", label: "Tracking", icon: Truck },
   { key: "returns", label: "Returns", icon: RotateCcw },
@@ -77,8 +77,8 @@ export default function Dashboard() {
   // Section rendering for mobile
   const renderSection = (tab) => {
     switch (tab) {
-      case "cart":
-        return <CartAndWishlist />
+      // case "cart":
+      //   return <CartAndWishlist />
       case "orders":
         return <OrderHistory />
       case "tracking":
@@ -158,9 +158,9 @@ export default function Dashboard() {
               ))}
             </TabsList>
             {/* Tab contents */}
-            <TabsContent value="cart" className="space-y-6">
+            {/* <TabsContent value="cart" className="space-y-6">
               <CartAndWishlist />
-            </TabsContent>
+            </TabsContent> */}
             <TabsContent value="orders" className="space-y-6">
               <OrderHistory />
             </TabsContent>

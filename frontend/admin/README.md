@@ -1,12 +1,108 @@
-# React + Vite
+# Groovystreetz Admin Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive admin panel for managing the Groovystreetz e-commerce platform.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🔐 Authentication
+- Secure admin login with CSRF protection
+- Role-based access control (admin, superadmin)
+- Protected routes for admin-only access
 
-## Expanding the ESLint configuration
+### 👥 User Management
+- View all platform users
+- Filter users by role (customer, admin, superadmin)
+- Search users by name, email, or username
+- User statistics and analytics
+- Role-based user categorization
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 📊 Dashboard
+- Overview of platform metrics
+- User statistics
+- Order tracking
+- Sales analytics
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- Backend API running on `http://localhost:8000`
+
+### Installation
+```bash
+npm install
+```
+
+### Development
+```bash
+npm run dev
+```
+
+The admin panel will be available at `http://localhost:5173`
+
+### Building for Production
+```bash
+npm run build
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/login/` - Admin login
+- `GET /api/auth/user/` - Get current user info
+
+### User Management
+- `GET /api/admin/users/` - Get all users (admin only)
+
+## Authentication Flow
+
+1. Admin navigates to `/login`
+2. Enters admin credentials
+3. System validates admin role (admin or superadmin)
+4. Redirects to dashboard on success
+5. All protected routes check authentication status
+
+## User Roles
+
+- **Customer**: Regular platform users
+- **Admin**: Platform administrators with limited access
+- **Super Admin**: System administrators with full access
+
+## Security Features
+
+- CSRF token protection
+- Credential-based authentication
+- Role-based route protection
+- Secure cookie handling
+
+## File Structure
+
+```
+src/
+├── components/
+│   ├── Layout/           # Layout components
+│   ├── PageComponents/   # Page-specific components
+│   │   └── Customers/    # User management
+│   └── ui/              # Reusable UI components
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions
+├── pages/               # Page components
+└── App.jsx             # Main app component
+```
+
+## Dependencies
+
+- React 19
+- React Router DOM
+- Axios for API calls
+- Zustand for state management
+- TanStack Query for data fetching
+- Tailwind CSS for styling
+- Lucide React for icons
+
+## Development Notes
+
+- Uses `withCredentials: true` for API calls
+- CSRF tokens are automatically included in headers
+- Protected routes redirect to login if unauthorized
+- Admin authentication is checked on every route change

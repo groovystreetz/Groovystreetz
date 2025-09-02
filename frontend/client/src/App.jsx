@@ -12,6 +12,9 @@ import LoadingPage from './pages/LoadingPage' // 👈 import it
 import './App.css'
 import Dashboard from './pages/dashboard'
 import ProductPage from './pages/productpage'
+import ProductDetail from './pages/ProductDetail'
+import Cart from './pages/Cart'
+import Wishlist from './pages/Wishlist'
 
 function RequireAuth({ children }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -22,7 +25,7 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2500) // simulate 2.5s load
+    const timer = setTimeout(() => setLoading(false), 1000) // simulate 2.5s load
     return () => clearTimeout(timer)
   }, [])
 
@@ -38,6 +41,13 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductPage />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={
+          <RequireAuth>
+            <Wishlist />
+          </RequireAuth>
+        } />
         <Route path="/dashboard" element={
           <RequireAuth>
             <div className='w-screen h-screen overflow-x-hidden'>

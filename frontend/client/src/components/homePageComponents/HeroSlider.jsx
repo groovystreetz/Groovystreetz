@@ -48,7 +48,7 @@ function HeroSlider() {
 
   return (
     <section
-      className="relative w-full mt-16 h-screen flex items-center justify-center overflow-hidden bg-[#fcfaf8] font-['Plus Jakarta Sans','Noto Sans',sans-serif]"
+      className="relative  w-screen mt-16 h-screen flex items-center justify-center overflow-hidden font-['Plus Jakarta Sans','Noto Sans',sans-serif]"
     >
       {/* Background Image with overlay */}
       <div

@@ -22,28 +22,28 @@ const originMap = {
 };
 
 const Categories = () => (
-  <div className="w-full max-w-6xl mx-auto pt-4 pb-12 mt-14">
+  <div className="w-full  mx-auto max-w-[95%] pt-4 pb-12 mt-14">
     <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-black tracking-wide">
       CATEGORIES
     </h2>
 
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
       {categoryImages.map((img, index) => (
         <Motion.div
           key={`${img.alt}-${index}`}
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
-          whileHover={{ scale: 1.08 }}
+          whileHover={{ scale: 1.02 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, ease: "easeOut" }}
           style={{ transformOrigin: originMap[index % 4] }}
           className="flex flex-col cursor-pointer"
         >
-          <div className="bg-white shadow-lg border border-black p-3 flex justify-center items-center rounded-xl overflow-hidden">
+          <div className="shadow-lg p-0 flex justify-center items-center overflow-hidden">
             <img
               src={img.src}
               alt={img.alt}
-              className="w-full h-40 object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+              className="w-full h-72 object-cover transition-transform duration-300 hover:scale-105"
             />
           </div>
           <span className="mt-3 text-sm md:text-base font-medium text-gray-900 text-center tracking-wide">

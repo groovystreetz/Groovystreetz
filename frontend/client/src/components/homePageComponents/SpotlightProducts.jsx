@@ -25,7 +25,7 @@ const cardVariants = {
 
 const SpotlightProducts = () => {
   return (
-    <div className="w-full max-w-6xl mx-auto py-16 px-4">
+    <div className="w-full mx-auto py-16 px-4">
       <Motion.h2
         className="text-3xl font-extrabold mb-10 text-center text-black"
         initial={{ opacity: 0, y: -20 }}
@@ -36,32 +36,36 @@ const SpotlightProducts = () => {
         🌟 Spotlight Products
       </Motion.h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {products.map((product, index) => (
           <Motion.div
             key={product.id}
-            className="bg-white border border-black shadow-lg rounded-2xl flex flex-col items-center p-6 cursor-pointer"
-            custom={index * 0.2} // faster cascade: 0s, 0.2s, 0.4s
+            className="relative aspect-square w-full overflow-hidden cursor-pointer group rounded-lg shadow-lg"
+            custom={index * 0.2}
             initial="hidden"
             whileInView="visible"
             variants={cardVariants}
             viewport={{ once: true, amount: 0.3 }}
-            whileHover={{
-              y: -8,
-              scale: 1.03,
-              boxShadow: "0px 12px 20px rgba(0,0,0,0.15)",
-            }}
+            whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 200, damping: 10 }}
           >
+            {/* Product Image */}
             <Motion.img
               src={product.image}
               alt={product.name}
-              className="w-36 h-48 object-cover mb-5 rounded-xl shadow-md"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
-            <p className="text-orange-500 text-lg font-bold tracking-wide">{product.price}</p>
+
+            {/* Overlay with Details */}
+            <Motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileHover={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end items-center text-white p-4 opacity-0 group-hover:opacity-100"
+            >
+              <h3 className="text-lg font-semibold">{product.name}</h3>
+              <p className="text-sm mt-1">{product.price}</p>
+            </Motion.div>
           </Motion.div>
         ))}
       </div>

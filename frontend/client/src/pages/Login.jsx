@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 import axios from 'axios'
+import { getCookie } from '../lib/csrf'
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -37,10 +38,17 @@ function Login() {
     setTouched({ email: true, password: true })
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/login/', {
-          email,
-          password,
-        })
+        const csrfToken = getCookie('csrftoken')
+        const response = await axios.post(
+          'http://localhost:8000/api/login/',
+          { email, password },
+          {
+            withCredentials: true,
+            headers: {
+              'X-CSRFToken': csrfToken,
+            },
+          }
+        )
         // Save token/session if returned
         if (response.data && response.data.key) {
           localStorage.setItem('token', response.data.key)
@@ -72,7 +80,7 @@ function Login() {
       scope: 'openid email profile',
       callback: async (tokenResponse) => {
         try {
-          await axios.post('http://127.0.0.1:8000/api/auth/google/', {
+          await axios.post('http://localhost:8000/api/auth/google/', {
             access_token: tokenResponse.access_token,
           });
           alert('Google login successful!');

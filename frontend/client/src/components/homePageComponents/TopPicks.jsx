@@ -1,80 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-
-const products = [
-  {
-    id: 1,
-    name: "Product 1",
-    category: "Shirts",
-    image: "/images/product1.jpg",
-    price: "₹999",
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    category: "Boxers",
-    image: "/images/product2.jpg",
-    price: "₹899",
-  },
-  {
-    id: 3,
-    name: "Product 3",
-    category: "Shirts",
-    image: "/images/product3.jpg",
-    price: "₹799",
-  },
-  {
-    id: 4,
-    name: "Product 4",
-    category: "Boxers",
-    image: "/images/product4.jpg",
-    price: "₹699",
-  },
-  {
-    id: 5,
-    name: "Product 5",
-    category: "Shirts",
-    image: "/images/product5.jpg",
-    price: "₹599",
-  },
-  {
-    id: 6,
-    name: "Product 6",
-    category: "Boxers",
-    image: "/images/product6.jpg",
-    price: "₹499",
-  },
-  {
-    id: 7,
-    name: "Product 7",
-    category: "Shirts",
-    image: "/images/product7.jpg",
-    price: "₹399",
-  },
-  {
-    id: 8,
-    name: "Product 8",
-    category: "Boxers",
-    image: "/images/product8.jpg",
-    price: "₹299",
-  },
-  {
-    id: 9,
-    name: "Product 9",
-    category: "Shirts",
-    image: "/images/product9.jpg",
-    price: "₹199",
-  },
-  {
-    id: 10,
-    name: "Product 10",
-    category: "Boxers",
-    image: "/images/product10.jpg",
-    price: "₹99",
-  },
-];
+import { useProducts } from "../../hooks/useProducts";
 
 const TopPicks = () => {
+  const { products, isLoading, isError } = useProducts();
   const [startIdx, setStartIdx] = useState(0);
   const [cardCount, setCardCount] = useState(4);
 
@@ -88,25 +17,31 @@ const TopPicks = () => {
     return () => window.removeEventListener("resize", updateCardCount);
   }, []);
 
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Failed to load products.</div>;
+
+  // Only use the first 4 products for the carousel
+  const displayProducts = products.slice(0, 4);
+
   const handlePrev = () => {
     setStartIdx((prev) => Math.max(prev - cardCount, 0));
   };
 
   const handleNext = () => {
     setStartIdx((prev) =>
-      Math.min(prev + cardCount, products.length - 1)
+      Math.min(prev + cardCount, displayProducts.length - 1)
     );
   };
 
-  const visibleProducts = products.slice(
+  const visibleProducts = displayProducts.slice(
     startIdx,
-    Math.min(startIdx + cardCount, products.length)
+    Math.min(startIdx + cardCount, displayProducts.length)
   );
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8">
       <h2 className="text-2xl font-bold mb-6 text-center text-black">
-        TOP 10 PICKS OF THE WEEK
+        TOP PICKS OF THE WEEK
       </h2>
       <div className="relative flex items-center overflow-hidden">
         {/* Left Arrow */}
@@ -132,8 +67,7 @@ const TopPicks = () => {
                 className="absolute -left-8 top-32 text-7xl font-extrabold text-white select-none pointer-events-none"
                 style={{
                   zIndex: -1,
-                  textShadow:
-                    "0px 0px 8px rgba(0,0,0,0.6)",
+                  textShadow: "0px 0px 8px rgba(0,0,0,0.6)",
                 }}
               >
                 {startIdx + index + 1}
@@ -142,7 +76,7 @@ const TopPicks = () => {
               {/* Premium Card */}
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:shadow-2xl">
                 <img
-                  src={product.image}
+                  src={product.image || "/images/product1.jpg"}
                   alt={product.name}
                   className="w-56 h-64 object-cover rounded-2xl"
                 />
@@ -157,7 +91,7 @@ const TopPicks = () => {
                   {product.category}
                 </span>
                 <span className="text-gray-800 font-bold block">
-                  {product.price}
+                  ₹{product.price}
                 </span>
               </div>
             </div>
@@ -167,9 +101,9 @@ const TopPicks = () => {
         {/* Right Arrow */}
         <button
           onClick={handleNext}
-          disabled={startIdx >= products.length - 1}
+          disabled={startIdx >= displayProducts.length - 1}
           className={`absolute right-10 z-10 p-2 hover:text-orange-600 bg-white rounded-full shadow-md transition ${
-            startIdx >= products.length - 1
+            startIdx >= displayProducts.length - 1
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}

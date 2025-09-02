@@ -3,12 +3,35 @@ import { Checkbox } from "../ui/checkbox"
 import { Slider } from "../ui/slider"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select"
 import { FITS, SIZES } from "./constants.js"
+import { useCategories } from "@/hooks/useCategories"
 
-const ProductFilters = ({ priceRange, setPriceRange, sizes, setSizes, fits, setFits, sort, setSort }) => {
+const ProductFilters = ({ priceRange, setPriceRange, sizes, setSizes, fits, setFits, sort, setSort, selectedCategory, setSelectedCategory }) => {
 	const [internal, setInternal] = useState(priceRange)
+	const { categories, isLoading } = useCategories()
 
 	return (
 		<aside className="w-72 shrink-0 space-y-6">
+			<div>
+				<h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">Categories</h3>
+				<div className="flex flex-col gap-2">
+					<button
+						className={`text-left text-sm rounded-md px-3 py-1 border ${!selectedCategory ? 'bg-primary text-primary-foreground' : ''}`}
+						onClick={() => setSelectedCategory(null)}
+					>
+						All
+					</button>
+					{(isLoading ? [] : categories).map((c) => (
+						<button
+							key={c.slug}
+							className={`text-left text-sm rounded-md px-3 py-1 border ${selectedCategory === c.slug ? 'bg-primary text-primary-foreground' : ''}`}
+							onClick={() => setSelectedCategory(c.slug)}
+						>
+							{c.name}
+						</button>
+					))}
+				</div>
+			</div>
+
 			<div>
 				<h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">Price</h3>
 				<div className="px-1.5">
