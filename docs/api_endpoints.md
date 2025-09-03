@@ -1,606 +1,506 @@
-# API Endpoints
+# Comprehensive API Endpoints Reference
 
-This document details the main API endpoints for the Groovystreetz application.
+## **Recently Added Features (Complete Implementation)**
 
----
+### ✅ **New Category & Product Features**
+```http
+# Get category by ID with image
+GET /api/categories/{id}/
+Response: { "id": 1, "name": "T-Shirts", "slug": "t-shirts", "image": "categories/tshirts.jpg" }
 
-## Public Endpoints
+# Enhanced products with variants, images, reviews
+GET /api/enhanced-products/
+Query: ?categories=tshirts,hoodies&search=red&min_price=10&max_price=100&new_arrivals=true
 
-These endpoints are publicly accessible and do not require authentication.
+# New arrivals (last 30 days)
+GET /api/new-arrivals/
+```
 
-### Get All Categories
+### ✅ **Order Management Enhancements**
+```http
+# Update order status (Admin/SuperAdmin)
+PATCH /api/admin/orders/{order_id}/status/
+{
+  "status": "shipped",  # pending, shipped, delivered, cancelled
+  "tracking_number": "TRACK123456"
+}
 
-*   **Endpoint:** `GET /api/categories/`
-*   **Example Request:**
-    ```bash
-    curl http://127.0.0.1:8000/api/categories/
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    [
-        {
-            "id": 1,
-            "name": "T-Shirts",
-            "slug": "t-shirts"
-        },
-        {
-            "id": 2,
-            "name": "Hoodies",
-            "slug": "hoodies"
-        }
-    ]
-    ```
+# Orders now include user details and address
+GET /api/orders/{id}/
+Response includes: { "user_details": { "name": "John Doe", "email": "john@example.com", "phone": "+1234567890" } }
+```
 
-### Get All Products
+### ✅ **User Profile & Address Management**
+```http
+# Enhanced profile editing
+PATCH /api/profile/edit/
+{ "first_name": "John", "last_name": "Doe", "phone": "+1234567890", "email": "new@email.com" }
 
-*   **Endpoint:** `GET /api/products/`
-*   **Example Request:**
-    ```bash
-    curl http://127.0.0.1:8000/api/products/
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    [
-        {
-            "id": 1,
-            "name": "Groovy T-Shirt",
-            "description": "A cool t-shirt",
-            "price": "25.00",
-            "image": "/media/products/t-shirt.jpg",
-            "category": "T-Shirts",
-            "stock": 100
-        },
-        {
-            "id": 2,
-            "name": "Cozy Hoodie",
-            "description": "A warm hoodie",
-            "price": "50.00",
-            "image": "/media/products/hoodie.jpg",
-            "category": "Hoodies",
-            "stock": 50
-        }
-    ]
-    ```
+# Multiple addresses with default setting
+GET /api/enhanced-addresses/
+POST /api/enhanced-addresses/
+{ "address_line_1": "123 Main St", "city": "NYC", "is_default": true }
 
----
+# Delete address
+DELETE /api/addresses/{address_id}/delete/
 
-## Wishlist Endpoints
+# Soft delete user account
+DELETE /api/user/delete/
 
-These endpoints require authentication and allow users to manage their wishlists.
+# Admin contact update for support
+PATCH /api/admin/users/{user_id}/contact/
+{ "phone": "+9876543210", "email": "support@email.com" }
+```
 
-### Get User's Wishlist
+### ✅ **Product Variants & Multiple Images**
+```http
+# Product variants (color, size, etc.)
+GET /api/product-variants/?product={product_id}
+POST /api/product-variants/
+{
+  "product": 1,
+  "name": "Red - Large",
+  "sku": "TSHIRT-RED-L",
+  "price_modifier": "5.00",  # Extra ₹5 for this variant
+  "stock": 50
+}
 
-*   **Endpoint:** `GET /api/wishlist/`
-*   **Required Role:** Authenticated user
-*   **Description:** Retrieve the user's complete wishlist with products and statistics
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
+# Multiple images per product/variant
+GET /api/product-images/?product={product_id}
+POST /api/product-images/
+{
+  "product": 1,
+  "variant": 2,  # Optional: specific to red variant
+  "image": [file],
+  "alt_text": "Red t-shirt front view",
+  "is_primary": true,
+  "order": 0
+}
+```
+
+### ✅ **Review & Rating System**
+```http
+# Product reviews with 5-star rating
+GET /api/reviews/?product={product_id}
+POST /api/reviews/
+{
+  "product": 1,
+  "rating": 5,  # 1-5 stars
+  "title": "Great product!",
+  "comment": "Love the quality and fit!"
+}
+
+# Mark review as helpful
+POST /api/reviews/{review_id}/helpful/
+
+# Admin review management
+GET /api/admin/reviews/
+PATCH /api/admin/reviews/{id}/  # Approve/disapprove
+```
+
+### ✅ **Reward Points System**
+```http
+# Get user's reward points
+GET /api/reward-points/
+Response: {
+  "reward_points": { "total_points": 2500 },
+  "recent_transactions": [
+    { "transaction_type": "earn", "points": 10, "description": "Purchase reward", "created_at": "..." }
+  ]
+}
+
+# Redeem points (1000 points = ₹1000 coupon)
+POST /api/reward-points/redeem/
+{ "points": 1000 }
+Response: {
+  "message": "Successfully redeemed 1000 points",
+  "coupon_code": "REWARD12345",
+  "coupon_value": 1000,
+  "remaining_points": 1500
+}
+```
+
+### ✅ **Testimonials System**
+```http
+# Public testimonials
+GET /api/testimonials/
+Query: ?featured=true
+
+# Submit testimonial
+POST /api/testimonials/
+{ "content": "Amazing service and products!", "rating": 5 }
+
+# Admin testimonial management
+GET /api/admin/testimonials/
+PATCH /api/admin/testimonials/{id}/
+{ "is_approved": true, "is_featured": true }
+```
+
+### ✅ **Contact Us System**
+```http
+# Submit contact message
+POST /api/contact/
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "+1234567890",
+  "subject": "order",  # general, order, product, shipping, return, technical, other
+  "message": "I have a question about my recent order..."
+}
+
+# Admin contact management
+GET /api/admin/contacts/
+Query: ?resolved=false
+
+# Mark contact as resolved
+PATCH /api/admin/contacts/{message_id}/resolve/
+```
+
+### ✅ **Multiple Category Filtering**
+```http
+# Filter products by multiple categories
+GET /api/enhanced-products/?categories=tshirts,hoodies,jeans
+# Comma-separated category slugs
+
+# Advanced filtering
+GET /api/enhanced-products/?categories=tshirts&min_price=10&max_price=50&search=cotton&new_arrivals=true
+```
+
+### ✅ **Homepage Content Management**
+```http
+# Banners
+GET /api/banners/
+Query: ?type=hero  # hero, promotion, category
+
+# Spotlight content
+GET /api/spotlights/
+
+# Admin banner management
+GET /api/admin/banners/
+POST /api/admin/banners/
+{
+  "title": "Summer Sale",
+  "subtitle": "Up to 50% off!",
+  "image": [file],
+  "banner_type": "promotion",
+  "link_url": "/products/sale",
+  "link_text": "Shop Now",
+  "start_date": "2024-06-01T00:00:00Z",
+  "end_date": "2024-08-31T23:59:59Z",
+  "order": 1
+}
+
+# Admin spotlight management
+GET /api/admin/spotlights/
+POST /api/admin/spotlights/
+{
+  "title": "Featured Product",
+  "description": "Check out our best seller!",
+  "spotlight_type": "product",
+  "product": 1,
+  "image": [file],
+  "order": 1
+}
+```
+
+## **Advanced Permission System**
+
+### ✅ **Granular Role & Permission Management**
+```http
+# List all permissions
+GET /api/permissions/
+Response: [
+  {
+    "id": 1,
+    "name": "Read Products",
+    "codename": "read_products",
+    "permission_type": "read",
+    "resource_type": "products"
+  }
+]
+
+# Role management (SuperAdmin only)
+GET /api/admin/roles/
+POST /api/admin/roles/
+{
+  "name": "Product Manager",
+  "description": "Can manage products only",
+  "permission_ids": [1, 2, 3, 4],  # read_products, write_products, delete_products, manage_products
+  "is_active": true
+}
+
+# Assign roles to users
+POST /api/admin/assign-roles/
+{
+  "user_id": 5,
+  "role_ids": [1, 2]  # Multiple roles can be assigned
+}
+
+# Check user permissions
+GET /api/user/permissions/
+Response: {
+  "user": "admin@example.com",
+  "role": "admin",
+  "permissions": {
+    "products": [
+      { "codename": "read_products", "permission_type": "read" },
+      { "codename": "write_products", "permission_type": "write" }
+    ],
+    "orders": [ ... ]
+  },
+  "permission_count": 15
+}
+
+# Check specific permission
+POST /api/user/check-permission/
+{ "permission": "read_products" }
+Response: { "user": "admin@example.com", "permission": "read_products", "has_permission": true }
+
+# Initialize default permissions (run once)
+POST /api/admin/initialize-permissions/
+```
+
+## **Permission Types & Resources**
+
+### **Permission Types:**
+- `read` - View/read access
+- `write` - Create/update access  
+- `delete` - Delete access
+- `manage` - Full management access
+
+### **Resource Types:**
+- `users` - User Management
+- `products` - Product Management
+- `orders` - Order Management
+- `coupons` - Coupon Management
+- `reviews` - Review Management
+- `testimonials` - Testimonial Management
+- `contacts` - Contact Management
+- `banners` - Banner Management
+- `spotlights` - Spotlight Management
+- `rewards` - Reward Points Management
+- `analytics` - Analytics & Reports
+
+### **Example Permission Codenames:**
+- `read_products` - Can view products
+- `write_orders` - Can create/update orders
+- `delete_users` - Can delete users
+- `manage_coupons` - Full coupon management
+
+## **Enhanced Coupon System**
+
+### ✅ **Coupon Validation & Application**
+```http
+# Validate coupon before applying
+POST /api/coupons/validate/
+{
+  "coupon_code": "SAVE20",
+  "order_total": "100.00"
+}
+
+Response: {
+  "valid": true,
+  "coupon": {
+    "code": "SAVE20",
+    "name": "20% Off Everything",
+    "discount_type": "percentage",
+    "discount_value": "20.00",
+    "no_return_policy": false
+  },
+  "discount_amount": "20.00",
+  "final_total": "80.00"
+}
+
+# Apply coupon to order
+POST /api/coupons/apply/
+{ "coupon_code": "SAVE20" }
+
+# Admin coupon management
+GET /api/admin/coupons/
+Query: ?is_active=true&discount_type=percentage
+
+# Coupon analytics
+GET /api/admin/coupon-stats/
+Response: {
+  "total_coupons": 50,
+  "active_coupons": 35,
+  "expired_coupons": 10,
+  "total_usage": 1250,
+  "total_discount_given": 15750.50,
+  "top_coupons": [
+    { "code": "SAVE20", "usage_count": 450, "discount_type": "percentage" }
+  ]
+}
+```
+
+## **Response Examples**
+
+### **Enhanced Product Response (with variants & images)**
+```json
+{
+  "id": 1,
+  "name": "Cotton T-Shirt",
+  "description": "Premium cotton t-shirt",
+  "price": "29.99",
+  "category": "T-Shirts",
+  "stock": 100,
+  "variants": [
     {
-        "user": 1,
-        "products": [
-            {
-                "id": 1,
-                "name": "Groovy T-Shirt",
-                "description": "A cool t-shirt",
-                "price": "25.00",
-                "image": "/media/products/t-shirt.jpg",
-                "category": "T-Shirts",
-                "stock": 100
-            },
-            {
-                "id": 2,
-                "name": "Cozy Hoodie",
-                "description": "A warm hoodie",
-                "price": "50.00",
-                "image": "/media/products/hoodie.jpg",
-                "category": "Hoodies",
-                "stock": 50
-            }
-        ],
-        "total_items": 2,
-        "total_value": "75.00"
-    }
-    ```
-
-### Add Product to Wishlist
-
-*   **Endpoint:** `POST /api/wishlist/add/<int:product_id>/`
-*   **Required Role:** Authenticated user
-*   **Description:** Add a specific product to the user's wishlist
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/wishlist/add/1/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
+      "id": 1,
+      "name": "Red - Large",
+      "sku": "TSHIRT-RED-L",
+      "price_modifier": "0.00",
+      "final_price": "29.99",
+      "stock": 25
+    },
     {
-        "message": "Product added to wishlist",
-        "product_id": 1
+      "id": 2,
+      "name": "Blue - Medium", 
+      "sku": "TSHIRT-BLUE-M",
+      "price_modifier": "0.00",
+      "final_price": "29.99",
+      "stock": 30
     }
-    ```
-*   **Already Exists Response:** `200 OK`
-    ```json
+  ],
+  "images": [
     {
-        "message": "Product already in wishlist",
-        "product_id": 1
-    }
-    ```
-
-### Remove Product from Wishlist
-
-*   **Endpoint:** `DELETE /api/wishlist/remove/<int:product_id>/`
-*   **Required Role:** Authenticated user
-*   **Description:** Remove a specific product from the user's wishlist
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X DELETE http://127.0.0.1:8000/api/wishlist/remove/1/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
+      "id": 1,
+      "image": "/media/products/gallery/tshirt-red-front.jpg",
+      "alt_text": "Red t-shirt front view",
+      "is_primary": true,
+      "variant": 1
+    },
     {
-        "message": "Product removed from wishlist",
-        "product_id": 1
+      "id": 2,
+      "image": "/media/products/gallery/tshirt-red-back.jpg", 
+      "alt_text": "Red t-shirt back view",
+      "is_primary": false,
+      "variant": 1
     }
-    ```
-
-### Toggle Product in Wishlist
-
-*   **Endpoint:** `POST /api/wishlist/toggle/<int:product_id>/`
-*   **Required Role:** Authenticated user
-*   **Description:** Smart toggle - adds product if not in wishlist, removes if already present
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/wishlist/toggle/1/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response (Added):** `200 OK`
-    ```json
+  ],
+  "reviews": [
     {
-        "message": "Product added to wishlist",
-        "action": "added",
-        "product_id": 1
+      "id": 1,
+      "user_name": "John Doe",
+      "rating": 5,
+      "title": "Great quality!",
+      "comment": "Love the fit and fabric quality.",
+      "is_verified_purchase": true,
+      "helpful_count": 5
     }
-    ```
-*   **Success Response (Removed):** `200 OK`
-    ```json
+  ],
+  "average_rating": 4.5,
+  "review_count": 12
+}
+```
+
+### **Enhanced Order Response (with user details)**
+```json
+{
+  "id": 123,
+  "user_details": {
+    "name": "John Doe",
+    "email": "john@example.com", 
+    "phone": "+1234567890"
+  },
+  "items": [
     {
-        "message": "Product removed from wishlist",
-        "action": "removed",
-        "product_id": 1
+      "product": 1,
+      "quantity": 2,
+      "price": "29.99"
     }
-    ```
+  ],
+  "original_price": "79.98",
+  "discount_amount": "15.00",
+  "total_price": "64.98",
+  "shipping_address": "123 Main St, NYC, NY 10001",
+  "status": "shipped",
+  "tracking_number": "TRACK123456",
+  "coupon_code": "SAVE20",
+  "has_discount": true,
+  "discount_percentage": 18.75,
+  "no_return_allowed": false,
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
 
-### Clear Wishlist
+## **All Endpoints Summary**
 
-*   **Endpoint:** `DELETE /api/wishlist/clear/`
-*   **Required Role:** Authenticated user
-*   **Description:** Remove all products from the user's wishlist
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X DELETE http://127.0.0.1:8000/api/wishlist/clear/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "message": "Cleared 5 products from wishlist"
-    }
-    ```
+### **Authentication & Profile**
+- `POST /api/register/` - User registration  
+- `POST /api/login/` - User login
+- `POST /api/logout/` - User logout  
+- `PATCH /api/profile/edit/` - Edit user profile
+- `DELETE /api/user/delete/` - Delete user account
 
-### Get Wishlist Statistics
+### **Categories & Products** 
+- `GET /api/categories/` - List categories
+- `GET /api/categories/{id}/` - Get category by ID ✅
+- `GET /api/enhanced-products/` - Enhanced product list ✅
+- `GET /api/enhanced-products/{id}/` - Enhanced product detail ✅
+- `GET /api/new-arrivals/` - New arrival products ✅
 
-*   **Endpoint:** `GET /api/wishlist/stats/`
-*   **Required Role:** Authenticated user
-*   **Description:** Get summary statistics about the user's wishlist
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/stats/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "total_items": 3,
-        "total_value": "125.00",
-        "is_empty": false
-    }
-    ```
+### **Product Management (Admin)**
+- `GET/POST/PATCH/DELETE /api/admin/products/` - Full product CRUD
+- `GET/POST/PATCH/DELETE /api/product-variants/` - Variant management ✅
+- `GET/POST/PATCH/DELETE /api/product-images/` - Image management ✅
 
-### Check Product in Wishlist
+### **Orders**
+- `POST /api/orders/create/` - Create order
+- `GET /api/orders/` - User order history  
+- `GET /api/orders/{id}/` - Order details
+- `PATCH /api/admin/orders/{id}/status/` - Update order status ✅
 
-*   **Endpoint:** `GET /api/wishlist/check/<int:product_id>/`
-*   **Required Role:** Authenticated user
-*   **Description:** Check if a specific product is in the user's wishlist
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/wishlist/check/1/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "product_id": 1,
-        "in_wishlist": true,
-        "product_name": "Groovy T-Shirt"
-    }
-    ```
+### **Reviews & Ratings** ✅
+- `GET /api/reviews/` - List reviews
+- `POST /api/reviews/` - Create review
+- `POST /api/reviews/{id}/helpful/` - Mark helpful
+- Admin: `GET/POST/PATCH/DELETE /api/admin/reviews/`
 
----
+### **Addresses** ✅
+- `GET/POST/PATCH/DELETE /api/enhanced-addresses/` - Enhanced address management
+- `DELETE /api/addresses/{id}/delete/` - Delete address
 
-## User Profile Endpoints
+### **Wishlist**
+- `GET /api/wishlist/` - Get wishlist
+- `POST /api/wishlist/add/{product_id}/` - Add to wishlist
+- `DELETE /api/wishlist/remove/{product_id}/` - Remove from wishlist
+- `POST /api/wishlist/toggle/{product_id}/` - Toggle wishlist
+- `DELETE /api/wishlist/clear/` - Clear wishlist
+- `GET /api/wishlist/stats/` - Wishlist stats
+- `GET /api/wishlist/check/{product_id}/` - Check if in wishlist
 
-These endpoints require authentication.
+### **Coupons**
+- `POST /api/coupons/validate/` - Validate coupon ✅
+- `POST /api/coupons/apply/` - Apply coupon ✅
+- Admin: `GET/POST/PATCH/DELETE /api/admin/coupons/`
+- `GET /api/admin/coupon-stats/` - Coupon analytics
 
-### Create a New Order
+### **Reward Points** ✅
+- `GET /api/reward-points/` - Get user points
+- `POST /api/reward-points/redeem/` - Redeem points
 
-*   **Endpoint:** `POST /api/orders/create/`
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X POST http://127.0.0.1:8000/api/orders/create/ \
-    -H "Content-Type: application/json" \
-    -H "X-CSRFToken: <your_csrf_token>" \
-    -d '{
-        "shipping_address": "123 Main St, Anytown, USA",
-        "total_price": "75.00",
-        "items": [
-            {"product": 1, "quantity": 1, "price": "25.00"},
-            {"product": 2, "quantity": 1, "price": "50.00"}
-        ]
-    }'
-    ```
-*   **Success Response:** `201 Created`
-    ```json
-    {
-        "id": 1,
-        "items": [
-            {"product": 1, "quantity": 1, "price": "25.00"},
-            {"product": 2, "quantity": 1, "price": "50.00"}
-        ],
-        "total_price": "75.00",
-        "shipping_address": "123 Main St, Anytown, USA",
-        "created_at": "2025-07-28T05:10:48.610360Z",
-        "status": "pending"
-    }
-    ```
+### **Content Management** ✅
+- `GET /api/testimonials/` - Public testimonials
+- `POST /api/testimonials/` - Submit testimonial  
+- `POST /api/contact/` - Contact form
+- `GET /api/banners/` - Homepage banners
+- `GET /api/spotlights/` - Featured content
+- Admin: Full CRUD for all content types
 
-### Get User's Order History
+### **Admin & User Management**
+- `GET /api/admin/users/` - List users
+- `PATCH /api/admin/users/{id}/` - Update user
+- `PATCH /api/admin/users/{id}/contact/` - Update contact info ✅
+- `GET /api/admin/orders/` - All orders
+- `GET /api/admin/sales-report/` - Sales analytics
 
-*   **Endpoint:** `GET /api/orders/`
-*   **Example Request:**
-    ```bash
-    curl -b cookies.txt -X GET http://127.0.0.1:8000/api/orders/ \
-    -H "X-CSRFToken: <your_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    [
-        {
-            "id": 1,
-            "items": [
-                {"product": 1, "quantity": 1, "price": "25.00"},
-                {"product": 2, "quantity": 1, "price": "50.00"}
-            ],
-            "total_price": "75.00",
-            "shipping_address": "123 Main St, Anytown, USA",
-            "created_at": "2025-07-28T05:10:48.610360Z",
-            "status": "pending"
-        }
-    ]
-    ```
+### **Permission System** ✅
+- `GET /api/permissions/` - List permissions
+- `GET/POST/PATCH/DELETE /api/admin/roles/` - Role management
+- `POST /api/admin/assign-roles/` - Assign user roles
+- `GET /api/user/permissions/` - User permissions
+- `POST /api/user/check-permission/` - Check permission
+- `POST /api/admin/initialize-permissions/` - Initialize system
 
----
-
-## Role-Based Access Control
-
-The API implements a three-tier role system:
-
-*   **`customer`** - Access to public endpoints + own data (orders, wishlist, designs)
-*   **`admin`** - Limited admin access for operations (orders, sales reports, product management)
-*   **`superadmin`** - Full system access (everything admin can do + user management + role changes)
-
----
-
-## Admin Endpoints (Limited Access)
-
-These endpoints are accessible to users with `admin` or `superadmin` roles.
-
-### Get All Orders
-
-*   **Endpoint:** `GET /api/admin/orders/`
-*   **Required Role:** `admin` or `superadmin`
-*   **Description:** List all orders in the system for management and fulfillment.
-
----
-
-## SuperAdmin Endpoints (Full Access)
-
-These endpoints are restricted to users with the `superadmin` role only.
-
-### Get All Users
-
-*   **Endpoint:** `GET /api/admin/users/`
-*   **Required Role:** `superadmin`
-*   **Description:** View all users in the system for user management.
-*   **Example Request:**
-    ```bash
-    curl -b superadmin_cookies.txt -X GET http://127.0.0.1:8000/api/admin/users/ \
-    -H "X-CSRFToken: <your_superadmin_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    [
-        {
-            "pk": 1,
-            "email": "customer@example.com",
-            "username": "customer",
-            "first_name": "",
-            "last_name": "",
-            "role": "customer"
-        },
-        {
-            "pk": 2,
-            "email": "admin@example.com",
-            "username": "adminuser",
-            "first_name": "",
-            "last_name": "",
-            "role": "admin"
-        },
-        {
-            "pk": 3,
-            "email": "superadmin@example.com",
-            "username": "superuser",
-            "first_name": "",
-            "last_name": "",
-            "role": "superadmin"
-        }
-    ]
-    ```
-
-### Update User Details & Roles
-
-*   **Endpoint:** `PUT /api/admin/users/{id}/` or `PATCH /api/admin/users/{id}/`
-*   **Required Role:** `superadmin`
-*   **Description:** Update user information including role changes.
-*   **Example: Promote user to admin:**
-    ```bash
-    curl -b superadmin_cookies.txt -X PATCH http://127.0.0.1:8000/api/admin/users/2/ \
-    -H "Content-Type: application/json" \
-    -H "X-CSRFToken: <your_superadmin_csrf_token>" \
-    -d '{"role": "admin"}'
-    ```
-
-### Remove User (Soft Delete)
-
-*   **Endpoint:** `DELETE /api/admin/users/{id}/`
-*   **Required Role:** `superadmin`
-*   **Description:** Deactivate a user account (soft delete - preserves data integrity).
-*   **Example Request:**
-    ```bash
-    curl -b superadmin_cookies.txt -X DELETE http://127.0.0.1:8000/api/admin/users/2/ \
-    -H "X-CSRFToken: <your_superadmin_csrf_token>"
-    ```
-*   **Success Response:** `204 No Content`
-
----
-
-## Shared Admin Endpoints
-
-These endpoints are accessible to both `admin` and `superadmin` roles.
-
-### Get Sales Report
-
-*   **Endpoint:** `GET /api/admin/sales-report/`
-*   **Required Role:** `admin` or `superadmin`
-*   **Example Request:**
-    ```bash
-    curl -b admin_cookies.txt -X GET http://127.0.0.1:8000/api/admin/sales-report/ \
-    -H "X-CSRFToken: <your_admin_csrf_token>"
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "total_sales": 150.00,
-        "total_orders": 2
-    }
-    ```
-
-### Manage Products
-
-This endpoint provides full CRUD (Create, Read, Update, Delete) functionality for products.
-
-*   **Required Role:** `admin` or `superadmin`
-*   **List All Products:** `GET /api/admin/products/`
-*   **Create a Product:** `POST /api/admin/products/`
-*   **Retrieve a Product:** `GET /api/admin/products/{id}/`
-*   **Update a Product:** `PUT /api/admin/products/{id}/` or `PATCH /api/admin/products/{id}/`
-*   **Delete a Product:** `DELETE /api/admin/products/{id}/`
-
-*   **Example: Create a Product**
-    Since this is a `multipart/form-data` request (for the image upload), it's best to use a tool like `curl` with the `-F` flag.
-
-    ```bash
-    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/products/ \
-    -H "X-CSRFToken: <your_admin_csrf_token>" \
-    -F "name=New Awesome T-Shirt" \
-    -F "description=This is the best t-shirt ever." \
-    -F "price=29.99" \
-    -F "category=1" \
-    -F "stock=150" \
-    -F "image=@/path/to/your/image.jpg"
-    ```
-
-*   **Success Response:** `201 Created`
-    ```json
-    {
-        "id": 3,
-        "name": "New Awesome T-Shirt",
-        "description": "This is the best t-shirt ever.",
-        "price": "29.99",
-        "image": "/media/products/image.jpg",
-        "category": 1,
-        "stock": 150
-    }
-    ```
-
----
-
-## Coupon System Endpoints
-
-### Validate Coupon Code
-
-*   **Endpoint:** `POST /api/coupons/validate/`
-*   **Required Role:** Authenticated user
-*   **Description:** Validate a coupon code and calculate potential discount before applying to order
-*   **Request Body:**
-    ```json
-    {
-        "coupon_code": "SAVE20",
-        "order_total": "100.00"
-    }
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "valid": true,
-        "coupon": {
-            "code": "SAVE20",
-            "name": "20% Off Everything",
-            "discount_type": "percentage",
-            "discount_value": "20.00",
-            "no_return_policy": false
-        },
-        "discount_amount": "20.00",
-        "final_total": "80.00"
-    }
-    ```
-*   **Error Response:** `400 Bad Request`
-    ```json
-    {
-        "valid": false,
-        "errors": ["This coupon has expired", "Minimum order value of $50.00 required"]
-    }
-    ```
-
-### Apply Coupon to Order
-
-*   **Endpoint:** `POST /api/coupons/apply/`
-*   **Required Role:** Authenticated user
-*   **Description:** Apply a coupon code to user's order/cart
-*   **Request Body:**
-    ```json
-    {
-        "coupon_code": "SAVE20"
-    }
-    ```
-*   **Success Response:** `200 OK`
-    ```json
-    {
-        "message": "Coupon SAVE20 is ready to be applied to your order",
-        "coupon": {
-            "id": 1,
-            "code": "SAVE20",
-            "name": "20% Off Everything",
-            "discount_type": "percentage",
-            "discount_value": "20.00",
-            "no_return_policy": false
-        }
-    }
-    ```
-
----
-
-## Admin Coupon Management
-
-### Manage Coupons (CRUD)
-
-*   **Required Role:** `admin` or `superadmin`
-*   **Base Endpoint:** `/api/admin/coupons/`
-*   **Operations:**
-    *   **List All Coupons:** `GET /api/admin/coupons/`
-    *   **Create Coupon:** `POST /api/admin/coupons/`
-    *   **Get Coupon:** `GET /api/admin/coupons/{id}/`
-    *   **Update Coupon:** `PUT/PATCH /api/admin/coupons/{id}/`
-    *   **Delete Coupon:** `DELETE /api/admin/coupons/{id}/`
-
-*   **Example: Create Percentage Coupon**
-    ```bash
-    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/coupons/ \
-    -H "Content-Type: application/json" \
-    -H "X-CSRFToken: <your_admin_csrf_token>" \
-    -d '{
-        "code": "SAVE20",
-        "name": "20% Off Everything",
-        "description": "Get 20% off your entire order",
-        "discount_type": "percentage",
-        "discount_value": "20.00",
-        "minimum_order_value": "50.00",
-        "max_uses_total": 1000,
-        "max_uses_per_user": 1,
-        "valid_from": "2025-01-01T00:00:00Z",
-        "valid_until": "2025-12-31T23:59:59Z",
-        "is_active": true,
-        "no_return_policy": false
-    }'
-    ```
-
-*   **Example: Create No-Return Policy Coupon**
-    ```bash
-    curl -b admin_cookies.txt -X POST http://127.0.0.1:8000/api/admin/coupons/ \
-    -H "Content-Type: application/json" \
-    -H "X-CSRFToken: <your_admin_csrf_token>" \
-    -d '{
-        "code": "FINAL50",
-        "name": "50% Off Final Sale",
-        "description": "Massive discount but no returns allowed",
-        "discount_type": "percentage",
-        "discount_value": "50.00",
-        "minimum_order_value": "100.00",
-        "max_uses_total": 500,
-        "max_uses_per_user": 1,
-        "valid_from": "2025-01-01T00:00:00Z",
-        "valid_until": "2025-01-31T23:59:59Z",
-        "is_active": true,
-        "no_return_policy": true
-    }'
-    ```
-
-### Coupon Usage Analytics
-
-*   **Endpoint:** `GET /api/admin/coupon-usage/`
-*   **Required Role:** `admin` or `superadmin`
-*   **Description:** View all coupon usage records
-*   **Optional Filters:**
-    *   `?date_from=2025-01-01`
-    *   `?date_to=2025-01-31`
-    *   `/api/admin/coupon-usage/{coupon_id}/` - Usage for specific coupon
-
-### Coupon Statistics
-
-*   **Endpoint:** `GET /api/admin/coupon-stats/`
-*   **Required Role:** `admin` or `superadmin`
-*   **Description:** Get comprehensive coupon system analytics
-*   **Response Example:**
-    ```json
-    {
-        "total_coupons": 25,
-        "active_coupons": 18,
-        "expired_coupons": 3,
-        "total_usage": 1250,
-        "total_discount_given": 15750.00,
-        "top_coupons": [
-            {
-                "code": "SAVE20",
-                "name": "20% Off Everything",
-                "usage_count": 450,
-                "discount_type": "percentage"
-            }
-        ]
-    }
-    ```
+**🎯 Total: 60+ endpoints covering all requested functionality!**

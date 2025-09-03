@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
     # Explicitly define username field with proper max_length
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
 
     # --- ROLE FIELD ---
     # This field will store the user's role with three tiers:
@@ -61,6 +62,7 @@ def populate_username(sender, request, user, **kwargs):
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
+    image = models.ImageField(upload_to='categories/', blank=True, null=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -285,3 +287,300 @@ class CouponUsage(models.Model):
 
     def __str__(self):
         return f"{self.coupon.code} used by {self.user.email} on {self.used_at.date()}"
+
+
+# ==============================================================================
+# NEW MODELS FOR ENHANCED FEATURES
+# ==============================================================================
+
+class Testimonial(models.Model):
+    """Model for customer testimonials"""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='testimonials')
+    content = models.TextField(help_text="Testimonial content")
+    rating = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)], help_text="Rating from 1 to 5")
+    is_approved = models.BooleanField(default=False, help_text="Admin approval status")
+    is_featured = models.BooleanField(default=False, help_text="Feature on homepage")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Testimonial by {self.user.email} - {self.rating} stars"
+
+
+class ContactMessage(models.Model):
+    """Model for contact us messages"""
+    SUBJECT_CHOICES = [
+        ('general', 'General Inquiry'),
+        ('order', 'Order Issue'),
+        ('product', 'Product Question'),
+        ('shipping', 'Shipping Issue'),
+        ('return', 'Return/Refund'),
+        ('technical', 'Technical Support'),
+        ('other', 'Other')
+    ]
+    
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES, default='general')
+    message = models.TextField()
+    is_resolved = models.BooleanField(default=False)
+    resolved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_contacts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Contact from {self.name} - {self.subject}"
+
+
+class ProductVariant(models.Model):
+    """Model for product variants (color, size, etc.)"""
+    product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, help_text="Variant name (e.g., Red, Large, etc.)")
+    sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit")
+    price_modifier = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="Price difference from base product")
+    stock = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['product', 'name']
+        
+    def __str__(self):
+        return f"{self.product.name} - {self.name}"
+    
+    @property
+    def final_price(self):
+        return self.product.price + self.price_modifier
+
+
+class ProductImage(models.Model):
+    """Model for multiple product images"""
+    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+    variant = models.ForeignKey(ProductVariant, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to='products/gallery/')
+    alt_text = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        
+    def __str__(self):
+        return f"Image for {self.product.name}" + (f" - {self.variant.name}" if self.variant else "")
+
+
+class Review(models.Model):
+    """Model for product reviews"""
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, related_name='reviews', on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    title = models.CharField(max_length=200, blank=True)
+    comment = models.TextField()
+    is_verified_purchase = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=True)
+    helpful_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['product', 'user']
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Review by {self.user.email} for {self.product.name} - {self.rating} stars"
+
+
+class RewardPoints(models.Model):
+    """Model for user reward points"""
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='reward_points')
+    total_points = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Rewards for {self.user.email}: {self.total_points} points"
+
+
+class RewardTransaction(models.Model):
+    """Model to track reward point transactions"""
+    TRANSACTION_TYPES = [
+        ('earn', 'Earned Points'),
+        ('redeem', 'Redeemed Points'),
+        ('expire', 'Expired Points'),
+        ('bonus', 'Bonus Points'),
+    ]
+    
+    user = models.ForeignKey(CustomUser, related_name='reward_transactions', on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    points = models.IntegerField(help_text="Positive for earning, negative for spending")
+    description = models.CharField(max_length=200)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.user.email} - {self.transaction_type}: {self.points} points"
+
+
+class Banner(models.Model):
+    """Model for homepage banners"""
+    BANNER_TYPES = [
+        ('hero', 'Hero Banner'),
+        ('promotion', 'Promotional Banner'),
+        ('category', 'Category Banner'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=300, blank=True)
+    image = models.ImageField(upload_to='banners/')
+    banner_type = models.CharField(max_length=20, choices=BANNER_TYPES, default='promotion')
+    link_url = models.URLField(blank=True, help_text="Optional link for banner")
+    link_text = models.CharField(max_length=50, blank=True, help_text="Button text")
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', '-created_at']
+        
+    def __str__(self):
+        return f"{self.banner_type.title()} Banner: {self.title}"
+
+
+class Spotlight(models.Model):
+    """Model for spotlight products/categories"""
+    SPOTLIGHT_TYPES = [
+        ('product', 'Product'),
+        ('category', 'Category'),
+        ('collection', 'Collection'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    spotlight_type = models.CharField(max_length=20, choices=SPOTLIGHT_TYPES)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to='spotlight/', blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', '-created_at']
+        
+    def __str__(self):
+        return f"Spotlight: {self.title}"
+
+
+# ==============================================================================
+# ADVANCED ROLE AND PERMISSION SYSTEM
+# ==============================================================================
+
+class Permission(models.Model):
+    """Model for granular permissions"""
+    PERMISSION_TYPES = [
+        ('read', 'Read Access'),
+        ('write', 'Write Access'),
+        ('delete', 'Delete Access'),
+        ('manage', 'Full Management Access'),
+    ]
+    
+    RESOURCE_TYPES = [
+        ('users', 'User Management'),
+        ('products', 'Product Management'),
+        ('orders', 'Order Management'),
+        ('coupons', 'Coupon Management'),
+        ('reviews', 'Review Management'),
+        ('testimonials', 'Testimonial Management'),
+        ('contacts', 'Contact Management'),
+        ('banners', 'Banner Management'),
+        ('spotlights', 'Spotlight Management'),
+        ('rewards', 'Reward Points Management'),
+        ('analytics', 'Analytics & Reports'),
+    ]
+    
+    name = models.CharField(max_length=100, unique=True)
+    codename = models.CharField(max_length=50, unique=True)
+    permission_type = models.CharField(max_length=10, choices=PERMISSION_TYPES)
+    resource_type = models.CharField(max_length=20, choices=RESOURCE_TYPES)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['permission_type', 'resource_type']
+        ordering = ['resource_type', 'permission_type']
+    
+    def __str__(self):
+        return f"{self.name} ({self.permission_type} {self.resource_type})"
+
+
+class Role(models.Model):
+    """Enhanced role model with granular permissions"""
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
+    is_active = models.BooleanField(default=True)
+    is_system_role = models.BooleanField(default=False, help_text="System roles cannot be deleted")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    def has_permission(self, permission_codename):
+        """Check if role has specific permission"""
+        return self.permissions.filter(
+            codename=permission_codename,
+            is_active=True
+        ).exists()
+
+
+class UserRole(models.Model):
+    """Model to assign roles to users with additional context"""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_roles')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='user_assignments')
+    assigned_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='role_assignments_made')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        unique_together = ['user', 'role']
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.role.name}"
+
+
+# Update the CustomUser model to work with new role system
+def get_user_permissions(user):
+    """Get all permissions for a user based on their roles"""
+    if not user.is_authenticated:
+        return Permission.objects.none()
+    
+    return Permission.objects.filter(
+        roles__user_assignments__user=user,
+        roles__user_assignments__is_active=True,
+        roles__is_active=True,
+        is_active=True
+    ).distinct()
+
+
+def user_has_permission(user, permission_codename):
+    """Check if user has specific permission"""
+    return get_user_permissions(user).filter(codename=permission_codename).exists()
+
+
+# Add method to CustomUser model
+CustomUser.add_to_class('get_permissions', lambda self: get_user_permissions(self))
+CustomUser.add_to_class('has_permission', lambda self, perm: user_has_permission(self, perm))

@@ -23,12 +23,30 @@ The API is designed to be RESTful and follows standard conventions. It is organi
 
 The backend provides a comprehensive set of features to support the Groovystreetz application:
 
-*   **User Authentication**: A complete authentication system with support for email/password and Google social login.
-*   **Role-Based Access Control**: Three-tier role hierarchy (customer, admin, superadmin) with granular permissions.
-*   **E-commerce**: Core e-commerce functionality, including product and category management, order processing, and inventory tracking.
-*   **Coupon System**: Comprehensive discount management with flexible pricing, policy controls, and usage tracking.
-*   **User Profiles**: User-specific features such as order history, address book, and wishlists.
-*   **Admin Dashboard**: Multi-level admin system with limited admin access for operations and full superadmin access for complete system management.
+### **Core Authentication & User Management**
+*   **User Authentication**: Complete system with email/password and Google social login
+*   **Advanced Role-Based Access Control**: Granular permission system with custom roles
+*   **User Profile Management**: Enhanced profile editing with phone numbers and address management
+*   **Multi-Address Support**: Users can manage multiple addresses with default settings
+
+### **E-commerce Features**
+*   **Product Catalog**: Categories with images, product variants (color/size), multiple images per variant
+*   **Shopping Cart & Orders**: Complete order management with user details and address integration
+*   **Coupon System**: Comprehensive discount management with validation and usage tracking
+*   **Inventory Management**: Stock tracking with variant-specific inventory
+
+### **Advanced Features**
+*   **Review & Rating System**: 5-star reviews with helpful votes and verified purchase detection
+*   **Reward Points System**: Earn 5-10 points per purchase, redeem 1000 points for ₹1000 coupons
+*   **Testimonials**: Customer testimonial management with admin approval
+*   **Contact System**: Contact form with admin resolution tracking
+*   **Content Management**: Homepage banners and spotlight content management
+
+### **Admin & Analytics**
+*   **Multi-level Admin System**: Customer, Admin, and SuperAdmin roles with specific permissions
+*   **Comprehensive Admin Panel**: Full CRUD operations for all resources
+*   **Analytics & Reports**: Sales reports, coupon statistics, and usage analytics
+*   **Permission Management**: Granular role and permission assignment system
 
 ## Role-Based Access Control System
 

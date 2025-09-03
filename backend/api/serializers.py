@@ -62,8 +62,18 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
         model = User
         # Define the specific fields to include in the API response.
         # This gives us full control over what user data is exposed.
-        fields = ('pk', 'email', 'username', 'first_name', 'last_name', 'role')
-        # Added 'role' field to expose the user's role in API responses
+        fields = ('pk', 'email', 'username', 'first_name', 'last_name', 'role', 'phone')
+        # Added 'role' and 'phone' field to expose the user's role and phone in API responses
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """
+    Admin serializer for user management with role update capability.
+    """
+    class Meta:
+        model = User
+        fields = ('pk', 'email', 'username', 'first_name', 'last_name', 'role', 'phone', 'is_active', 'date_joined', 'last_login')
+        read_only_fields = ('date_joined', 'last_login')
 
 
 # ==============================================================================
@@ -74,7 +84,7 @@ from .models import Category, Product
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('id', 'name', 'slug')
+        fields = ('id', 'name', 'slug', 'image')
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -276,3 +286,288 @@ class ApplyCouponSerializer(serializers.Serializer):
     
     def validate_coupon_code(self, value):
         return value.upper().strip()
+
+
+# ==============================================================================
+# NEW SERIALIZERS FOR ENHANCED FEATURES
+# ==============================================================================
+
+from .models import (
+    Testimonial, ContactMessage, ProductVariant, ProductImage, Review, 
+    RewardPoints, RewardTransaction, Banner, Spotlight, Permission, Role, UserRole
+)
+
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'user', 'user_name', 'user_email', 'content', 'rating', 
+                 'is_approved', 'is_featured', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
+
+
+class AdminTestimonialSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = Testimonial
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ['id', 'name', 'email', 'phone', 'subject', 'message', 
+                 'is_resolved', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class AdminContactMessageSerializer(serializers.ModelSerializer):
+    resolved_by_name = serializers.CharField(source='resolved_by.get_full_name', read_only=True)
+    
+    class Meta:
+        model = ContactMessage
+        fields = '__all__'
+        read_only_fields = ['created_at']
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    final_price = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = ProductVariant
+        fields = ['id', 'name', 'sku', 'price_modifier', 'final_price', 
+                 'stock', 'is_active', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'alt_text', 'is_primary', 'order', 'variant']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = Review
+        fields = ['id', 'product', 'user', 'user_name', 'user_email', 'rating', 
+                 'title', 'comment', 'is_verified_purchase', 'is_approved', 
+                 'helpful_count', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'is_verified_purchase', 'helpful_count', 
+                           'created_at', 'updated_at']
+
+
+class AdminReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class RewardPointsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RewardPoints
+        fields = ['total_points', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class RewardTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RewardTransaction
+        fields = ['id', 'transaction_type', 'points', 'description', 'order', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Banner
+        fields = ['id', 'title', 'subtitle', 'image', 'banner_type', 'link_url', 
+                 'link_text', 'is_active', 'order', 'start_date', 'end_date', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class SpotlightSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    class Meta:
+        model = Spotlight
+        fields = ['id', 'title', 'description', 'spotlight_type', 'product', 
+                 'product_name', 'category', 'category_name', 'image', 
+                 'is_active', 'order', 'created_at']
+        read_only_fields = ['created_at']
+
+
+# Enhanced Product Serializer with variants and images
+class EnhancedProductSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField()
+    variants = ProductVariantSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'description', 'price', 'image', 'category', 
+                 'stock', 'variants', 'images', 'reviews', 'average_rating', 
+                 'review_count', 'created_at', 'updated_at']
+    
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if reviews.exists():
+            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        return 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.filter(is_approved=True).count()
+
+
+# Update Address model to include default functionality
+class EnhancedAddressSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
+    class Meta:
+        model = Address
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        # If this is set as default, remove default from other addresses
+        if validated_data.get('is_default', False):
+            Address.objects.filter(
+                user=validated_data['user'], 
+                is_default=True
+            ).update(is_default=False)
+        
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        # If setting as default, remove default from other addresses
+        if validated_data.get('is_default', False):
+            Address.objects.filter(
+                user=instance.user, 
+                is_default=True
+            ).exclude(id=instance.id).update(is_default=False)
+        
+        return super().update(instance, validated_data)
+
+
+# ==============================================================================
+# PERMISSION SYSTEM SERIALIZERS
+# ==============================================================================
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id', 'name', 'codename', 'permission_type', 'resource_type', 
+                 'description', 'is_active', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True, read_only=True)
+    permission_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'description', 'permissions', 'permission_count',
+                 'is_active', 'is_system_role', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_permission_count(self, obj):
+        return obj.permissions.filter(is_active=True).count()
+
+
+class AdminRoleSerializer(serializers.ModelSerializer):
+    permission_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+    permissions = PermissionSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'description', 'permissions', 'permission_ids',
+                 'is_active', 'is_system_role', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def create(self, validated_data):
+        permission_ids = validated_data.pop('permission_ids', [])
+        role = Role.objects.create(**validated_data)
+        
+        if permission_ids:
+            permissions = Permission.objects.filter(id__in=permission_ids)
+            role.permissions.set(permissions)
+        
+        return role
+    
+    def update(self, instance, validated_data):
+        permission_ids = validated_data.pop('permission_ids', None)
+        
+        # Update role fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update permissions if provided
+        if permission_ids is not None:
+            permissions = Permission.objects.filter(id__in=permission_ids)
+            instance.permissions.set(permissions)
+        
+        return instance
+
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source='role.name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    assigned_by_name = serializers.CharField(source='assigned_by.get_full_name', read_only=True)
+    
+    class Meta:
+        model = UserRole
+        fields = ['id', 'user', 'user_email', 'role', 'role_name', 
+                 'assigned_by', 'assigned_by_name', 'assigned_at', 'is_active']
+        read_only_fields = ['assigned_by', 'assigned_at']
+
+
+class UserRoleAssignmentSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    role_ids = serializers.ListField(child=serializers.IntegerField())
+    
+    def validate_user_id(self, value):
+        try:
+            User.objects.get(id=value)
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found")
+    
+    def validate_role_ids(self, value):
+        existing_roles = Role.objects.filter(id__in=value, is_active=True)
+        if len(existing_roles) != len(value):
+            raise serializers.ValidationError("One or more roles not found or inactive")
+        return value
+
+
+class EnhancedUserSerializer(AdminUserSerializer):
+    """Enhanced user serializer with role information"""
+    user_roles = UserRoleSerializer(many=True, read_only=True)
+    permissions = serializers.SerializerMethodField()
+    
+    class Meta(AdminUserSerializer.Meta):
+        fields = list(AdminUserSerializer.Meta.fields) + ['user_roles', 'permissions']
+    
+    def get_permissions(self, obj):
+        permissions = obj.get_permissions()
+        return PermissionSerializer(permissions, many=True).data
