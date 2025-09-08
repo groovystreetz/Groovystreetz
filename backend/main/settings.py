@@ -197,6 +197,87 @@ import warnings
 warnings.filterwarnings('ignore', module='dj_rest_auth')
 
 
+# ==============================================================================
+# SHIPROCKET INTEGRATION CONFIGURATION
+# ==============================================================================
+
+# ShipRocket API Credentials
+SHIPROCKET_EMAIL = os.environ.get('SHIPROCKET_EMAIL')
+SHIPROCKET_PASSWORD = os.environ.get('SHIPROCKET_PASSWORD')
+
+# ShipRocket Configuration
+SHIPROCKET_BASE_URL = 'https://apiv2.shiprocket.in/v1/external'
+SHIPROCKET_AUTH_URL = 'https://apiv2.shiprocket.in/v1/external/auth/login'
+
+# Default pickup address (can be overridden per order)
+SHIPROCKET_DEFAULT_PICKUP = {
+    'pickup_location': os.environ.get('SHIPROCKET_PICKUP_LOCATION', 'Primary'),
+    'name': os.environ.get('SHIPROCKET_PICKUP_NAME', 'GroovyStreetz'),
+    'email': os.environ.get('SHIPROCKET_PICKUP_EMAIL', ''),
+    'phone': os.environ.get('SHIPROCKET_PICKUP_PHONE', ''),
+    'address': os.environ.get('SHIPROCKET_PICKUP_ADDRESS', ''),
+    'address_2': os.environ.get('SHIPROCKET_PICKUP_ADDRESS_2', ''),
+    'city': os.environ.get('SHIPROCKET_PICKUP_CITY', ''),
+    'state': os.environ.get('SHIPROCKET_PICKUP_STATE', ''),
+    'country': os.environ.get('SHIPROCKET_PICKUP_COUNTRY', 'India'),
+    'pin_code': os.environ.get('SHIPROCKET_PICKUP_PINCODE', ''),
+}
+
+# ShipRocket Integration Settings
+SHIPROCKET_ENABLED = os.environ.get('SHIPROCKET_ENABLED', 'true').lower() == 'true'
+SHIPROCKET_AUTO_PICKUP = os.environ.get('SHIPROCKET_AUTO_PICKUP', 'true').lower() == 'true'
+SHIPROCKET_DEFAULT_DIMENSIONS = {
+    'length': float(os.environ.get('SHIPROCKET_DEFAULT_LENGTH', '10')),  # cm
+    'breadth': float(os.environ.get('SHIPROCKET_DEFAULT_BREADTH', '10')),  # cm
+    'height': float(os.environ.get('SHIPROCKET_DEFAULT_HEIGHT', '5')),   # cm
+    'weight': float(os.environ.get('SHIPROCKET_DEFAULT_WEIGHT', '0.5')),  # kg
+}
+
+# Cache configuration for ShipRocket tokens
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
+
+# Logging configuration for ShipRocket
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'shiprocket.log'),
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'api.shiprocket_service': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+
 # --- Social Account (Google) Configuration ---
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

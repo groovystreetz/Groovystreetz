@@ -129,15 +129,32 @@ class OrderSerializer(serializers.ModelSerializer):
     coupon_code = serializers.CharField(source='applied_coupon.code', read_only=True)
     discount_percentage = serializers.ReadOnlyField()
     has_discount = serializers.ReadOnlyField()
+    
+    # ShipRocket related fields
+    is_shipped_via_shiprocket = serializers.ReadOnlyField()
+    can_be_tracked = serializers.ReadOnlyField()
+    shiprocket_tracking_url = serializers.ReadOnlyField()
+    shiprocket_status_display = serializers.CharField(source='get_shiprocket_status_display', read_only=True)
 
     class Meta:
         model = Order
         fields = [
             'id', 'user', 'items', 'original_price', 'discount_amount', 'total_price',
-            'shipping_address', 'created_at', 'status', 'applied_coupon', 'coupon_code',
-            'no_return_allowed', 'discount_percentage', 'has_discount'
+            'shipping_address', 'created_at', 'updated_at', 'status', 'applied_coupon', 'coupon_code',
+            'no_return_allowed', 'discount_percentage', 'has_discount', 'tracking_number',
+            # ShipRocket fields
+            'shiprocket_order_id', 'awb_code', 'courier_company_id', 'courier_company_name',
+            'shipment_id', 'shiprocket_status', 'shiprocket_status_display', 'estimated_delivery_date',
+            'shipped_date', 'delivered_date', 'shipping_charges', 'is_shiprocket_enabled',
+            'is_shipped_via_shiprocket', 'can_be_tracked', 'shiprocket_tracking_url'
         ]
-        read_only_fields = ['created_at', 'status', 'discount_percentage', 'has_discount']
+        read_only_fields = [
+            'created_at', 'updated_at', 'status', 'discount_percentage', 'has_discount',
+            'shiprocket_order_id', 'awb_code', 'courier_company_id', 'courier_company_name',
+            'shipment_id', 'shiprocket_status', 'shiprocket_status_display', 'estimated_delivery_date',
+            'shipped_date', 'delivered_date', 'shipping_charges', 'tracking_number',
+            'is_shipped_via_shiprocket', 'can_be_tracked', 'shiprocket_tracking_url'
+        ]
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')

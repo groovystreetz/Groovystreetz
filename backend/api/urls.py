@@ -11,6 +11,9 @@ from .views import (
     WishlistToggleView, WishlistClearView, WishlistStatsView, WishlistCheckView,
     AdminUserListView, AdminUserDetailView, AdminOrderListView,
     AdminSalesReportView, AdminProductViewSet,
+    # ShipRocket views
+    ShippingRateCalculationView, PincodeServiceabilityView, ShipmentTrackingView,
+    PublicTrackingView, AdminShipmentManagementView,
     # Coupon views
     CouponValidationView, ApplyCouponView, AdminCouponViewSet,
     AdminCouponUsageView, AdminCouponStatsView,
@@ -27,6 +30,9 @@ from .views import (
     PermissionListView, RoleViewSet, UserRoleViewSet, AssignUserRolesView,
     UserPermissionsView, CheckPermissionView, InitializePermissionsView
 )
+
+# Import webhook views
+from .webhooks import ShipRocketWebhookView, ShipRocketWebhookTestView, shiprocket_webhook_legacy
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
@@ -73,6 +79,18 @@ urlpatterns = [
     path('wishlist/clear/', WishlistClearView.as_view(), name='wishlist-clear'),
     path('wishlist/stats/', WishlistStatsView.as_view(), name='wishlist-stats'),
     path('wishlist/check/<int:product_id>/', WishlistCheckView.as_view(), name='wishlist-check'),
+
+    # ShipRocket endpoints
+    path('shipping/calculate-rates/', ShippingRateCalculationView.as_view(), name='shipping-calculate-rates'),
+    path('shipping/pincode/<str:pincode>/', PincodeServiceabilityView.as_view(), name='pincode-serviceability'),
+    path('orders/<int:order_id>/tracking/', ShipmentTrackingView.as_view(), name='shipment-tracking'),
+    path('tracking/<str:awb_code>/', PublicTrackingView.as_view(), name='public-tracking'),
+    path('admin/orders/<int:order_id>/shipment/', AdminShipmentManagementView.as_view(), name='admin-shipment-management'),
+
+    # ShipRocket Webhooks
+    path('webhooks/shiprocket/', ShipRocketWebhookView.as_view(), name='shiprocket-webhook'),
+    path('webhooks/shiprocket/test/', ShipRocketWebhookTestView.as_view(), name='shiprocket-webhook-test'),
+    path('webhooks/shiprocket/legacy/', shiprocket_webhook_legacy, name='shiprocket-webhook-legacy'),
 
     # Coupon endpoints
     path('coupons/validate/', CouponValidationView.as_view(), name='coupon-validate'),

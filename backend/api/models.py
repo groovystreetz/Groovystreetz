@@ -125,6 +125,32 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     tracking_number = models.CharField(max_length=255, blank=True, null=True)
+    
+    # ShipRocket Integration Fields
+    shiprocket_order_id = models.CharField(max_length=100, blank=True, null=True, 
+                                          help_text="ShipRocket order ID")
+    awb_code = models.CharField(max_length=100, blank=True, null=True,
+                               help_text="Airway Bill number from ShipRocket")
+    courier_company_id = models.CharField(max_length=50, blank=True, null=True,
+                                         help_text="Courier company ID from ShipRocket")
+    courier_company_name = models.CharField(max_length=100, blank=True, null=True,
+                                           help_text="Courier company name")
+    shipment_id = models.CharField(max_length=100, blank=True, null=True,
+                                  help_text="ShipRocket shipment ID")
+    shipment_pickup_token = models.CharField(max_length=255, blank=True, null=True,
+                                           help_text="Pickup token for shipment")
+    shiprocket_status = models.CharField(max_length=50, blank=True, null=True,
+                                        help_text="Current status from ShipRocket")
+    estimated_delivery_date = models.DateTimeField(blank=True, null=True,
+                                                   help_text="Estimated delivery date from courier")
+    shipped_date = models.DateTimeField(blank=True, null=True,
+                                       help_text="Date when shipment was picked up")
+    delivered_date = models.DateTimeField(blank=True, null=True,
+                                         help_text="Date when shipment was delivered")
+    shipping_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                          help_text="Actual shipping charges from courier")
+    is_shiprocket_enabled = models.BooleanField(default=True,
+                                               help_text="Whether to use ShipRocket for this order")
 
     def __str__(self):
         return f"Order {self.id} by {self.user.email if self.user else 'Guest'}"
@@ -140,6 +166,74 @@ class Order(models.Model):
         if self.original_price > 0:
             return (self.discount_amount / self.original_price) * 100
         return 0
+
+    @property
+    def is_shipped_via_shiprocket(self):
+        """Check if order is shipped through ShipRocket"""
+        return bool(self.shiprocket_order_id and self.awb_code)
+
+    @property
+    def can_be_tracked(self):
+        """Check if order can be tracked"""
+        return bool(self.awb_code or self.tracking_number)
+
+    @property
+    def shiprocket_tracking_url(self):
+        """Generate ShipRocket tracking URL"""
+        if self.awb_code:
+            return f"https://shiprocket.co/tracking/{self.awb_code}"
+        return None
+
+    def get_shiprocket_status_display(self):
+        """Get human-readable ShipRocket status"""
+        status_mapping = {
+            'NEW': 'Order Placed',
+            'AWB_ASSIGNED': 'AWB Assigned',
+            'PICKUP_GENERATED': 'Pickup Scheduled',
+            'PICKED_UP': 'Picked Up',
+            'IN_TRANSIT': 'In Transit',
+            'OUT_FOR_DELIVERY': 'Out for Delivery',
+            'DELIVERED': 'Delivered',
+            'RTO': 'Return to Origin',
+            'CANCELLED': 'Cancelled',
+            'LOST': 'Lost',
+            'DAMAGED': 'Damaged'
+        }
+        return status_mapping.get(self.shiprocket_status, self.shiprocket_status or 'Unknown')
+
+    def update_from_shiprocket_webhook(self, webhook_data):
+        """Update order from ShipRocket webhook data"""
+        from django.utils import timezone
+        
+        # Update status
+        if 'current_status' in webhook_data:
+            self.shiprocket_status = webhook_data['current_status']
+            
+        # Update dates based on status
+        if self.shiprocket_status == 'PICKED_UP' and not self.shipped_date:
+            self.shipped_date = timezone.now()
+            if self.status == 'pending':
+                self.status = 'shipped'
+                
+        elif self.shiprocket_status == 'DELIVERED' and not self.delivered_date:
+            self.delivered_date = timezone.now()
+            self.status = 'delivered'
+            
+        elif self.shiprocket_status == 'CANCELLED':
+            self.status = 'cancelled'
+        
+        # Update tracking information
+        if 'etd' in webhook_data:
+            try:
+                from datetime import datetime
+                self.estimated_delivery_date = datetime.fromisoformat(webhook_data['etd'])
+            except:
+                pass
+        
+        self.save(update_fields=[
+            'shiprocket_status', 'status', 'shipped_date', 
+            'delivered_date', 'estimated_delivery_date', 'updated_at'
+        ])
 
 
 class OrderItem(models.Model):

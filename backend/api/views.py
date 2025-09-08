@@ -191,12 +191,564 @@ class DesignListCreateView(generics.ListCreateAPIView):
 class OrderCreateView(generics.CreateAPIView):
     """
     Endpoint for creating a new order.
+    Automatically creates corresponding ShipRocket order if enabled.
     """
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        from django.conf import settings
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        from .shiprocket_utils import ShipRocketDataMapper, ShipRocketValidator
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Save the order first
+        order = serializer.save(user=self.request.user)
+        
+        # Only proceed with ShipRocket if enabled and order is configured for it
+        if not getattr(settings, 'SHIPROCKET_ENABLED', True) or not order.is_shiprocket_enabled:
+            logger.info(f"ShipRocket integration skipped for order {order.id}")
+            return
+        
+        try:
+            # Validate order for ShipRocket
+            is_valid, validation_errors = ShipRocketValidator.validate_order_for_shiprocket(order)
+            
+            if not is_valid:
+                logger.warning(f"Order {order.id} validation failed for ShipRocket: {validation_errors}")
+                # You can choose to either fail the order or continue without ShipRocket
+                # For now, we'll log and continue
+                return
+            
+            # Map order to ShipRocket format
+            shiprocket_data = ShipRocketDataMapper.map_order_to_shiprocket(order)
+            
+            # Sanitize data
+            shiprocket_data = ShipRocketValidator.sanitize_shiprocket_data(shiprocket_data)
+            
+            # Create order in ShipRocket
+            logger.info(f"Creating ShipRocket order for order {order.id}")
+            shiprocket_response = shiprocket_service.create_order(shiprocket_data)
+            
+            # Process successful response
+            if shiprocket_response.get('status_code') == 1:  # Success
+                order_data = shiprocket_response.get('payload', {})
+                
+                # Update order with ShipRocket details
+                order.shiprocket_order_id = order_data.get('order_id')
+                order.awb_code = order_data.get('awb_code')
+                order.courier_company_id = order_data.get('courier_company_id')
+                order.courier_company_name = order_data.get('courier_name')
+                order.shipment_id = order_data.get('shipment_id')
+                order.shiprocket_status = 'NEW'
+                order.shipping_charges = order_data.get('charges', 0)
+                
+                # Update tracking number if not already set
+                if not order.tracking_number and order.awb_code:
+                    order.tracking_number = order.awb_code
+                
+                order.save()
+                
+                logger.info(f"Successfully created ShipRocket order {order.shiprocket_order_id} for order {order.id}")
+                
+                # Auto-generate pickup if enabled
+                if getattr(settings, 'SHIPROCKET_AUTO_PICKUP', True) and order.shipment_id:
+                    try:
+                        pickup_response = shiprocket_service.generate_pickup(order.shipment_id)
+                        if pickup_response.get('status'):
+                            order.shipment_pickup_token = pickup_response.get('response', {}).get('pickup_token')
+                            order.save()
+                            logger.info(f"Auto-generated pickup for order {order.id}")
+                    except Exception as pickup_error:
+                        logger.error(f"Failed to auto-generate pickup for order {order.id}: {pickup_error}")
+                
+            else:
+                # Handle ShipRocket API errors
+                error_message = shiprocket_response.get('message', 'Unknown error')
+                logger.error(f"ShipRocket order creation failed for order {order.id}: {error_message}")
+                
+                # Store error information for debugging
+                order.shiprocket_status = 'ERROR'
+                order.save()
+        
+        except ShipRocketAPIError as e:
+            logger.error(f"ShipRocket API error for order {order.id}: {e}")
+            # Don't fail the order creation, just log the error
+            order.shiprocket_status = 'ERROR'
+            order.save()
+        
+        except Exception as e:
+            logger.error(f"Unexpected error during ShipRocket integration for order {order.id}: {e}")
+            # Don't fail the order creation, just log the error
+            order.shiprocket_status = 'ERROR'
+            order.save()
+
+
+# ==============================================================================
+# SHIPROCKET INTEGRATION VIEWS
+# ==============================================================================
+
+class ShippingRateCalculationView(views.APIView):
+    """
+    Calculate shipping rates for given order details
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request):
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        from .shiprocket_utils import ShipRocketValidator
+        from django.conf import settings
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Check if ShipRocket is enabled
+        if not getattr(settings, 'SHIPROCKET_ENABLED', True):
+            return response.Response({
+                'error': 'Shipping rate calculation is currently unavailable'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        try:
+            # Get request data
+            delivery_pincode = request.data.get('delivery_pincode')
+            weight = request.data.get('weight', settings.SHIPROCKET_DEFAULT_DIMENSIONS['weight'])
+            cod = 1 if request.data.get('cod', False) else 0
+            order_value = request.data.get('order_value', 0)
+            
+            # Validate required fields
+            if not delivery_pincode:
+                return response.Response({
+                    'error': 'delivery_pincode is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate pincode format
+            if not ShipRocketValidator.validate_pincode(delivery_pincode):
+                return response.Response({
+                    'error': 'Invalid pincode format. Must be 6 digits.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get pickup pincode from settings
+            pickup_pincode = settings.SHIPROCKET_DEFAULT_PICKUP.get('pin_code')
+            if not pickup_pincode:
+                return response.Response({
+                    'error': 'Pickup pincode not configured'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Get courier serviceability
+            serviceability_response = shiprocket_service.get_courier_serviceability(
+                pickup_postcode=pickup_pincode,
+                delivery_postcode=delivery_pincode,
+                weight=float(weight),
+                cod=cod
+            )
+            
+            if serviceability_response.get('status') == 200:
+                courier_data = serviceability_response.get('data', {})
+                available_couriers = courier_data.get('available_courier_companies', [])
+                
+                # Format response
+                shipping_options = []
+                for courier in available_couriers:
+                    shipping_option = {
+                        'courier_company_id': courier.get('courier_company_id'),
+                        'courier_name': courier.get('courier_name'),
+                        'freight_charge': courier.get('freight_charge', 0),
+                        'cod_charge': courier.get('cod_charges', 0) if cod else 0,
+                        'total_charge': courier.get('rate', 0),
+                        'expected_delivery_days': courier.get('etd'),
+                        'is_cod_available': courier.get('cod') == 1,
+                        'is_surface': courier.get('is_surface', False),
+                        'pickup_performance': courier.get('pickup_performance', 0),
+                        'delivery_performance': courier.get('delivery_performance', 0)
+                    }
+                    shipping_options.append(shipping_option)
+                
+                # Sort by total charge (cheapest first)
+                shipping_options.sort(key=lambda x: x['total_charge'])
+                
+                return response.Response({
+                    'success': True,
+                    'delivery_pincode': delivery_pincode,
+                    'pickup_pincode': pickup_pincode,
+                    'weight': weight,
+                    'cod_enabled': bool(cod),
+                    'order_value': order_value,
+                    'shipping_options': shipping_options,
+                    'recommended_option': shipping_options[0] if shipping_options else None
+                }, status=status.HTTP_200_OK)
+            
+            else:
+                error_message = serviceability_response.get('message', 'Unable to fetch shipping rates')
+                return response.Response({
+                    'error': f'Shipping calculation failed: {error_message}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except ShipRocketAPIError as e:
+            logger.error(f"ShipRocket API error during rate calculation: {e}")
+            return response.Response({
+                'error': 'Shipping rate calculation service temporarily unavailable'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error during shipping rate calculation: {e}")
+            return response.Response({
+                'error': 'An error occurred while calculating shipping rates'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PincodeServiceabilityView(views.APIView):
+    """
+    Check if delivery is available to a specific pincode
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, pincode):
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        from .shiprocket_utils import ShipRocketValidator
+        from django.conf import settings
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Validate pincode format
+        if not ShipRocketValidator.validate_pincode(pincode):
+            return response.Response({
+                'serviceable': False,
+                'error': 'Invalid pincode format'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if ShipRocket is enabled
+        if not getattr(settings, 'SHIPROCKET_ENABLED', True):
+            return response.Response({
+                'serviceable': False,
+                'error': 'Shipping service currently unavailable'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        try:
+            # Get pickup pincode from settings
+            pickup_pincode = settings.SHIPROCKET_DEFAULT_PICKUP.get('pin_code')
+            if not pickup_pincode:
+                return response.Response({
+                    'serviceable': False,
+                    'error': 'Pickup location not configured'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Check serviceability with minimal weight
+            serviceability_response = shiprocket_service.get_courier_serviceability(
+                pickup_postcode=pickup_pincode,
+                delivery_postcode=pincode,
+                weight=0.1,  # Minimal weight for serviceability check
+                cod=0
+            )
+            
+            if serviceability_response.get('status') == 200:
+                courier_data = serviceability_response.get('data', {})
+                available_couriers = courier_data.get('available_courier_companies', [])
+                
+                is_serviceable = len(available_couriers) > 0
+                
+                return response.Response({
+                    'serviceable': is_serviceable,
+                    'pincode': pincode,
+                    'available_couriers_count': len(available_couriers),
+                    'cod_available': any(courier.get('cod') == 1 for courier in available_couriers),
+                    'fastest_delivery_days': min((courier.get('etd', 999) for courier in available_couriers), default=None)
+                }, status=status.HTTP_200_OK)
+            
+            else:
+                return response.Response({
+                    'serviceable': False,
+                    'pincode': pincode,
+                    'error': serviceability_response.get('message', 'Service not available')
+                }, status=status.HTTP_200_OK)
+        
+        except ShipRocketAPIError as e:
+            logger.error(f"ShipRocket API error during serviceability check: {e}")
+            return response.Response({
+                'serviceable': False,
+                'error': 'Unable to check serviceability at this time'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error during serviceability check: {e}")
+            return response.Response({
+                'serviceable': False,
+                'error': 'An error occurred while checking serviceability'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ShipmentTrackingView(views.APIView):
+    """
+    Track shipment by order ID or AWB code
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, order_id):
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Get the order
+            try:
+                order = Order.objects.get(id=order_id, user=request.user)
+            except Order.DoesNotExist:
+                return response.Response({
+                    'error': 'Order not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Check if order has tracking information
+            if not order.can_be_tracked:
+                return response.Response({
+                    'error': 'This order cannot be tracked yet'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            tracking_data = {
+                'order_id': order.id,
+                'order_status': order.status,
+                'shiprocket_status': order.shiprocket_status,
+                'shiprocket_status_display': order.get_shiprocket_status_display(),
+                'awb_code': order.awb_code,
+                'courier_company': order.courier_company_name,
+                'tracking_url': order.shiprocket_tracking_url,
+                'shipped_date': order.shipped_date,
+                'delivered_date': order.delivered_date,
+                'estimated_delivery_date': order.estimated_delivery_date,
+                'tracking_history': []
+            }
+            
+            # Try to get live tracking data from ShipRocket
+            if order.awb_code:
+                try:
+                    shiprocket_tracking = shiprocket_service.track_awb(order.awb_code)
+                    
+                    if shiprocket_tracking.get('status') == 200:
+                        tracking_info = shiprocket_tracking.get('data', {})
+                        
+                        # Update tracking data with live information
+                        if tracking_info:
+                            tracking_data['current_status'] = tracking_info.get('current_status')
+                            tracking_data['current_status_display'] = tracking_info.get('current_status_body')
+                            tracking_data['delivery_date'] = tracking_info.get('delivered_date')
+                            tracking_data['pickup_date'] = tracking_info.get('pickup_date')
+                            tracking_data['expected_delivery'] = tracking_info.get('etd')
+                            
+                            # Format tracking history
+                            scans = tracking_info.get('scans', [])
+                            tracking_history = []
+                            for scan in scans:
+                                tracking_history.append({
+                                    'date': scan.get('date'),
+                                    'status': scan.get('status'),
+                                    'activity': scan.get('activity'),
+                                    'location': scan.get('location'),
+                                    'status_body': scan.get('status_body')
+                                })
+                            
+                            tracking_data['tracking_history'] = tracking_history
+                
+                except ShipRocketAPIError as e:
+                    logger.warning(f"Could not fetch live tracking for order {order.id}: {e}")
+                    # Continue with stored data
+            
+            return response.Response(tracking_data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            logger.error(f"Error tracking order {order_id}: {e}")
+            return response.Response({
+                'error': 'Unable to retrieve tracking information'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PublicTrackingView(views.APIView):
+    """
+    Public tracking by AWB code (no authentication required)
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, awb_code):
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        if not awb_code:
+            return response.Response({
+                'error': 'AWB code is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Get tracking data from ShipRocket
+            shiprocket_tracking = shiprocket_service.track_awb(awb_code)
+            
+            if shiprocket_tracking.get('status') == 200:
+                tracking_info = shiprocket_tracking.get('data', {})
+                
+                if not tracking_info:
+                    return response.Response({
+                        'error': 'No tracking information found for this AWB code'
+                    }, status=status.HTTP_404_NOT_FOUND)
+                
+                # Format response
+                tracking_data = {
+                    'awb_code': awb_code,
+                    'current_status': tracking_info.get('current_status'),
+                    'current_status_display': tracking_info.get('current_status_body'),
+                    'courier_company': tracking_info.get('courier_company_name'),
+                    'delivery_date': tracking_info.get('delivered_date'),
+                    'pickup_date': tracking_info.get('pickup_date'),
+                    'expected_delivery': tracking_info.get('etd'),
+                    'origin': tracking_info.get('pickup_location'),
+                    'destination': tracking_info.get('delivery_location'),
+                    'tracking_history': []
+                }
+                
+                # Format tracking history
+                scans = tracking_info.get('scans', [])
+                tracking_history = []
+                for scan in scans:
+                    tracking_history.append({
+                        'date': scan.get('date'),
+                        'status': scan.get('status'),
+                        'activity': scan.get('activity'),
+                        'location': scan.get('location'),
+                        'status_body': scan.get('status_body')
+                    })
+                
+                tracking_data['tracking_history'] = tracking_history
+                
+                return response.Response(tracking_data, status=status.HTTP_200_OK)
+            
+            else:
+                return response.Response({
+                    'error': 'Unable to fetch tracking information'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except ShipRocketAPIError as e:
+            logger.error(f"ShipRocket API error tracking AWB {awb_code}: {e}")
+            return response.Response({
+                'error': 'Tracking service temporarily unavailable'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        except Exception as e:
+            logger.error(f"Error tracking AWB {awb_code}: {e}")
+            return response.Response({
+                'error': 'Unable to retrieve tracking information'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AdminShipmentManagementView(views.APIView):
+    """
+    Admin view for managing shipments (generate pickup, cancel, etc.)
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
+    
+    def post(self, request, order_id):
+        from .shiprocket_service import shiprocket_service, ShipRocketAPIError
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        action = request.data.get('action')
+        
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return response.Response({
+                'error': 'Order not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        if not order.is_shipped_via_shiprocket:
+            return response.Response({
+                'error': 'Order is not shipped via ShipRocket'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            if action == 'generate_pickup':
+                if not order.shipment_id:
+                    return response.Response({
+                        'error': 'No shipment ID found for this order'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                pickup_response = shiprocket_service.generate_pickup(order.shipment_id)
+                
+                if pickup_response.get('status'):
+                    order.shipment_pickup_token = pickup_response.get('response', {}).get('pickup_token')
+                    order.save()
+                    
+                    return response.Response({
+                        'success': True,
+                        'message': 'Pickup generated successfully',
+                        'pickup_token': order.shipment_pickup_token
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return response.Response({
+                        'error': pickup_response.get('message', 'Failed to generate pickup')
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            elif action == 'cancel_shipment':
+                if not order.awb_code:
+                    return response.Response({
+                        'error': 'No AWB code found for this order'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                cancel_response = shiprocket_service.cancel_shipment([order.awb_code])
+                
+                if cancel_response.get('status_code') == 1:
+                    order.status = 'cancelled'
+                    order.shiprocket_status = 'CANCELLED'
+                    order.save()
+                    
+                    return response.Response({
+                        'success': True,
+                        'message': 'Shipment cancelled successfully'
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return response.Response({
+                        'error': cancel_response.get('message', 'Failed to cancel shipment')
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            elif action == 'sync_status':
+                # Sync status from ShipRocket
+                if order.awb_code:
+                    tracking_response = shiprocket_service.track_awb(order.awb_code)
+                    
+                    if tracking_response.get('status') == 200:
+                        tracking_info = tracking_response.get('data', {})
+                        
+                        if tracking_info:
+                            # Update order status from tracking info
+                            order.update_from_shiprocket_webhook(tracking_info)
+                            
+                            return response.Response({
+                                'success': True,
+                                'message': 'Order status synced successfully',
+                                'current_status': order.shiprocket_status,
+                                'order_status': order.status
+                            }, status=status.HTTP_200_OK)
+                    
+                return response.Response({
+                    'error': 'Failed to sync status'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            else:
+                return response.Response({
+                    'error': 'Invalid action. Supported actions: generate_pickup, cancel_shipment, sync_status'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except ShipRocketAPIError as e:
+            logger.error(f"ShipRocket API error for action {action} on order {order_id}: {e}")
+            return response.Response({
+                'error': 'ShipRocket service error'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        except Exception as e:
+            logger.error(f"Error performing action {action} on order {order_id}: {e}")
+            return response.Response({
+                'error': 'An error occurred while processing the request'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ==============================================================================
