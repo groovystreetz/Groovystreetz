@@ -131,10 +131,17 @@ const ProductPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
 
-  // Get category from URL query parameter
+  // Get category and search from URL query parameters
   useEffect(() => {
-    const categoryFromUrl = searchParams.get('category')
+    const categoryFromUrl = searchParams.get('category') || searchParams.get('categories')
+    const searchFromUrl = searchParams.get('search')
+    
     setCategorySlug(categoryFromUrl)
+    
+    // Set search query from URL parameter
+    if (searchFromUrl) {
+      setSearchQuery(decodeURIComponent(searchFromUrl))
+    }
   }, [searchParams])
 
   // Debounce search query to avoid too many API calls
@@ -145,6 +152,26 @@ const ProductPage = () => {
 
     return () => clearTimeout(timer)
   }, [searchQuery])
+
+  // Update URL when search query changes
+  useEffect(() => {
+    const currentParams = new URLSearchParams(searchParams)
+    
+    if (searchQuery.trim()) {
+      currentParams.set('search', encodeURIComponent(searchQuery.trim()))
+    } else {
+      currentParams.delete('search')
+    }
+    
+    // Only update URL if the search parameter has actually changed
+    const newSearchParam = currentParams.get('search')
+    const currentSearchParam = searchParams.get('search')
+    
+    if (newSearchParam !== currentSearchParam) {
+      const newUrl = `${window.location.pathname}${currentParams.toString() ? '?' + currentParams.toString() : ''}`
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [searchQuery, searchParams])
 
   const { products, isLoading, isError } = useProducts(categorySlug)
 
@@ -199,8 +226,20 @@ const ProductPage = () => {
       <section className="container mx-auto px-4 py-6 mt-24">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Best-Selling Men's T-Shirts</h1>
-            <p className="text-sm text-muted-foreground">Explore our curated selection</p>
+            <h1 className="text-2xl font-bold">
+              {debouncedSearchQuery 
+                ? `Search Results for "${debouncedSearchQuery}"` 
+                : categorySlug 
+                  ? `${categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)} Products`
+                  : "Best-Selling Products"
+              }
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {debouncedSearchQuery 
+                ? `Found ${filtered.length} products matching your search`
+                : "Explore our curated selection"
+              }
+            </p>
           </div>
           <div className="hidden md:block">
             <Select value={sort} onValueChange={setSort}>

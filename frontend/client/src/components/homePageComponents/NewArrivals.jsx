@@ -134,7 +134,7 @@ function NewArrivals() {
   );
 
   return (
-    <div className="mt-20 bg-white">
+    <div className="mt-20 w-screen bg-white">
       <div className=" mx-auto px-4 relative">
         {/* Heading */}
         <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-wide">

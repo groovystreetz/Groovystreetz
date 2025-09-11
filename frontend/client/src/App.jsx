@@ -15,6 +15,14 @@ import ProductPage from './pages/productpage'
 import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Wishlist from './pages/Wishlist'
+import Contact from './pages/contact'
+import TermsAndConditions from './pages/tnc'
+import PrivacyandPolicy from './pages/privacyAndPolicy'
+import About from './pages/About'
+import InvestorRelations from './pages/InvestorRelations'
+import GiftVouchers from './components/giftVouchers'
+import ProductTest from './pages/product'
+import MenTShirts from './pages/productpage2'
 
 function RequireAuth({ children }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -43,6 +51,13 @@ function App() {
         <Route path="/products" element={<ProductPage />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/terms-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyandPolicy />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/investor-relations" element={<InvestorRelations />} />
+        <Route path="/productz" element={<ProductTest />} />
+        <Route path="/men" element={<MenTShirts />} />
         <Route path="/wishlist" element={
           <RequireAuth>
             <Wishlist />
@@ -55,6 +70,7 @@ function App() {
             </div>
           </RequireAuth>
         } />
+        <Route path="/gift-vouchers" element={<GiftVouchers />} />
       </Routes>
     </Router>
   )

@@ -5,11 +5,11 @@ import { useProducts } from "../../hooks/useProducts";
 const TopPicks = () => {
   const { products, isLoading, isError } = useProducts();
   const [startIdx, setStartIdx] = useState(0);
-  const [cardCount, setCardCount] = useState(4);
+  const [cardCount, setCardCount] = useState(5);
 
   useEffect(() => {
     const updateCardCount = () => {
-      setCardCount(window.innerWidth < 768 ? 1 : 4);
+      setCardCount(window.innerWidth < 768 ? 1 : 5);
       setStartIdx(0);
     };
     updateCardCount();
@@ -21,7 +21,7 @@ const TopPicks = () => {
   if (isError) return <div>Failed to load products.</div>;
 
   // Only use the first 4 products for the carousel
-  const displayProducts = products.slice(0, 4);
+  const displayProducts = products.slice(0, 10);
 
   const handlePrev = () => {
     setStartIdx((prev) => Math.max(prev - cardCount, 0));
@@ -39,9 +39,9 @@ const TopPicks = () => {
   );
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-8">
+    <div className="w-screen  max-w-[95%] mx-auto py-8">
       <h2 className="text-2xl font-bold mb-6 text-center text-black">
-        TOP PICKS OF THE WEEK
+        TOP PICKS OF THE WEEKS
       </h2>
       <div className="relative flex items-center overflow-hidden">
         {/* Left Arrow */}
@@ -56,15 +56,15 @@ const TopPicks = () => {
         </button>
 
         {/* Cards */}
-        <div className="flex gap-11 mx-10 w-full justify-center transition-transform duration-500 ease-out">
+        <div className="flex gap-5 w-full justify-between transition-transform duration-500 ease-out">
           {visibleProducts.map((product, index) => (
             <div
               key={product.id}
-              className="relative flex flex-col items-start overflow-visible min-w-[250px]"
+              className="relative flex flex-col items-start overflow-visible "
             >
               {/* Number behind */}
               <span
-                className="absolute -left-8 top-32 text-7xl font-extrabold text-white select-none pointer-events-none"
+                className="absolute bg-black -left-8 top-32 text-7xl font-extrabold text-white select-none pointer-events-none"
                 style={{
                   zIndex: -1,
                   textShadow: "0px 0px 8px rgba(0,0,0,0.6)",
@@ -74,11 +74,11 @@ const TopPicks = () => {
               </span>
 
               {/* Premium Card */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:shadow-2xl">
+              <div className="bg-white rounded-none shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:shadow-2xl">
                 <img
                   src={product.image || "/images/product1.jpg"}
                   alt={product.name}
-                  className="w-56 h-64 object-cover rounded-2xl"
+                  className="w-56 h-64 object-cover rounded-none"
                 />
               </div>
 

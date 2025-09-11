@@ -70,7 +70,7 @@ const NAV_ITEMS = [
 ]
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("cart")
+  const [activeTab, setActiveTab] = useState("profile")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const isMobile = useIsMobile()
 
