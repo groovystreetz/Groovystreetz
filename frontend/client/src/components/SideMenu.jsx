@@ -56,6 +56,29 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
           )}
         </div>
 
+        {/* Main Navigation */}
+        <div className="p-4 border-b border-orange-100">
+          <h3 className="font-semibold text-lg text-orange-700 mb-3">Shop</h3>
+          <div className="space-y-2">
+            {[
+              { label: "Man", path: "/products?categories=man" },
+              { label: "Women", path: "/products?categories=women" },
+              { label: "Groovy Street", path: "/products?categories=groovy-street" },
+            ].map((item, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  onClose();
+                  navigate(item.path);
+                }}
+                className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
+              >
+                {item.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Categories */}
         <div className="flex-grow p-4">
           <div className="flex items-center justify-between mb-3">

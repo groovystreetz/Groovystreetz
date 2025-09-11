@@ -25,7 +25,7 @@ const cardVariants = {
 
 const SpotlightProducts = () => {
   return (
-    <div className="w-full mx-auto py-16 px-4">
+    <div className="w-screen mx-auto py-16 px-4">
       <Motion.h2
         className="text-3xl font-extrabold mb-10 text-center text-black"
         initial={{ opacity: 0, y: -20 }}
@@ -33,7 +33,7 @@ const SpotlightProducts = () => {
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
       >
-        🌟 Spotlight Products
+        Spotlight Products
       </Motion.h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

@@ -17,7 +17,7 @@ import Footer from "../components/Footer";
 
 const HomePage = () => {
   return (
-    <>
+    <div className="w-screen overflow-x-hidden">
       <Navbar />
         <HeroSlider />
       {/* <div className="container mx-auto px-4"> */}
@@ -30,12 +30,12 @@ const HomePage = () => {
         <VideoSection />
         <NoPrint />
         <ShopFor />
-        <Slogan />    
-      {/* </div> */}
-      <SellingPartners />
+        {/* <Slogan />     */}
+     
+      {/* <SellingPartners />
       <Footer />
-      <BackToTop />
-    </>
+      <BackToTop /> */}
+    </div>
   );
 };
 

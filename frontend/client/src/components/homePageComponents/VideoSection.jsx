@@ -1,165 +1,105 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import React from "react";
 
-const imageURL =
-  "https://imprez.in/im-storage/2024/05/Supima-Black-T-Shirts-Premium-Comfort-and-Durability.jpg";
+const LeftIcon = () => (
+  <span className="material-icons text-gray-600" style={{ fontSize: 32 }}>
+    chevron_left
+  </span>
+);
+const RightIcon = () => (
+  <span className="material-icons text-gray-600" style={{ fontSize: 32 }}>
+    chevron_right
+  </span>
+);
 
-const items = Array.from({ length: 15 }, (_, i) => ({
-  id: i + 1,
-  title: `Supima: Sparkling Orange ${i + 1}`,
-  category: "Premium Cotton T-Shirts",
-  price: `₹999`,
-  oldPrice: `₹1,199`,
-  image: imageURL,
-}));
+const picks = [
+  {
+    rank: 1,
+    title: "Pull On Denims: Grey",
+    category: "Shorts",
+    price: "₹ 1999",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBNVsjB081LPB-e8Q3fSjx7bctbMFEVlGRBaKC3b2yBHctsPEkKiq788gdOXrwOVmgaWOcDFt_BovKZx-QsBGbeiKbRAEkp54BsuQ6BfqyPukZFhz4bmk8CyxbSwMs3kHu1UPtX5xWH44rwLRHjnmIdgEListXWo2KRuvl6fyKPSl7VkhNW5W_EfrM4-H7gInsUHhUmAmUHzsJAjpSxYC4r5xsyh35qX6g0NFBL79UpViN0p96laktnJN_7Osz-6xyAWwPwvoXijuM",
+    alt: "Man wearing grey pull-on denims sitting on a stool",
+  },
+  {
+    rank: 2,
+    title: "TSS Originals: Rider's Soul",
+    category: "Supima T-shirt",
+    price: "₹ 1299",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuC0pmCCpzB8qbQ6kEp_okDqoi-eiFmGi0RpFZzgECDin8ypZ7QFsc3eZN9a6w6CjIKJMkAS3kXowkDLJ3xxDvD-ajTB_x4VemtJgMRU1-1rqBAtvCdBU7PAvK644DtxiXmAs-WwgZ3a28PlSrs_V2R87w-M-Fwr-NCju7OIEnN7p03zENSa1VRMg2FmXvyRMhF_Mdkv71Klo6npV-65iyW6BsT7ZFnUMnziFz7iRIJ4kIcOeCvozJ_JoQvK4w1F7ZaYy-3nqndxGaw",
+    alt: "Man wearing a dark green Rider's Soul t-shirt",
+  },
+  {
+    rank: 3,
+    title: "Gurkha Pants: Light Olive",
+    category: "Pants",
+    price: "₹ 2599",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAA8iAJR2ql-glqPSsD2_z2ZISr_QrclqXhVlG5gJDshhNMyfhEqjQgRKe8NUppZa48oRaiBOPSI705QoS1OHhv7yUGDgkySYSx0IPRYCOHmiK1b52BoDvGeAOh0v753mtTUjTHA_OEMPNQFPrWw8xhgu4H-rRlNzHiUX07d7q1ngXaE-GbCv9qAtyJ3slYoZYhI6sow3DuXaihzWG9ncEaMst-pAFJhwNQrxaiGAxLqCEsNKLQst-qBWQDapHIcsOzZaZIuoa58Vs",
+    alt: "Man wearing light olive Gurkha pants",
+  },
+  {
+    rank: 4,
+    title: "Attack On Titan: Captain Levi",
+    category: "Jeans",
+    price: "₹ 799",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDMDOLKvVWe-zMoBMVqaao7Nljsi-gClRcTQCl5_N4JLhq-6upJHoqPoyusqX42PMydc72ubX3_u8SERlEGmT3BIKgYLzy6aSo5m8hHZ60H0zooc7NEcZxPUWmtpquaAiigEiAylB2gayaDAEWThvAja5Duoa8-DCeWudQC5T2tXZbhnC_l3INPjd8w0ZAOyZzo8XZBhpJN9QudGkTHl1gfnDLeCd4iOrBGCTQ7eyVKcyUAAFxmIQc6h4sTEFPIKx5yzbTGvh5p9ug",
+    alt: "Man wearing an Attack on Titan Captain Levi t-shirt",
+  },
+  {
+    rank: 5,
+    title: "Attack On Titan: Captain Levi",
+    category: "Jeans",
+    price: "₹ 799",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDMDOLKvVWe-zMoBMVqaao7Nljsi-gClRcTQCl5_N4JLhq-6upJHoqPoyusqX42PMydc72ubX3_u8SERlEGmT3BIKgYLzy6aSo5m8hHZ60H0zooc7NEcZxPUWmtpquaAiigEiAylB2gayaDAEWThvAja5Duoa8-DCeWudQC5T2tXZbhnC_l3INPjd8w0ZAOyZzo8XZBhpJN9QudGkTHl1gfnDLeCd4iOrBGCTQ7eyVKcyUAAFxmIQc6h4sTEFPIKx5yzbTGvh5p9ug",
+    alt: "Man wearing an Attack on Titan Captain Levi t-shirt",
+  },
+];
 
-function Banners() {
-  const [startIndex, setStartIndex] = useState(0);
-  const cardsPerPage = 5;
-  const cardWidth = 208; // card + gap
-  const maxIndex = items.length - cardsPerPage;
-  const autoScrollInterval = useRef(null);
-
-  const handleNext = () => {
-    setStartIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
-  };
-
-  const handlePrev = () => {
-    setStartIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));
-  };
-
-  // Auto scroll setup
-  useEffect(() => {
-    autoScrollInterval.current = setInterval(() => {
-      setStartIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
-    }, 3000);
-
-    return () => clearInterval(autoScrollInterval.current);
-  }, [maxIndex]);
-
-  const resetAutoScroll = () => {
-    clearInterval(autoScrollInterval.current);
-    autoScrollInterval.current = setInterval(() => {
-      setStartIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
-    }, 3000);
-  };
-
-  const tiltStyles = [
-    { rotate: "-12deg", translateX: "-20px", scale: 0.9, zIndex: 1 },
-    { rotate: "-6deg", translateX: "-10px", scale: 0.95, zIndex: 2 },
-    { rotate: "0deg", translateX: "0px", scale: 1, zIndex: 3 },
-    { rotate: "6deg", translateX: "10px", scale: 0.95, zIndex: 2 },
-    { rotate: "12deg", translateX: "20px", scale: 0.9, zIndex: 1 },
-  ];
-
+function VideoSection() {
   return (
-    <div className="mt-20 px-4 md:px-8 relative max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
-        WATCH AND SHOP
+    <div className="w-full max-w-[95%] mx-auto py-12 px-2">
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-10">
+        TOP  PICKS OF THE WEEK
       </h2>
-
-      <div className="relative flex items-center justify-center">
-        {/* Left Arrow */}
-        <button
-          onClick={() => {
-            handlePrev();
-            resetAutoScroll();
-          }}
-          disabled={startIndex === 0}
-          className={`z-10 p-2 mr-2 hover:text-orange-600 bg-white shadow-lg rounded-full ${
-            startIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <FiChevronLeft className="text-3xl" />
-        </button>
-
-        {/* Cards Container */}
-        <div className="overflow-hidden w-[1040px]">
-          <div
-            className="flex gap-6 transition-transform duration-700 ease-in-out"
-            style={{
-              transform: `translateX(${-startIndex * (cardWidth + 24)}px)`,
-            }}
-          >
-            {items.map((item, index) => {
-              const visiblePos = index - startIndex;
-              const style =
-                visiblePos >= 0 && visiblePos < cardsPerPage
-                  ? tiltStyles[visiblePos]
-                  : { rotate: "0deg", translateX: "0px", scale: 0.85, zIndex: 0 };
-
-              return (
-                <div
-                  key={item.id}
-                  className="flex-shrink-0 w-52 cursor-pointer"
-                  style={{
-                    transform: `rotate(${style.rotate}) translateX(${style.translateX}) scale(${style.scale})`,
-                    zIndex: style.zIndex,
-                    transition: "transform 0.7s ease-in-out",
-                  }}
-                  title={item.title}
-                >
-                  <div className="relative w-full h-[350px] rounded-2xl shadow-xl overflow-hidden bg-white">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Overlay Text */}
-                    <div className="absolute inset-0 flex items-center justify-center px-2 text-center">
-                      <p className="text-white font-bold text-sm sm:text-base leading-tight drop-shadow-lg">
-                        COLOURS THAT
-                        <br />
-                        DON’T FADE
-                      </p>
-                    </div>
-                    {/* Product info overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-white/95 text-xs text-black px-2 py-2 flex items-center gap-2 shadow-md">
-                      <img
-                        src={item.image}
-                        alt="Product"
-                        className="w-8 h-8 object-cover rounded"
-                      />
-                      <div className="flex flex-col overflow-hidden">
-                        <span className="font-semibold truncate">{item.title}</span>
-                        <span className="text-xs text-gray-600">
-                          {item.price}{" "}
-                          <span className="line-through text-gray-400">
-                            {item.oldPrice}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-left">
-                    <h3 className="text-sm font-semibold text-gray-800">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-gray-500">{item.category}</p>
-                    <p className="text-sm text-gray-700 font-bold">{item.price}</p>
-                  </div>
+      <div className="relative">
+        <div className="flex items-center">
+          <div className="flex gap-3 overflow-x-auto w-full px-2 pl-9" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+            <style>
+            
+            </style>
+            {picks.map((item) => (
+              <div
+                key={item.rank}
+                className="relative flex-shrink-0 w-64 group"
+              >
+                <div className="absolute inset-0 flex items-center">
+                  <span className="text-9xl font-bold text-gray-300 opacity-80 -ml-11">
+                    {item.rank}
+                  </span>
                 </div>
-              );
-            })}
+                <div className="relative bg-gray-100 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out group-hover:shadow-xl">
+                  <img
+                    alt={item.alt}
+                    className="w-full h-80 object-cover"
+                    src={item.image}
+                  />
+                </div>
+                <div className="pt-4">
+                  <h3 className="font-semibold text-gray-800">{item.title}</h3>
+                  <p className="text-gray-500 text-sm">{item.category}</p>
+                  <p className="text-gray-800 font-medium mt-1">{item.price}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Right Arrow */}
-        <button
-          onClick={() => {
-            handleNext();
-            resetAutoScroll();
-          }}
-          disabled={startIndex >= maxIndex}
-          className={`z-10 p-2 ml-2 hover:text-orange-600 bg-white shadow-lg rounded-full ${
-            startIndex >= maxIndex ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <FiChevronRight className="text-3xl" />
-        </button>
       </div>
     </div>
   );
 }
 
-export default Banners;
+export default VideoSection;
