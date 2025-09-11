@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "../ui/button";
 
 const ProductCard = () => {
+  const [liked, setLiked] = React.useState(false);
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-sm">
       {/* Image Section */}
@@ -25,25 +26,16 @@ const ProductCard = () => {
         </div>
 
         {/* Favorite Button */}
-        {/*
-          Toggle heart icon between outlined and filled on click.
-        */}
-        {(() => {
-          const [liked, setLiked] = React.useState(false);
-          return (
-            <Button
-              className="absolute bg-transparent top-4 right-4 text-red-500 shadow-none hover:bg-transparent hover:border-none focus:ring-0 outline-none ring-0 focus:outline-none focus-visible:outline-none border-none focus-visible:ring-0 active:ring-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLiked((prev) => !prev);
-              }}
-            >
-              <span className="material-icons">
-                {liked ? "favorite" : "favorite_border"}
-              </span>
-            </Button>
-          );
-        })()}
+        {/* Toggle heart icon between outlined and filled on click. */}
+        <Button
+          className="absolute bg-transparent top-4 right-4 text-red-500 shadow-none hover:bg-transparent hover:border-none focus:ring-0 outline-none ring-0 focus:outline-none focus-visible:outline-none border-none focus-visible:ring-0 active:ring-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLiked((prev) => !prev);
+          }}
+        >
+          <span className="material-icons">{liked ? "favorite" : "favorite_border"}</span>
+        </Button>
       </div>
 
       {/* Details Section */}

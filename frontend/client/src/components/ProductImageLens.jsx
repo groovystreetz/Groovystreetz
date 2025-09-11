@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Lens } from "./ui/lens";
-import {motion}  from "framer-motion";
+import {motion as Motion}  from "framer-motion";
 import { cn } from "../lib/utils";
 
 export function ProductImageLens({ 
@@ -30,7 +30,7 @@ export function ProductImageLens({
       </Lens>
       
       {/* Optional overlay effect when hovering */}
-      <motion.div
+      <Motion.div
         animate={{
           opacity: hovering ? 0.1 : 0,
         }}

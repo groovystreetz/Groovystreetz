@@ -448,7 +448,7 @@ function ProductTest() {
  {/* Share */}
  <div className="mt-6 flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-900">Share</span>
-              {PRODUCT.share.map((s, i) => {
+              {PRODUCT.share.map((s) => {
                 const IconComponent = s.icon;
                 return (
                   <a

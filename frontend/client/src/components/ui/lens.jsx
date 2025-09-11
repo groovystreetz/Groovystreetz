@@ -1,6 +1,6 @@
 "use client";;
 import React, { useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion as Motion } from "motion/react";
 
 export const Lens = ({
   children,
@@ -40,7 +40,7 @@ export const Lens = ({
       {children}
       {isStatic ? (
         <div>
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, scale: 0.58 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -63,13 +63,13 @@ export const Lens = ({
               }}>
               {children}
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       ) : (
         <AnimatePresence>
           {isHovering && (
             <div>
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, scale: 0.58 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
@@ -95,7 +95,7 @@ export const Lens = ({
                   }}>
                   {children}
                 </div>
-              </motion.div>
+              </Motion.div>
             </div>
           )}
         </AnimatePresence>

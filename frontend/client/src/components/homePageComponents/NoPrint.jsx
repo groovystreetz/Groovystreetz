@@ -24,15 +24,15 @@ const items = [
 const NoPrint = () => {
   const scrollRef = useRef(null);
 
-  const scroll = (direction) => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, clientWidth } = scrollRef.current;
-    const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
-    scrollRef.current.scrollTo({
-      left: scrollLeft + scrollAmount,
-      behavior: "smooth",
-    });
-  };
+  // const scroll = (direction) => {
+  //   if (!scrollRef.current) return;
+  //   const { scrollLeft, clientWidth } = scrollRef.current;
+  //   const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
+  //   scrollRef.current.scrollTo({
+  //     left: scrollLeft + scrollAmount,
+  //     behavior: "smooth",
+  //   });
+  // };
 
   return (
     <div className="w-full max-w-[95%] mx-auto py-12">
