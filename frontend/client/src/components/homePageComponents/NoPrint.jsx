@@ -22,7 +22,7 @@ const items = [
 ];
 
 const NoPrint = () => {
-  const scrollRef = useRef(null);
+  // const scrollRef = useRef(null);
 
   // const scroll = (direction) => {
   //   if (!scrollRef.current) return;
