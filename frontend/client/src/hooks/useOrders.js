@@ -13,7 +13,7 @@ export const useOrders = () => {
     try {
       const csrfToken = getCookie('csrftoken');
       const response = await axios.post(
-        'http://localhost:8000/api/orders/create/',
+        import.meta.env.VITE_API_BASE_URL + '/orders/create/',
         orderData,
         {
           withCredentials: true,

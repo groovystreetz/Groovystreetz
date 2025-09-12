@@ -40,7 +40,7 @@ function Login() {
       try {
         const csrfToken = getCookie('csrftoken')
         const response = await axios.post(
-          'http://localhost:8000/api/login/',
+          import.meta.env.VITE_API_BASE_URL + '/login/',
           { email, password },
           {
             withCredentials: true,
@@ -80,7 +80,7 @@ function Login() {
       scope: 'openid email profile',
       callback: async (tokenResponse) => {
         try {
-          await axios.post('http://localhost:8000/api/auth/google/', {
+          await axios.post(import.meta.env.VITE_API_BASE_URL + '/auth/google/', {
             access_token: tokenResponse.access_token,
           });
           alert('Google login successful!');

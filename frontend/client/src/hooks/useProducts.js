@@ -19,7 +19,7 @@ export function useProducts(categorySlug) {
     queryFn: async () => {
       const url = categorySlug
         ? `http://localhost:8000/api/products/?category=${encodeURIComponent(categorySlug)}`
-        : 'http://localhost:8000/api/products';
+        : import.meta.env.VITE_API_BASE_URL + '/products';
       const res = await axios.get(url);
       return res.data;
     },

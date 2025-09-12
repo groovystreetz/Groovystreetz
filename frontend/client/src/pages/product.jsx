@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { ProductImageLens } from "../components/ProductImageLens";
-import ProductCard from "../components/products/CARDpRODUCT";
+import ProductCard from "../components/products/ProductCard";
 import { FaWhatsapp, FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 import {
   Accordion,
@@ -17,76 +18,31 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../components/ui/sheet";
+import { useProduct } from "../hooks/useProduct";
 
-const PRODUCT = {
-  name: "Super Pants: Eclipse Stripes",
-  category: "Men Super Flex Pants",
-  brand: "The Souled Store",
-  price: 2599,
-  images: [
-    "https://bananaclub.co.in/cdn/shop/files/DeepBlackGurkhaPant_3.jpg?v=1738820001&width=1000",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuC05xK1qVmniStT4aGT7MlUYbid11UTY2erX_bcK1hHRfuh3NJ78rTkS-1kvuYIwvxvN3WYb9C6tdm8oHtwmNwzT_MpEo0IRbY8YCryjkWX0XWo77D05Oy6fWOD71gUUoKdl9oMXaxg1sX6Jut70pNhZ7_DLfD3n09pIFyZJgt-4drr96ImZ9U4eGHm0PYl-dA0W8W-jpF-h6k4HJ2ROu2c-u9X-pSd6Dt4xQDDBaAFAagGF1FcLy106S2Zdoj95c0d98PqbLDFjMQ",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAw8sIIEkraxk5iU08CmyPk7UpANyc31kkJf1J4-du_CfdOfkM_ybCYPY4r9D4C7BjdNFySaId8I5xPfnySuXdwLbcJD7_eZwXMH80Ngzftnyy4syCaPQlgpsJRbbA6e_JXsJ9sMuQ_upq4_aHsYc2IP4uomQ6i8xND2WHra5DWB4Krp66gtQBnSpBXoIX2fhWh5aFyv7ijufQK6MAp_US1DnOthPd1lXeU0B94e953tM7fBGbIjdg_OOqOXvf4GvSufwx08wRd4rE",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuB_po9E46oVDD87XT0wRPCDBsnRDadH-wzFAjp9QSVNIPrZEA4i8MxAiqKczlLW4t-J64RKCiPnqxI9Oh38OTI3aknMUG8eYrQX4yLokpREjTIf4olkthhz1E3r6Tz5pMR34b8N44T7sDN_h_whFXJKVmzfEsLi3xKJ7ruERXehtV5MgaCxo4_zEts5aOR77dH0TMEitIDKUxDk7cP2-T-wRk30C9Ej0KESeBqEMEIm_OawNMx-31odpvOaTY1yIayxRl52rHtueMk",
-  ],
-  features: [
-    {
-      icon: "https://lh3.googleusercontent.com/aida-public/AB6AXuBmaZCyV1fvGXN2FedVRZbXqp-5sdqskeM6JbAdds1v1nVGJS_03WydMdJHbV--DpuQpVVPV5stx5CjTOJTZI7fs4vlsThtzMKogk4fwySQLPRBTqtPe7k9yNTdxYPNmfm3SSx8p8BwAWHoeCpOvzQ7uH3nTCIgKFiB1j3QO69eEzCKrJMb1eOn4r-FYaVdWRHXJh7ONNIwc2lwRrgw_Ee7DVh0V7kgAVsTBVK-nRq8ZYNmRGdBT2nXio3fie176L161OzTLaTsddI",
-      label: "Classic Fit",
-    },
-    {
-      icon: "https://lh3.googleusercontent.com/aida-public/AB6AXuBPymX2qzzzFe24ZeI43J127pcABHlOdQMRd-GmV2_CCfkbA5hq070exk_-v0eK3goLhcI7LSV945frJ2ie-k3rC-s9JRDDeTveNpHZt39HJfd8UpNE0Pc8Njt81BNfBUKBr2zQAuIhzhcm94kGR1J7J31mC7RhmxamUqmtp1kFeg-x1PL2dCQ0Qw_F7MvDEJIiQkp_NOaunJoy0X-cSKrjPYxbu9V2ctiUjSnSljsQ_WgA1io3LWZ9c6Q8WAUbgjZoSxQOEe0TN3o",
-      label: "Comfortable Inside Drawcord",
-    },
-    {
-      icon: "https://lh3.googleusercontent.com/aida-public/AB6AXuAiY4aaCMIaaERiMP_BIa4LylyOEXDAvmkKmjQmhs1BS7xRM8ymH3SLzUNhnGuruNqORPmEt_VmdIpAvsF1BxU6rXS9tQRP9YrlDW03z_Eepf8wcR4CJdN-AHLWnlMj11UcovcwlYDRjHLTciscpKXzoPOhmYJuQ7RurDaz0C_MM9j-O_FhDTIvcdKnmjFxVVe0FAFjq0CaR0Lkm4Ozl3hBYiRihtfwFbAnKsQLZOqnpnpadt3KunOqKmMsl19I-Kz_cNYD8C6sMQM",
-      label: "Wrinkle-Resistant",
-    },
-  ],
-  variants: [
-    {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAw8sIIEkraxk5iU08CmyPk7UpANyc31kkJf1J4-du_CfdOfkM_ybCYPY4r9D4C7BjdNFySaId8I5xPfnySuXdwLbcJD7_eZwXMH80Ngzftnyy4syCaPQlgpsJRbbA6e_JXsJ9sMuQ_upq4_aHsYc2IP4uomQ6i8xND2WHra5DWB4Krp66gtQBnSpBXoIX2fhWh5aFyv7ijufQK6MAp_US1DnOthPd1lXeU0B94e953tM7fBGbIjdg_OOqOXvf4GvSufwx08wRd4rE",
-      alt: "A man wearing grey pinstripe pants, showing a side view.",
-      selected: true,
-    },
-    {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuB_po9E46oVDD87XT0wRPCDBsnRDadH-wzFAjp9QSVNIPrZEA4i8MxAiqKczlLW4t-J64RKCiPnqxI9Oh38OTI3aknMUG8eYrQX4yLokpREjTIf4olkthhz1E3r6Tz5pMR34b8N44T7sDN_h_whFXJKVmzfEsLi3xKJ7ruERXehtV5MgaCxo4_zEts5aOR77dH0TMEitIDKUxDk7cP2-T-wRk30C9Ej0KESeBqEMEIm_OawNMx-31odpvOaTY1yIayxRl52rHtueMk",
-      alt: "A close-up of the grey pinstripe pants.",
-      selected: false,
-    },
-  ],
-  sizes: [
-    { label: "28", selected: false },
-    { label: "30", selected: false },
-    { label: "32", selected: true },
-    { label: "34", selected: false },
-    { label: "36", selected: false },
-    { label: "38", selected: false },
-    { label: "40", selected: false },
-  ],
-  share: [
-    {
-      name: "WhatsApp",
-      icon: FaWhatsapp,
-      color: "#25D366",
-    },
-    {
-      name: "Facebook",
-      icon: FaFacebook,
-      color: "#1877F2",
-    },
-    {
-      name: "Twitter",
-      icon: FaTwitter,
-      color: "#1DA1F2",
-    },
-    {
-      name: "Instagram",
-      icon: FaInstagram,
-      color: "#E4405F",
-    },
-  ],
-};
+// Share options for social media
+const SHARE_OPTIONS = [
+  {
+    name: "WhatsApp",
+    icon: FaWhatsapp,
+    color: "#25D366",
+  },
+  {
+    name: "Facebook",
+    icon: FaFacebook,
+    color: "#1877F2",
+  },
+  {
+    name: "Twitter",
+    icon: FaTwitter,
+    color: "#1DA1F2",
+  },
+  {
+    name: "Instagram",
+    icon: FaInstagram,
+    color: "#E4405F",
+  },
+];
 
 const SIZES = ["28", "30", "32", "34", "36", "38", "40"];
 const QUANTITIES = ["01", "02", "03"];
@@ -118,41 +74,85 @@ const SIZE_CHART = {
   }
 };
 
-function ProductTest() {
+function ProductPage() {
+  const { id } = useParams();
+  const { product, isLoading, isError, error } = useProduct(id);
+  
   const [selectedVariant, setSelectedVariant] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("32");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState("01");
   const [sizeUnit, setSizeUnit] = useState("inches");
   const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewImages, setReviewImages] = useState([]);
-  const [reviews, setReviews] = useState([
-    {
-      id: "r1",
-      user: "Aman Sharma",
-      rating: 5,
-      comment: "Great fit and very comfortable for office wear!",
-      date: new Date().toISOString(),
-      images: [],
-    },
-    {
-      id: "r2",
-      user: "Priya Verma",
-      rating: 4,
-      comment: "Quality is good. Slightly long in length but manageable.",
-      date: new Date(Date.now() - 86400000).toISOString(),
-      images: [
-        "https://bananaclub.co.in/cdn/shop/files/DeepBlackGurkhaPant_3.jpg?v=1738820001&width=1000",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC05xK1qVmniStT4aGT7MlUYbid11UTY2erX_bcK1hHRfuh3NJ78rTkS-1kvuYIwvxvN3WYb9C6tdm8oHtwmNwzT_MpEo0IRbY8YCryjkWX0XWo77D05Oy6fWOD71gUUoKdl9oMXaxg1sX6Jut70pNhZ7_DLfD3n09pIFyZJgt-4drr96ImZ9U4eGHm0PYl-dA0W8W-jpF-h6k4HJ2ROu2c-u9X-pSd6Dt4xQDDBaAFAagGF1FcLy106S2Zdoj95c0d98PqbLDFjMQ",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAw8sIIEkraxk5iU08CmyPk7UpANyc31kkJf1J4-du_CfdOfkM_ybCYPY4r9D4C7BjdNFySaId8I5xPfnySuXdwLbcJD7_eZwXMH80Ngzftnyy4syCaPQlgpsJRbbA6e_JXsJ9sMuQ_upq4_aHsYc2IP4uomQ6i8xND2WHra5DWB4Krp66gtQBnSpBXoIX2fhWh5aFyv7ijufQK6MAp_US1DnOthPd1lXeU0B94e953tM7fBGbIjdg_OOqOXvf4GvSufwx08wRd4rE",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuB_po9E46oVDD87XT0wRPCDBsnRDadH-wzFAjp9QSVNIPrZEA4i8MxAiqKczlLW4t-J64RKCiPnqxI9Oh38OTI3aknMUG8eYrQX4yLokpREjTIf4olkthhz1E3r6Tz5pMR34b8N44T7sDN_h_whFXJKVmzfEsLi3xKJ7ruERXehtV5MgaCxo4_zEts5aOR77dH0TMEitIDKUxDk7cP2-T-wRk30C9Ej0KESeBqEMEIm_OawNMx-31odpvOaTY1yIayxRl52rHtueMk",
-      ],
-    },
-  ]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#F57C26] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+          <p className="text-gray-600 mb-4">
+            {error?.message || "The product you're looking for doesn't exist."}
+          </p>
+          <button 
+            onClick={() => window.history.back()}
+            className="bg-[#F57C26] hover:bg-[#ce6b25] text-white font-bold py-2 px-4 rounded-lg"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No product data
+  if (!product) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-500 text-6xl mb-4">📦</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Product Data</h2>
+          <p className="text-gray-600">Unable to load product information.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract data from API response
+  const productImages = product.images?.map(img => img.image) || [];
+  const productVariants = product.variants || [];
+  const productReviews = product.reviews || [];
+  
+  // Get unique sizes from variants
+  const availableSizes = [...new Set(productVariants.map(variant => {
+    const sizeMatch = variant.name.match(/\/([A-Z]+)$/);
+    return sizeMatch ? sizeMatch[1] : 'S';
+  }))];
+
+  // Set default selected size when product loads
+  useEffect(() => {
+    if (product && availableSizes.length > 0 && !selectedSize) {
+      setSelectedSize(availableSizes[0]);
+    }
+  }, [product, availableSizes, selectedSize]);
 
   const openLightbox = (imagesArray, startIndex = 0) => {
     setLightboxImages(imagesArray || []);
@@ -196,15 +196,13 @@ function ProductTest() {
 
   const submitReview = () => {
     if (!reviewRating || reviewComment.trim().length === 0) return;
-    const newReview = {
-      id: `r-${Date.now()}`,
-      user: "You",
+    // TODO: Implement API call to submit review
+    console.log('Submitting review:', {
+      productId: product.id,
       rating: reviewRating,
       comment: reviewComment.trim(),
-      date: new Date().toISOString(),
       images: reviewImages.map((img) => img.previewUrl),
-    };
-    setReviews((prev) => [newReview, ...prev]);
+    });
 
     setReviewRating(0);
     setHoverRating(0);
@@ -216,7 +214,7 @@ function ProductTest() {
     <div className="bg-white  min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="text-sm text-gray-500 mb-8">
-          Home / Men Super Flex Pants / The Souled Store / Super Pants: Eclipse Stripes
+          Home / {product.category} / {product.name}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left: Images and Features */}
@@ -224,7 +222,7 @@ function ProductTest() {
             {/* Masonry-style image grid, full image display */}
             <div className="lg:col-span-10 order-2 lg:order-1">
               <div className="columns-2 gap-4 space-y-4">
-                {PRODUCT.images.map((image, index) => (
+                {productImages.map((image, index) => (
                   <ProductImageLens
                     key={index}
                     src={image}
@@ -262,34 +260,34 @@ function ProductTest() {
           </div>
           {/* Right: Product Details */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">{PRODUCT.name}</h1>
-            <p className="text-gray-500 mt-1">{PRODUCT.category}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-4">₹ {PRODUCT.price}</p>
+            <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
+            <p className="text-gray-500 mt-1">{product.category}</p>
+            <p className="text-3xl font-bold text-gray-900 mt-4">₹ {product.price}</p>
             <p className="text-sm text-gray-500">Price incl. of all taxes</p>
             {/* Variants */}
-            <div className="mt-6">
-              <h2 className="text-sm font-medium text-gray-900">Shop by Variant/Look</h2>
-              <div className="flex space-x-4 mt-2">
-                {PRODUCT.variants.map((v, idx) => (
-                  <div
-                    key={v.src}
-                    className={
-                      (idx === selectedVariant
-                        ? "border-2 border-blue-500 "
-                        : "border border-gray-200 ") +
-                      "rounded-lg p-1 cursor-pointer"
-                    }
-                    onClick={() => setSelectedVariant(idx)}
-                  >
-                    <img
-                      alt={v.alt}
-                      className="w-24 h-24 object-cover rounded-md"
-                      src={v.src}
-                    />
-                  </div>
-                ))}
+            {productVariants.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-sm font-medium text-gray-900">Available Variants</h2>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {productVariants.map((variant, idx) => (
+                    <button
+                      key={variant.id}
+                      className={
+                        (idx === selectedVariant
+                          ? "border-2 border-blue-500 bg-blue-50 "
+                          : "border border-gray-200 ") +
+                        "rounded-lg p-2 cursor-pointer text-sm hover:bg-gray-50"
+                      }
+                      onClick={() => setSelectedVariant(idx)}
+                    >
+                      <div className="font-medium">{variant.name}</div>
+                      <div className="text-gray-600">₹{variant.final_price}</div>
+                      <div className="text-xs text-gray-500">Stock: {variant.stock}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             {/* Sizes */}
             <div className="mt-6">
               <div className="flex justify-between items-center">
@@ -391,7 +389,7 @@ function ProductTest() {
                 </Sheet>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {SIZES.map((size) => (
+                {availableSizes.map((size) => (
                   <button
                     key={size}
                     className={
@@ -448,7 +446,7 @@ function ProductTest() {
  {/* Share */}
  <div className="mt-6 flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-900">Share</span>
-              {PRODUCT.share.map((s) => {
+              {SHARE_OPTIONS.map((s) => {
                 const IconComponent = s.icon;
                 return (
                   <a
@@ -660,17 +658,17 @@ function ProductTest() {
         <div className="mt-6 rounded-lg bg-white ">
           <div className="flex items-center justify-between mb-4">
             <span className="font-semibold text-gray-900 text-base">Customer Reviews</span>
-            <span className="text-xs text-gray-500">{reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-gray-500">{productReviews.length} review{productReviews.length !== 1 ? 's' : ''}</span>
           </div>
-          {reviews.length === 0 ? (
+          {productReviews.length === 0 ? (
             <div className="text-sm text-gray-600">No reviews yet. Be the first to review.</div>
           ) : (
             <div className="space-y-5">
-              {reviews.map((rev) => (
+              {productReviews.map((rev) => (
                 <div key={rev.id} className="border border-gray-200 rounded-md p-4">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium text-gray-900 text-sm">{rev.user}</div>
-                    <div className="text-xs text-gray-500">{new Date(rev.date).toLocaleDateString()}</div>
+                    <div className="font-medium text-gray-900 text-sm">{rev.user_name}</div>
+                    <div className="text-xs text-gray-500">{new Date(rev.created_at).toLocaleDateString()}</div>
                   </div>
                   <div className="mt-1 flex items-center">
                     {Array.from({ length: 5 }).map((_, idx) => (
@@ -741,4 +739,4 @@ function ProductTest() {
   );
 }
 
-export default ProductTest;
+export default ProductPage;

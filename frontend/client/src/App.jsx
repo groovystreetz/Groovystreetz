@@ -11,7 +11,6 @@ import LoadingPage from './pages/LoadingPage' // 👈 import it
 
 import './App.css'
 import Dashboard from './pages/dashboard'
-import ProductPage from './pages/productpage'
 import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Wishlist from './pages/Wishlist'
@@ -21,8 +20,8 @@ import PrivacyandPolicy from './pages/privacyAndPolicy'
 import About from './pages/About'
 import InvestorRelations from './pages/InvestorRelations'
 import GiftVouchers from './components/giftVouchers'
-import ProductTest from './pages/product'
-import MenTShirts from './pages/productpage2'
+import MenTShirts from './pages/productpage'
+import ProductPage from './pages/product'
 
 function RequireAuth({ children }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -48,7 +47,6 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductPage />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/contact" element={<Contact />} />
@@ -56,8 +54,8 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyandPolicy />} />
         <Route path="/about" element={<About />} />
         <Route path="/investor-relations" element={<InvestorRelations />} />
-        <Route path="/productz" element={<ProductTest />} />
-        <Route path="/men" element={<MenTShirts />} />
+        <Route path="/product/:id" element={<ProductPage />} />
+        <Route path="/products" element={<MenTShirts />} />
         <Route path="/wishlist" element={
           <RequireAuth>
             <Wishlist />
