@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { ProductImageLens } from "../components/ProductImageLens";
@@ -90,6 +90,26 @@ function ProductPage() {
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Extract data from API response
+  const productImages = product?.images?.map(img => img.image) || [];
+  const productVariants = product?.variants || [];
+  const productReviews = product?.reviews || [];
+  
+  // Get unique sizes from variants using useMemo to prevent recreation on every render
+  const availableSizes = useMemo(() => {
+    return [...new Set(productVariants.map(variant => {
+      const sizeMatch = variant.name.match(/\/([A-Z]+)$/);
+      return sizeMatch ? sizeMatch[1] : 'S';
+    }))];
+  }, [productVariants]);
+
+  // Set default selected size when product loads
+  useEffect(() => {
+    if (product && availableSizes.length > 0 && !selectedSize) {
+      setSelectedSize(availableSizes[0]);
+    }
+  }, [product, availableSizes, selectedSize]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -135,24 +155,6 @@ function ProductPage() {
       </div>
     );
   }
-
-  // Extract data from API response
-  const productImages = product.images?.map(img => img.image) || [];
-  const productVariants = product.variants || [];
-  const productReviews = product.reviews || [];
-  
-  // Get unique sizes from variants
-  const availableSizes = [...new Set(productVariants.map(variant => {
-    const sizeMatch = variant.name.match(/\/([A-Z]+)$/);
-    return sizeMatch ? sizeMatch[1] : 'S';
-  }))];
-
-  // Set default selected size when product loads
-  useEffect(() => {
-    if (product && availableSizes.length > 0 && !selectedSize) {
-      setSelectedSize(availableSizes[0]);
-    }
-  }, [product, availableSizes, selectedSize]);
 
   const openLightbox = (imagesArray, startIndex = 0) => {
     setLightboxImages(imagesArray || []);
