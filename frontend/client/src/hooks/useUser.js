@@ -16,7 +16,7 @@ export function useUser() {
     queryKey: ['user'],
     queryFn: async () => {
       const csrfToken = getCookie('csrftoken');
-      const res = await axios.get('http://localhost:8000/api/auth/user/', {
+      const res = await axios.get(import.meta.env.VITE_API_BASE_URL + '/auth/user/', {
         withCredentials: true,
         headers: {
           'X-CSRFToken': csrfToken,

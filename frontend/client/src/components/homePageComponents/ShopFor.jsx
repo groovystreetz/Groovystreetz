@@ -30,33 +30,33 @@ const categories = [
 
 function ShopFor() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+    <div className="w-full max-w-[95%] mx-auto px-4 py-6 sm:py-12">
+      <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-800 mb-6 sm:mb-8">
         SHOP BY CATEGORY
       </h2>
       <div className="relative">
-        <div className="flex items-center justify-center space-x-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="relative group w-1/3"
+              className="relative group w-full sm:w-1/3"
             >
               <img
                 alt={cat.alt}
                 src={cat.image}
-                className="w-full h-auto rounded-lg shadow-md"
+                className="w-full aspect-square rounded-lg shadow-md object-cover"
                 draggable={false}
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white p-4 rounded-lg">
-                <h3 className="text-4xl font-extrabold tracking-wider">{cat.name}</h3>
-                <p className="mt-2 text-sm text-center">{cat.description}</p>
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white p-3 sm:p-4 rounded-lg">
+                <h3 className="text-2xl sm:text-4xl font-extrabold tracking-wider text-center">{cat.name}</h3>
+                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-center">{cat.description}</p>
               </div>
             </div>
           ))}
         </div>
-        {/* Navigation Buttons (non-functional, for UI only) */}
+        {/* Navigation Buttons - Hidden on mobile */}
         <button
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 bg-white rounded-full p-2 shadow-md text-gray-600 hover:bg-gray-100"
+          className="hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 bg-white rounded-full p-2 shadow-md text-gray-600 hover:bg-gray-100"
           type="button"
           tabIndex={-1}
           aria-label="Previous"
@@ -64,7 +64,7 @@ function ShopFor() {
           <span className="material-icons">chevron_left</span>
         </button>
         <button
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 bg-white rounded-full p-2 shadow-md text-gray-600 hover:bg-gray-100"
+          className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 bg-white rounded-full p-2 shadow-md text-gray-600 hover:bg-gray-100"
           type="button"
           tabIndex={-1}
           aria-label="Next"

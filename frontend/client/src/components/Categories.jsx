@@ -28,7 +28,7 @@ const Categories = () => {
         <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-black tracking-wide">
           CATEGORIES
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
           {[...Array(4)].map((_, index) => (
             <div key={index} className="animate-pulse">
               <div className="bg-gray-300 h-72 rounded-lg"></div>
@@ -59,7 +59,7 @@ const Categories = () => {
         CATEGORIES
       </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
         {categories.map((category, index) => {
           const imageSrc = category.image || fallbackImages[category.slug] || fallbackImages.default;
           

@@ -29,7 +29,7 @@ const OrderHistory = () => {
       setLoading(true)
       // const token = localStorage.getItem('token')
       const csrfToken = getCookie('csrftoken');
-      const response = await axios.get('http://localhost:8000/api/orders/', {
+      const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/orders/', {
         withCredentials: true,
         headers: {
           'X-CSRFToken': csrfToken,

@@ -7,13 +7,101 @@
 
 /* Your custom styles can go here */
 
+/* Mobile Keyboard Improvements */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .mobile-keyboard-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zoom on input focus */
+  input[type="text"], input[type="search"], textarea, select {
+    font-size: 16px !important;
+    transform: translateZ(0);
+  }
+  
+  /* Improve input focus behavior */
+  input:focus {
+    transform: translateZ(0);
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+}
+
+/* Android Chrome specific styles */
+@media screen and (max-width: 768px) {
+  /* Prevent viewport jumping when keyboard opens */
+  html {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure proper scrolling behavior */
+  .mobile-scroll-container {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Adjust viewport when keyboard is open */
+  .keyboard-open {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+  
+  /* Prevent input zoom on focus */
+  input[type="text"], input[type="search"], textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve touch targets */
+  input, button, select, textarea {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Additional mobile keyboard improvements */
+  .mobile-scroll-container.keyboard-open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure inputs stay visible when keyboard opens */
+  input:focus {
+    position: relative;
+    z-index: 1000;
+  }
+  
+  /* Smooth scrolling for mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 /* Global Font Setup */
-/* body {
+body {
  
   margin: 0;
   padding: 0;
-} */
+}
 
 :root {
   font-family: "Bebas Neue", sans-serif;
@@ -128,7 +216,7 @@ button:focus-visible {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-  .dark {
+  /* .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -161,7 +249,7 @@ button:focus-visible {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  } */
 }
 
 
@@ -172,5 +260,197 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: animate-in 0.2s ease-out;
+  }
+  
+  .animate-out {
+    animation: animate-out 0.2s ease-out;
+  }
+  
+  .fade-in-0 {
+    animation: fade-in 0.2s ease-out;
+  }
+  
+  .fade-out-0 {
+    animation: fade-out 0.2s ease-out;
+  }
+  
+  .slide-in-from-left {
+    animation: slide-in-from-left 0.3s ease-out;
+  }
+  
+  .slide-out-to-left {
+    animation: slide-out-to-left 0.3s ease-out;
+  }
+  
+  .slide-in-from-right {
+    animation: slide-in-from-right 0.3s ease-out;
+  }
+  
+  .slide-out-to-right {
+    animation: slide-out-to-right 0.3s ease-out;
+  }
+  
+  .slide-in-from-top {
+    animation: slide-in-from-top 0.3s ease-out;
+  }
+  
+  .slide-out-to-top {
+    animation: slide-out-to-top 0.3s ease-out;
+  }
+  
+  .slide-in-from-bottom {
+    animation: slide-in-from-bottom 0.3s ease-out;
+  }
+  
+  .slide-out-to-bottom {
+    animation: slide-out-to-bottom 0.3s ease-out;
+  }
+  
+  .zoom-in-95 {
+    animation: zoom-in-95 0.2s ease-out;
+  }
+  
+  .zoom-out-95 {
+    animation: zoom-out-95 0.2s ease-out;
+  }
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes animate-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-out-to-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-out-to-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes zoom-in-95 {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-out-95 {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
   }
 }
