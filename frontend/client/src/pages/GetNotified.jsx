@@ -35,7 +35,7 @@ function GetNotified() {
       setSuccess("Thanks for subscribing! 🎉");
       setEmail("");
     } catch (err) {
-      setErrors({ api: "Something went wrong. Please try again later." });
+      setErrors({ api: "Something went wrong. Please try again later."+ err });
     }
   };
 

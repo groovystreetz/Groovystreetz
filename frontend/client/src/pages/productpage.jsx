@@ -3,9 +3,9 @@ import Banners from "@/components/homePageComponents/BannerSection";
 import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetPortal, SheetOverlay } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import { Button } from "@/components/ui/button";
 import { Filter, X } from "lucide-react";
 
 const products = [
@@ -84,8 +84,8 @@ export default function MenTShirts() {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedThemes, setSelectedThemes] = useState([]);
-  const [categorySearch, setCategorySearch] = useState("");
-  const [themeSearch, setThemeSearch] = useState("");
+  // const [categorySearch, setCategorySearch] = useState("");
+  // const [themeSearch, setThemeSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const handleCategoryToggle = (category) => {
