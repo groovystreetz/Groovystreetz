@@ -78,7 +78,7 @@ const SIZE_CHART = {
 function ProductPage() {
   const { id } = useParams();
   const { product, isLoading, isError, error } = useProduct(id);
-  const { createReview, loading: reviewLoading, error: reviewError } = useReviews();
+  const { createReview, loading: reviewLoading, } = useReviews();
   
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
