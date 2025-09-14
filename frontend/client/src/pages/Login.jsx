@@ -49,13 +49,11 @@ function Login() {
             },
           }
         )
-        // Save token/session if returned
         if (response.data && response.data.key) {
           localStorage.setItem('token', response.data.key)
         } else if (response.data && response.data.token) {
           localStorage.setItem('token', response.data.token)
         } else {
-          // fallback: just set a flag
           localStorage.setItem('token', 'dummy')
         }
         alert('Login successful!')
@@ -72,86 +70,96 @@ function Login() {
 
   const handleGoogleLogin = () => {
     if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-      alert('Google API not loaded. Please try again in a moment.');
-      return;
+      alert('Google API not loaded. Please try again in a moment.')
+      return
     }
     const client = window.google.accounts.oauth2.initTokenClient({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, // <-- Replace with your real client ID
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       scope: 'openid email profile',
       callback: async (tokenResponse) => {
         try {
           await axios.post(import.meta.env.VITE_API_BASE_URL + '/auth/google/', {
             access_token: tokenResponse.access_token,
-          });
-          alert('Google login successful!');
-          // Optionally: save user info, redirect, etc.
+          })
+          alert('Google login successful!')
           navigate('/')
         } catch {
-          alert('Google login failed.');
+          alert('Google login failed.')
         }
       },
-    });
-    client.requestAccessToken();
-  };
+    })
+    client.requestAccessToken()
+  }
 
   return (
-    <div className="flex items-center justify-center ">
-      <div className="bg-white rounded-3xl shadow-lg flex w-full max-w-4xl overflow-hidden">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
+      <div className="bg-white rounded-3xl shadow-lg flex flex-col md:flex-row w-full max-w-4xl overflow-hidden">
         {/* Left Side */}
-        <div className="w-1/2 bg-gradient-to-br from-orange-400 to-orange-500 p-10 flex flex-col justify-between relative">
+        <div className="w-full md:w-1/2 bg-gradient-to-br from-orange-400 to-orange-500 p-8 md:p-10 flex flex-col justify-between relative">
           <div>
-            <h2 className="text-white text-4xl font-bold mb-4 leading-tight">
+            <h2 className="text-white text-3xl md:text-4xl font-bold mb-4 leading-tight">
               Discover<br />your style with<br />Groovystreetz.
             </h2>
-            <p className="text-orange-100 mb-8">
+            <p className="text-orange-100 mb-6 md:mb-8 text-sm md:text-base">
               Shop the latest trends and enjoy a seamless shopping experience on our user-friendly e-commerce platform.
             </p>
           </div>
-          {/* Placeholder for image */}
-          <div className="flex justify-center items-end ">
-           <img src="/loginhero.png" alt="" />
+          <div className="flex justify-center items-end mt-6 md:mt-0">
+            <img src="/loginhero.png" alt="Fashion" className="w-48 md:w-64" />
           </div>
         </div>
+
         {/* Right Side */}
-        <div className="w-1/2 p-10 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
           {/* Logo */}
-          <div className="flex items-center mb-8">
-            <div className="bg-orange-400 rounded-full w-12 h-12 flex items-center justify-center mr-3">
-              <span className="text-white text-2xl font-bold">GZ</span>
+          <div className="flex items-center mb-6 md:mb-8">
+            <div className="bg-orange-400 rounded-full w-10 h-10 md:w-12 md:h-12 flex items-center justify-center mr-3">
+              <span className="text-white text-xl md:text-2xl font-bold">GZ</span>
             </div>
-            <span className="font-bold text-xl">Groovystreetz</span>
+            <span className="font-bold text-lg md:text-xl">Groovystreetz</span>
           </div>
+
           {/* Welcome Text */}
-          <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-          <p className="text-gray-500 mb-6">Sign in to continue shopping with Groovystreetz</p>
+          <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome Back</h2>
+          <p className="text-gray-500 mb-6 text-sm md:text-base">
+            Sign in to continue shopping with Groovystreetz
+          </p>
+
           {/* Login Form */}
           <form className="space-y-4 mb-4" onSubmit={handleSubmit} noValidate>
+            {/* Email */}
             <div>
               <input
                 type="email"
                 name="email"
                 placeholder="Email address"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 onBlur={handleBlur}
-                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${errors.email && touched.email ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${
+                  errors.email && touched.email ? 'border-red-400' : 'border-gray-200'
+                } focus:outline-none focus:ring-2 focus:ring-orange-400`}
               />
               {errors.email && touched.email && (
-                <p className="text-red-500 text-xs mt-1  left-0 text-left">{errors.email}</p>
+                <p className="text-red-500 text-xs mt-1 text-left">{errors.email}</p>
               )}
               {errors.api && (
                 <p className="text-red-500 text-xs mt-1 text-left">{errors.api}</p>
               )}
             </div>
+
+            {/* Password */}
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="Password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 onBlur={handleBlur}
-                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${errors.password && touched.password ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${
+                  errors.password && touched.password ? 'border-red-400' : 'border-gray-200'
+                } focus:outline-none focus:ring-2 focus:ring-orange-400`}
               />
               <span
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xl"
@@ -166,14 +174,19 @@ function Login() {
                 <p className="text-red-500 text-xs mt-1 absolute left-0 -bottom-5">{errors.password}</p>
               )}
             </div>
-            <div className="flex items-center justify-between mb-2"></div>
-            <div className="flex items-center justify-between mb-2 ">
-              <label className="flex items-center text-sm text-gray-600">
+
+            {/* Remember & Forgot */}
+            <div className="flex items-center justify-between mb-2">
+              {/* <label className="flex items-center text-sm text-gray-600">
                 <input type="checkbox" className="form-checkbox accent-orange-400 mr-2" />
                 Remember me
-              </label>
-              <Link to="/forgot-password" className="text-sm text-orange-400 hover:underline">Forgot password?</Link>
+              </label> */}
+              <Link to="/forgot-password" className="text-sm text-orange-400 hover:underline">
+                Forgot password?
+              </Link>
             </div>
+
+            {/* Submit */}
             <button
               type="submit"
               className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-3 rounded-lg transition-colors"
@@ -181,30 +194,47 @@ function Login() {
               Login
             </button>
           </form>
+
           {/* Or Login with */}
           <div className="flex items-center my-4">
             <div className="flex-grow h-px bg-gray-200" />
             <span className="mx-2 text-gray-400 text-sm">Or Login with</span>
             <div className="flex-grow h-px bg-gray-200" />
           </div>
+
+          {/* Social Logins */}
           <div className="flex space-x-4 mb-6">
             <button
               type="button"
               className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50"
               onClick={handleGoogleLogin}
             >
-              <span className="mr-2 text-lg">
-                <img className='w-6 h-6' src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="google" />
-              </span>
+              <img
+                className="w-6 h-6 mr-2"
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                alt="google"
+              />
               Google
             </button>
-            <button className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50">
-              <span className="mr-2 text-lg"><img className='w-6 h-6' src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/2048px-Facebook_f_logo_%282019%29.svg.png" alt="facebook" /></span> Facebook
-            </button>
+            {/* <button
+              type="button"
+              className="flex-1 flex items-center justify-center border border-gray-200 rounded-lg py-2 hover:bg-gray-50"
+            >
+              <img
+                className="w-6 h-6 mr-2"
+                src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+                alt="facebook"
+              />
+              Facebook
+            </button> */}
           </div>
+
+          {/* Signup Redirect */}
           <p className="text-center text-gray-500 text-sm">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-orange-400 hover:underline font-semibold">Signup</Link>
+            <Link to="/signup" className="text-orange-400 hover:underline font-semibold">
+              Signup
+            </Link>
           </p>
         </div>
       </div>

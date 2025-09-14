@@ -1,5 +1,12 @@
+import Footer from "@/components/Footer";
 import Banners from "@/components/homePageComponents/BannerSection";
+import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetPortal, SheetOverlay } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Filter, X } from "lucide-react";
 
 const products = [
   {
@@ -79,6 +86,7 @@ export default function MenTShirts() {
   const [selectedThemes, setSelectedThemes] = useState([]);
   const [categorySearch, setCategorySearch] = useState("");
   const [themeSearch, setThemeSearch] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const handleCategoryToggle = (category) => {
     setSelectedCategories(prev => 
@@ -112,19 +120,137 @@ export default function MenTShirts() {
     );
   };
 
-  const filteredCategories = categories.filter(cat => 
-    cat.toLowerCase().includes(categorySearch.toLowerCase())
+  const filteredCategories = []
+
+  const filteredThemes = []
+
+  // Filter content component
+  const FilterContent = () => (
+    <div className="space-y-6">
+      {/* Categories */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Categories</h3>
+        <div className="relative mb-3">
+          <input
+            type="text"
+            placeholder="Search for Categories"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          />
+        </div>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {filteredCategories.map((category) => (
+            <label key={category} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(category)}
+                onChange={() => handleCategoryToggle(category)}
+                className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <span className="text-sm text-gray-700">{category}</span>
+            </label>
+          ))}
+        </div>
+        {categories.length > filteredCategories.length && (
+          <p className="text-xs text-gray-500 mt-2">+ {categories.length - filteredCategories.length} more</p>
+        )}
+      </div>
+
+      {/* Size */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Size</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {sizes.map((size) => (
+            <label key={size} className="flex items-center justify-center cursor-pointer hover:bg-gray-50 p-2 rounded border border-gray-200">
+              <input
+                type="checkbox"
+                checked={selectedSizes.includes(size)}
+                onChange={() => handleSizeToggle(size)}
+                className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <span className="text-sm text-gray-700 ml-2">{size}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Prices */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Prices</h3>
+        <div className="space-y-2">
+          {priceRanges.map((priceRange, index) => (
+            <label key={index} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={selectedPrices.includes(priceRange)}
+                onChange={() => handlePriceToggle(priceRange)}
+                className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <span className="text-sm text-gray-700">{priceRange.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Themes */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Themes</h3>
+        <div className="relative mb-3">
+        <input
+  type="text"
+  placeholder="Search for Themes"
+  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+
+  onFocus={(e) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  }}
+/>
+        </div>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {filteredThemes.map((theme) => (
+            <label key={theme} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input
+                type="checkbox"
+                checked={selectedThemes.includes(theme)}
+                onChange={() => handleThemeToggle(theme)}
+                className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <span className="text-sm text-gray-700">{theme}</span>
+            </label>
+          ))}
+        </div>
+        {themes.length > filteredThemes.length && (
+          <p className="text-xs text-gray-500 mt-2">+ {themes.length - filteredThemes.length} more</p>
+        )}
+      </div>
+
+      {/* Clear All Filters */}
+      <div className="pt-4 border-t border-gray-200">
+        <button 
+          onClick={() => {
+            setSelectedCategories([]);
+            setSelectedSizes([]);
+            setSelectedPrices([]);
+            setSelectedThemes([]);
+            
+          }}
+          className="w-full bg-orange-100 hover:bg-orange-200 text-orange-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200"
+        >
+          Clear All Filters
+        </button>
+      </div>
+    </div>
   );
 
-  const filteredThemes = themes.filter(theme => 
-    theme.toLowerCase().includes(themeSearch.toLowerCase())
-  );
   return (
     <div className="min-h-screen bg-gray-50 w-full">
+      <Navbar/>
+      <div  className="mt-[4.05rem]"/>
       <Banners/>
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className=" mx-auto ">
         {/* Header */}
-        <header className="mb-8">
+        <header className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div className="space-y-2">
               <nav className="text-sm text-gray-500 flex items-center space-x-1">
@@ -139,19 +265,42 @@ export default function MenTShirts() {
                 </span>
               </h1>
             </div>
-            <div className="relative w-full sm:w-auto">
-              <select className="w-full sm:w-64 appearance-none bg-white border border-gray-300 rounded-lg py-3 px-4 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm transition-all duration-200">
-                <option>Select Sorting Options</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest</option>
-                <option>Most Popular</option>
-                <option>Best Rating</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+            <div className="flex items-center gap-3">
+              {/* Mobile Filter Button */}
+              <div className="lg:hidden">
+                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                  <SheetTrigger asChild>
+                    <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                      <Filter className="w-4 h-4" />
+                      Filters
+                    </button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80 sm:w-96 flex flex-col">
+                    <SheetHeader>
+                      <SheetTitle className="text-left">Filter Products</SheetTitle>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto px-4 pb-4">
+                      <FilterContent />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+              
+              {/* Sort Dropdown */}
+              <div className="relative w-full sm:w-auto">
+                <select className="w-full sm:w-64 appearance-none bg-white border border-gray-300 rounded-lg py-3 px-4 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm transition-all duration-200">
+                  <option>Select Sorting Options</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Newest</option>
+                  <option>Most Popular</option>
+                  <option>Best Rating</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -159,123 +308,10 @@ export default function MenTShirts() {
 
         {/* Main Content with Sidebar */}
         <div className="flex flex-col lg:flex-row gap-8">
-            {/* Filter Sidebar */}
-            <aside className="w-full lg:w-80 bg-white rounded-lg shadow-sm border border-gray-100 p-6 h-fit lg:sticky lg:top-8 order-1 lg:order-1">
-            <div className="space-y-6">
-              {/* Categories */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Categories</h3>
-                <div className="relative mb-3">
-                  <input
-                    type="text"
-                    placeholder="Search for Categories"
-                    value={categorySearch}
-                    onChange={(e) => setCategorySearch(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  />
-                </div>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {filteredCategories.map((category) => (
-                    <label key={category} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => handleCategoryToggle(category)}
-                        className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-gray-700">{category}</span>
-                    </label>
-                  ))}
-                </div>
-                {categories.length > filteredCategories.length && (
-                  <p className="text-xs text-gray-500 mt-2">+ {categories.length - filteredCategories.length} more</p>
-                )}
-              </div>
-
-              {/* Size */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Size</h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {sizes.map((size) => (
-                    <label key={size} className="flex items-center justify-center cursor-pointer hover:bg-gray-50 p-2 rounded border border-gray-200">
-                      <input
-                        type="checkbox"
-                        checked={selectedSizes.includes(size)}
-                        onChange={() => handleSizeToggle(size)}
-                        className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-gray-700 ml-2">{size}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prices */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Prices</h3>
-                <div className="space-y-2">
-                  {priceRanges.map((priceRange, index) => (
-                    <label key={index} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedPrices.includes(priceRange)}
-                        onChange={() => handlePriceToggle(priceRange)}
-                        className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-gray-700">{priceRange.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Themes */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Themes</h3>
-                <div className="relative mb-3">
-                  <input
-                    type="text"
-                    placeholder="Search for Themes"
-                    value={themeSearch}
-                    onChange={(e) => setThemeSearch(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  />
-                </div>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {filteredThemes.map((theme) => (
-                    <label key={theme} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedThemes.includes(theme)}
-                        onChange={() => handleThemeToggle(theme)}
-                        className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-gray-700">{theme}</span>
-                    </label>
-                  ))}
-                </div>
-                {themes.length > filteredThemes.length && (
-                  <p className="text-xs text-gray-500 mt-2">+ {themes.length - filteredThemes.length} more</p>
-                )}
-              </div>
-
-              {/* Clear All Filters */}
-              <div className="pt-4 border-t border-gray-200">
-                <button 
-                  onClick={() => {
-                    setSelectedCategories([]);
-                    setSelectedSizes([]);
-                    setSelectedPrices([]);
-                    setSelectedThemes([]);
-                    setCategorySearch("");
-                    setThemeSearch("");
-                  }}
-                  className="w-full bg-orange-100 hover:bg-orange-200 text-orange-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200"
-                >
-                  Clear All Filters
-                </button>
-              </div>
-            </div>
-          </aside>
+            {/* Desktop Filter Sidebar - Hidden on mobile */}
+            <aside className="hidden lg:block w-80 bg-white rounded-lg shadow-sm border border-gray-100 p-6 h-fit sticky top-8">
+              <FilterContent />
+            </aside>
         {/* Product Grid */}
           <main className="flex-1 order-2 lg:order-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -342,14 +378,14 @@ export default function MenTShirts() {
         </div>
 
         {/* Load More Section */}
-        <div className="mt-12 text-center">
+        {/* <div className="mt-12 text-center">
           <button className="bg-white border-2 border-orange-300 hover:border-orange-400 text-orange-700 hover:text-orange-900 px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md">
             Load More Products
           </button>
-        </div>
+        </div> */}
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t border-gray-200">
+        {/* <footer className="mt-16 pt-8 border-t border-gray-200">
           <div className="text-center">
             <p className="text-sm text-gray-500">
               Showing 4 of 1445 products
@@ -362,7 +398,8 @@ export default function MenTShirts() {
               <button className="px-3 py-1 text-sm text-orange-600 hover:text-orange-900 rounded">362</button>
             </div>
           </div>
-        </footer>
+        </footer> */}
+        <Footer/>
       </div>
     </div>
   );

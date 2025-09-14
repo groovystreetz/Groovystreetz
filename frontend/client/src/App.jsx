@@ -22,6 +22,7 @@ import InvestorRelations from './pages/InvestorRelations'
 import GiftVouchers from './components/giftVouchers'
 import MenTShirts from './pages/productpage'
 import ProductPage from './pages/product'
+import GetNotified from './pages/GetNotified'
 
 function RequireAuth({ children }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -56,6 +57,7 @@ function App() {
         <Route path="/investor-relations" element={<InvestorRelations />} />
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/products" element={<MenTShirts />} />
+        <Route path="/get-notified" element={<GetNotified />} />
         <Route path="/wishlist" element={
           <RequireAuth>
             <Wishlist />

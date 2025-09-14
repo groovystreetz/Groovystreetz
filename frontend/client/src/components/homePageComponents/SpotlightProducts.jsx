@@ -56,12 +56,18 @@ const SpotlightProducts = () => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
-            {/* Overlay with Details */}
+            {/* Always visible on mobile */}
+            <div className="absolute inset-x-0 bottom-0 from-black/70 via-black/40 text-white p-3 flex flex-col items-center md:hidden">
+              <h3 className="text-base font-semibold">{product.name}</h3>
+              <p className="text-sm">{product.price}</p>
+            </div>
+
+            {/* Visible only on hover (desktop) */}
             <Motion.div
               initial={{ opacity: 0, y: 50 }}
               whileHover={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end items-center text-white p-4 opacity-0 group-hover:opacity-100"
+              className="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex-col justify-end items-center text-white p-4 opacity-0 group-hover:opacity-100"
             >
               <h3 className="text-lg font-semibold">{product.name}</h3>
               <p className="text-sm mt-1">{product.price}</p>
