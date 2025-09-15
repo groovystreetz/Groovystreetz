@@ -43,48 +43,81 @@ class Category(models.Model):
 ### Product Model (Enhanced)
 ```python
 class Product(models.Model):
-    # Existing fields...
+    GENDER_CHOICES = (
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unisex', 'Unisex'),
+    )
+
     category = ForeignKey(Category, related_name='products', on_delete=CASCADE)
     name = CharField(max_length=255)
     description = TextField(blank=True)
     price = DecimalField(max_digits=10, decimal_places=2)
     image = ImageField(upload_to='products/', blank=True, null=True)
     stock = PositiveIntegerField(default=0)
+    gender = CharField(max_length=10, choices=GENDER_CHOICES, default='unisex')  # NEW
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
-    
+
     # New related models: variants, images, reviews
 ```
 
 **Enhanced Capabilities:**
-- Product variants with different pricing
+- **Gender-based filtering**: Male, Female, Unisex categories
+- Product variants with separate color and size fields
 - Multiple images per product/variant
 - Customer reviews and ratings
 - Advanced filtering and search support
 
 ## New Advanced Models
 
-### ProductVariant Model
+### ProductVariant Model (Updated)
 ```python
 class ProductVariant(models.Model):
+    SIZE_CHOICES = (
+        ('xs', 'XS'), ('s', 'S'), ('m', 'M'), ('l', 'L'),
+        ('xl', 'XL'), ('xxl', 'XXL'), ('xxxl', 'XXXL'),
+    )
+
+    COLOR_CHOICES = (
+        ('red', 'Red'), ('blue', 'Blue'), ('green', 'Green'),
+        ('black', 'Black'), ('white', 'White'), ('yellow', 'Yellow'),
+        ('pink', 'Pink'), ('purple', 'Purple'), ('orange', 'Orange'),
+        ('gray', 'Gray'), ('brown', 'Brown'), ('navy', 'Navy'),
+        ('maroon', 'Maroon'), ('olive', 'Olive'), ('turquoise', 'Turquoise'),
+    )
+
     product = ForeignKey(Product, related_name='variants', on_delete=CASCADE)
-    name = CharField(max_length=100)  # e.g., "Red - Large"
+    size = CharField(max_length=10, choices=SIZE_CHOICES, blank=True)  # NEW: Separate field
+    color = CharField(max_length=20, choices=COLOR_CHOICES, blank=True)  # NEW: Separate field
     sku = CharField(max_length=50, unique=True)
     price_modifier = DecimalField(max_digits=8, decimal_places=2, default=0)
     stock = PositiveIntegerField(default=0)
     is_active = BooleanField(default=True)
     created_at = DateTimeField(auto_now_add=True)
-    
+
+    class Meta:
+        unique_together = ['product', 'size', 'color']  # NEW: Prevent duplicates
+
     @property
     def final_price(self):
         return self.product.price + self.price_modifier
+
+    @property
+    def name(self):
+        """Generate name based on size and color for backward compatibility"""
+        size_part = self.get_size_display() if self.size else ""
+        color_part = self.get_color_display() if self.color else ""
+        parts = [part for part in [size_part, color_part] if part]
+        return ", ".join(parts) if parts else "Default"
 ```
 
-**Use Cases:**
-- Different colors, sizes, materials
-- Variant-specific pricing (e.g., premium materials cost extra)
-- Individual stock tracking per variant
-- SKU management for inventory systems
+**Enhanced Features:**
+- **Separate size and color fields**: Better data structure for filtering
+- **Predefined choices**: 7 sizes (XS-XXXL) and 15 colors
+- **Unique constraint**: Prevents duplicate size/color combinations per product
+- **Backward compatibility**: Name property maintains existing functionality
+- **Database integrity**: Proper normalization for filtering and inventory
 
 ### ProductImage Model
 ```python
@@ -377,13 +410,41 @@ Banner (independent)
 Spotlight -> Product | Category (optional)
 ```
 
+### OrderItem Model (Enhanced)
+```python
+class OrderItem(models.Model):
+    order = ForeignKey(Order, related_name='items', on_delete=CASCADE)
+    product = ForeignKey(Product, related_name='order_items', on_delete=CASCADE)
+    variant = ForeignKey('ProductVariant', related_name='order_items',
+                        on_delete=CASCADE, null=True, blank=True)  # NEW
+    quantity = PositiveIntegerField(default=1)
+    price = DecimalField(max_digits=10, decimal_places=2)  # Price at time of purchase
+
+    @property
+    def final_price(self):
+        """Get the final price including variant price modifier"""
+        from decimal import Decimal
+        if self.variant:
+            return Decimal(str(self.price)) + Decimal(str(self.variant.price_modifier))
+        return self.price
+```
+
+**Enhanced Features:**
+- **Variant support**: Optional link to specific ProductVariant
+- **Backward compatibility**: Existing orders without variants still work
+- **Price calculation**: Includes variant modifiers in final price
+- **Order tracking**: Know exactly which size/color was ordered
+
 ## Migration History
 
-### Recent Migrations
+### Recent Migrations (Updated)
 1. **0009_category_image.py** - Added image field to Category
-2. **0010_customuser_phone.py** - Added phone field to CustomUser  
+2. **0010_customuser_phone.py** - Added phone field to CustomUser
 3. **0011_banner_contactmessage_productvariant_...py** - Added all new models
 4. **0012_permission_role_userrole.py** - Added permission system
+5. **0013_add_shiprocket_fields_to_order.py** - Added ShipRocket integration
+6. **0014_add_variant_fields.py** - Added gender to Product, color/size to ProductVariant, variant to OrderItem
+7. **0015_add_unique_constraint.py** - Added unique constraint for ProductVariant (product+size+color)
 
 ### Migration Commands
 ```bash

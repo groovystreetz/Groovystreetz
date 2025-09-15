@@ -2,6 +2,7 @@
 # General / Universal
 # =============================================================================
 # Ignore Operating System files
+logs/
 .DS_Store
 Thumbs.db
 ._*

@@ -90,16 +90,19 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     # To display the category name instead of its ID
     category = serializers.StringRelatedField()
+    gender_display = serializers.CharField(source='get_gender_display', read_only=True)
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock')
+        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock', 'gender', 'gender_display')
 
 
 class AdminProductSerializer(serializers.ModelSerializer):
+    gender_display = serializers.CharField(source='get_gender_display', read_only=True)
+    
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock')
+        fields = ('id', 'name', 'description', 'price', 'image', 'category', 'stock', 'gender', 'gender_display')
 
 
 
@@ -118,9 +121,13 @@ class DesignSerializer(serializers.ModelSerializer):
 from .models import Order, OrderItem
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    final_price = serializers.ReadOnlyField()
+    variant_name = serializers.CharField(source='variant.name', read_only=True, allow_null=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
         model = OrderItem
-        fields = ('product', 'quantity', 'price')
+        fields = ('product', 'product_name', 'variant', 'variant_name', 'quantity', 'price', 'final_price')
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -355,10 +362,12 @@ class AdminContactMessageSerializer(serializers.ModelSerializer):
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     final_price = serializers.ReadOnlyField()
+    size_display = serializers.CharField(source='get_size_display', read_only=True)
+    color_display = serializers.CharField(source='get_color_display', read_only=True)
     
     class Meta:
         model = ProductVariant
-        fields = ['id', 'name', 'sku', 'price_modifier', 'final_price', 
+        fields = ['id', 'size', 'color', 'size_display', 'color_display', 'sku', 'price_modifier', 'final_price', 
                  'stock', 'is_active', 'created_at']
         read_only_fields = ['created_at']
 
@@ -435,11 +444,12 @@ class EnhancedProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    gender_display = serializers.CharField(source='get_gender_display', read_only=True)
     
     class Meta:
         model = Product
         fields = ['id', 'name', 'description', 'price', 'image', 'category', 
-                 'stock', 'variants', 'images', 'reviews', 'average_rating', 
+                 'stock', 'gender', 'gender_display', 'variants', 'images', 'reviews', 'average_rating', 
                  'review_count', 'created_at', 'updated_at']
     
     def get_average_rating(self, obj):

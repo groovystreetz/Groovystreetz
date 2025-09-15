@@ -52,17 +52,39 @@ PATCH /api/admin/users/{user_id}/contact/
 { "phone": "+9876543210", "email": "support@email.com" }
 ```
 
-### ✅ **Product Variants & Multiple Images**
+### ✅ **Enhanced Product Variants & Gender Filtering**
 ```http
-# Product variants (color, size, etc.)
+# Product gender filtering (NEW!)
+GET /api/products/?gender=male
+GET /api/products/?gender=female
+GET /api/products/?gender=unisex
+
+# Enhanced product variants with separate color and size fields
 GET /api/product-variants/?product={product_id}
 POST /api/product-variants/
 {
   "product": 1,
-  "name": "Red - Large",
+  "size": "l",           # xs, s, m, l, xl, xxl, xxxl
+  "color": "red",        # red, blue, green, black, white, etc.
   "sku": "TSHIRT-RED-L",
   "price_modifier": "5.00",  # Extra ₹5 for this variant
-  "stock": 50
+  "stock": 50,
+  "is_active": true
+}
+
+Response:
+{
+  "id": 1,
+  "size": "l",
+  "color": "red",
+  "size_display": "L",
+  "color_display": "Red",
+  "sku": "TSHIRT-RED-L",
+  "price_modifier": "5.00",
+  "final_price": 34.99,
+  "stock": 50,
+  "is_active": true,
+  "created_at": "2025-09-15T23:00:00Z"
 }
 
 # Multiple images per product/variant
@@ -344,22 +366,34 @@ Response: {
   "price": "29.99",
   "category": "T-Shirts",
   "stock": 100,
+  "gender": "unisex",
+  "gender_display": "Unisex",
   "variants": [
     {
       "id": 1,
-      "name": "Red - Large",
+      "size": "l",
+      "color": "red",
+      "size_display": "L",
+      "color_display": "Red",
       "sku": "TSHIRT-RED-L",
       "price_modifier": "0.00",
-      "final_price": "29.99",
-      "stock": 25
+      "final_price": 29.99,
+      "stock": 25,
+      "is_active": true,
+      "created_at": "2025-09-15T23:00:00Z"
     },
     {
       "id": 2,
-      "name": "Blue - Medium", 
+      "size": "m",
+      "color": "blue",
+      "size_display": "M",
+      "color_display": "Blue",
       "sku": "TSHIRT-BLUE-M",
       "price_modifier": "0.00",
-      "final_price": "29.99",
-      "stock": 30
+      "final_price": 29.99,
+      "stock": 30,
+      "is_active": true,
+      "created_at": "2025-09-15T23:00:00Z"
     }
   ],
   "images": [
@@ -406,8 +440,12 @@ Response: {
   "items": [
     {
       "product": 1,
+      "product_name": "Cotton T-Shirt",
+      "variant": 1,
+      "variant_name": "L, Red",
       "quantity": 2,
-      "price": "29.99"
+      "price": "29.99",
+      "final_price": "29.99"
     }
   ],
   "original_price": "79.98",

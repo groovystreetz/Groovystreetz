@@ -72,12 +72,19 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    GENDER_CHOICES = (
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unisex', 'Unisex'),
+    )
+
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='products/', blank=True, null=True)  # Local image upload
     stock = models.PositiveIntegerField(default=0)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='unisex')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -239,11 +246,21 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='order_items', on_delete=models.CASCADE)
+    variant = models.ForeignKey('ProductVariant', related_name='order_items', on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2) # Price at the time of purchase
 
     def __str__(self):
-        return f"{self.quantity} of {self.product.name} in Order {self.order.id}"
+        variant_info = f" - {self.variant.name}" if self.variant else ""
+        return f"{self.quantity} of {self.product.name}{variant_info} in Order {self.order.id}"
+
+    @property
+    def final_price(self):
+        """Get the final price including variant price modifier"""
+        from decimal import Decimal
+        if self.variant:
+            return Decimal(str(self.price)) + Decimal(str(self.variant.price_modifier))
+        return self.price
 
 
 # ==============================================================================
@@ -435,8 +452,37 @@ class ContactMessage(models.Model):
 
 class ProductVariant(models.Model):
     """Model for product variants (color, size, etc.)"""
+    SIZE_CHOICES = (
+        ('xs', 'XS'),
+        ('s', 'S'),
+        ('m', 'M'),
+        ('l', 'L'),
+        ('xl', 'XL'),
+        ('xxl', 'XXL'),
+        ('xxxl', 'XXXL'),
+    )
+    
+    COLOR_CHOICES = (
+        ('red', 'Red'),
+        ('blue', 'Blue'),
+        ('green', 'Green'),
+        ('black', 'Black'),
+        ('white', 'White'),
+        ('yellow', 'Yellow'),
+        ('pink', 'Pink'),
+        ('purple', 'Purple'),
+        ('orange', 'Orange'),
+        ('gray', 'Gray'),
+        ('brown', 'Brown'),
+        ('navy', 'Navy'),
+        ('maroon', 'Maroon'),
+        ('olive', 'Olive'),
+        ('turquoise', 'Turquoise'),
+    )
+    
     product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, help_text="Variant name (e.g., Red, Large, etc.)")
+    size = models.CharField(max_length=10, choices=SIZE_CHOICES, blank=True)
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
     sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit")
     price_modifier = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="Price difference from base product")
     stock = models.PositiveIntegerField(default=0)
@@ -444,14 +490,25 @@ class ProductVariant(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ['product', 'name']
+        unique_together = ['product', 'size', 'color']
         
     def __str__(self):
-        return f"{self.product.name} - {self.name}"
+        size_part = f"Size {self.size.upper()}" if self.size else ""
+        color_part = f"Color {self.color.title()}" if self.color else ""
+        parts = [part for part in [size_part, color_part] if part]
+        return f"{self.product.name} - {', '.join(parts)}" if parts else f"{self.product.name} - Variant"
     
     @property
     def final_price(self):
         return self.product.price + self.price_modifier
+    
+    @property
+    def name(self):
+        """Generate a name based on size and color for backward compatibility"""
+        size_part = self.get_size_display() if self.size else ""
+        color_part = self.get_color_display() if self.color else ""
+        parts = [part for part in [size_part, color_part] if part]
+        return ", ".join(parts) if parts else "Default"
 
 
 class ProductImage(models.Model):

@@ -162,6 +162,11 @@ class ProductListView(generics.ListAPIView):
         category_slug = self.request.query_params.get('category')
         if category_slug:
             queryset = queryset.filter(category__slug=category_slug)
+        
+        # Gender filter
+        gender = self.request.query_params.get('gender')
+        if gender:
+            queryset = queryset.filter(gender=gender)
         return queryset
 
 
@@ -1317,6 +1322,11 @@ class EnhancedProductListView(generics.ListAPIView):
         if categories:
             category_list = categories.split(',')
             queryset = queryset.filter(category__slug__in=category_list)
+        
+        # Gender filter
+        gender = self.request.query_params.get('gender')
+        if gender:
+            queryset = queryset.filter(gender=gender)
         
         # Search
         search = self.request.query_params.get('search')
