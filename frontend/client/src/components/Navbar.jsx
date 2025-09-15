@@ -10,7 +10,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import IconButton from "@mui/material/IconButton";
 import SideMenu from "./SideMenu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useCartStore from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,34 @@ const Navbar = () => {
   const [isAtTop, setIsAtTop] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [hideTimeout, setHideTimeout] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { getCartCount } = useCartStore();
   const { totalItems: wishlistCount } = useWishlist();
 
   const isAuthenticated = !!localStorage.getItem("token");
+
+  // Navigation items
+  const navItems = [
+    { label: "Man", path: "/products?categories=man" },
+    { label: "Women", path: "/products?categories=women" },
+    { label: "Groovy Street", path: "/products?categories=groovy-street" },
+  ];
+
+  // Check if current path matches navigation item
+  const isActiveNavItem = (path) => {
+    return location.pathname === "/products" && location.search.includes(path.split("=")[1]);
+  };
+
+  // Handle search submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const encodedQuery = encodeURIComponent(searchQuery.trim());
+      navigate(`/products?search=${encodedQuery}`);
+    }
+  };
 
   // Handle scroll to toggle shadow + background
   useEffect(() => {
@@ -86,11 +109,37 @@ const Navbar = () => {
             : "bg-white/80 border-gray-200 shadow-lg"
         }`}
     >
-      {/* Hamburger */}
-      <div className="flex items-center">
+      {/* Left Section: Hamburger + Navigation Links */}
+      <div className="flex items-center space-x-6">
         <IconButton onClick={() => setDrawerOpen(true)} edge="start">
           <MenuIcon sx={{ color: isAtTop ? "#FFFFFF" : "#1F2937" }} />
         </IconButton>
+        
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center space-x-8">
+          {navItems.map((item, index) => (
+            <div key={index} className="relative">
+              <button
+                onClick={() => navigate(item.path)}
+                className={`relative px-3 py-2  text-base font-medium bg-transparent border-none focus:outline-none transition-all duration-300 tracking-wider ${
+                  isAtTop 
+                    ? "text-white hover:text-white/90" 
+                    : "text-gray-700 hover:text-gray-900"
+                }`}
+              >
+                {item.label}
+                {/* Animated Bottom Border */}
+                <div
+                  className={`absolute bottom-0 left-0 h-0.5 transition-all duration-500 ease-in-out ${
+                    isActiveNavItem(item.path)
+                      ? `w-full ${isAtTop ? "bg-white" : "bg-[#F57C26]"}`
+                      : "w-0 bg-transparent"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Centered Logo */}
@@ -107,22 +156,27 @@ const Navbar = () => {
       {/* Right Section: Search + Icons */}
       <div className="flex items-center space-x-4 ml-auto">
         {/* Search Box */}
-        <div className="relative hidden md:block w-full max-w-xs">
-          <FaSearch
-            className={`absolute top-1/2 left-3 transform -translate-y-1/2 ${
-              isAtTop ? "text-gray-200" : "text-gray-400"
-            }`}
-          />
+        <form onSubmit={handleSearch} className="relative hidden md:block w-full max-w-xs">
+          <button
+            type="submit"
+            className={`absolute top-1/2 bg-transparent left-0 transform -translate-y-1/2 ${
+              isAtTop ? "text-gray-200 hover:text-white" : "text-gray-400 hover:text-gray-600"
+            } transition-colors cursor-pointer`}
+          >
+            <FaSearch />
+          </button>
           <input
             type="text"
             placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full pl-10 pr-4 py-1 rounded-full border ${
               isAtTop
                 ? "border-white/30 bg-white/20 text-white placeholder-white/60 focus:ring-white"
                 : "border-gray-300 bg-gray-50 text-black placeholder-gray-400 focus:ring-gray-500"
             } focus:outline-none focus:ring-2`}
           />
-        </div>
+        </form>
 
         {/* Icons */}
         <div className="flex items-center space-x-4">

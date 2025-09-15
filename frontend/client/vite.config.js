@@ -15,4 +15,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    allowedHosts: ["crew-laser-don-rfc.trycloudflare.com"]
+  }
 })
+
+

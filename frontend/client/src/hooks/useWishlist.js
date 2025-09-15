@@ -49,7 +49,7 @@ const wishlistAPI = {
   // Get user's wishlist
   getWishlist: async () => {
     const csrfToken = getCookie('csrftoken');
-    const response = await axios.get('http://localhost:8000/api/wishlist/', {
+    const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/wishlist/', {
       withCredentials: true,
       headers: {
         'X-CSRFToken': csrfToken,
@@ -97,7 +97,7 @@ const wishlistAPI = {
   // Clear wishlist
   clearWishlist: async () => {
     const csrfToken = getCookie('csrftoken');
-    const response = await axios.delete('http://localhost:8000/api/wishlist/clear/', {
+    const response = await axios.delete(import.meta.env.VITE_API_BASE_URL + '/wishlist/clear/', {
       withCredentials: true,
       headers: {
         'X-CSRFToken': csrfToken,
@@ -109,7 +109,7 @@ const wishlistAPI = {
   // Get wishlist statistics
   getWishlistStats: async () => {
     const csrfToken = getCookie('csrftoken');
-    const response = await axios.get('http://localhost:8000/api/wishlist/stats/', {
+    const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/wishlist/stats/', {
       withCredentials: true,
       headers: {
         'X-CSRFToken': csrfToken,
