@@ -19,6 +19,7 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 import { useProduct } from "../hooks/useProduct";
+import { useReviews } from "../hooks/useReviews";
 
 // Share options for social media
 const SHARE_OPTIONS = [
@@ -77,6 +78,7 @@ const SIZE_CHART = {
 function ProductPage() {
   const { id } = useParams();
   const { product, isLoading, isError, error } = useProduct(id);
+  const { createReview, loading: reviewLoading, } = useReviews();
   
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
@@ -84,6 +86,7 @@ function ProductPage() {
   const [sizeUnit, setSizeUnit] = useState("inches");
   const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [reviewTitle, setReviewTitle] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [reviewImages, setReviewImages] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -196,20 +199,32 @@ function ProductPage() {
     });
   };
 
-  const submitReview = () => {
-    if (!reviewRating || reviewComment.trim().length === 0) return;
-    // TODO: Implement API call to submit review
-    console.log('Submitting review:', {
-      productId: product.id,
-      rating: reviewRating,
-      comment: reviewComment.trim(),
-      images: reviewImages.map((img) => img.previewUrl),
-    });
+  const submitReview = async () => {
+    if (!reviewRating || reviewComment.trim().length === 0 || !reviewTitle.trim()) return;
+    
+    try {
+      const reviewData = {
+        product: product.id,
+        rating: reviewRating,
+        title: reviewTitle.trim(),
+        comment: reviewComment.trim(),
+      };
 
-    setReviewRating(0);
-    setHoverRating(0);
-    setReviewComment("");
-    setReviewImages([]);
+      await createReview(reviewData);
+      
+      // Reset form on success
+      setReviewRating(0);
+      setHoverRating(0);
+      setReviewTitle("");
+      setReviewComment("");
+      setReviewImages([]);
+      
+      // You could add a success message here
+      alert('Review submitted successfully!');
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      alert('Failed to submit review. Please try again.');
+    }
   };
 
   return (
@@ -601,6 +616,17 @@ function ProductPage() {
               </div>
 
               <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-900 mb-2">Review Title</label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F57C26]"
+                  placeholder="Give your review a title..."
+                  value={reviewTitle}
+                  onChange={(e) => setReviewTitle(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-900 mb-2">Comment</label>
                 <textarea
                   className="w-full min-h-28 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F57C26]"
@@ -644,14 +670,14 @@ function ProductPage() {
                 <button
                   type="button"
                   onClick={submitReview}
-                  disabled={!reviewRating || reviewComment.trim().length === 0}
+                  disabled={!reviewRating || reviewComment.trim().length === 0 || !reviewTitle.trim() || reviewLoading}
                   className={`px-5 py-2 rounded-md text-white font-semibold ${
-                    !reviewRating || reviewComment.trim().length === 0
+                    !reviewRating || reviewComment.trim().length === 0 || !reviewTitle.trim() || reviewLoading
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-[#F57C26] hover:bg-[#ce6b25]"
                   }`}
                 >
-                  Submit Review
+                  {reviewLoading ? "Submitting..." : "Submit Review"}
                 </button>
               </div>
             </div>
