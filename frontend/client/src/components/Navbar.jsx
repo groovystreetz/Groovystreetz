@@ -33,7 +33,7 @@ const Navbar = () => {
   const navItems = [
     { label: "Man", path: "/products?categories=man" },
     { label: "Women", path: "/products?categories=women" },
-    { label: "Groovy Street", path: "/products?categories=groovy-street" },
+    { label: "Groovy Streetz", path: "/products?categories=groovy-street" },
   ];
 
   // Check if current path matches navigation item

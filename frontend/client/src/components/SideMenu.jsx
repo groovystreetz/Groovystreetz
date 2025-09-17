@@ -3,6 +3,7 @@ import Drawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaUserAlt } from "react-icons/fa";
 import { useCategories } from "@/hooks/useCategories";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const lowerLinks = [
   "My Account",
@@ -19,6 +20,22 @@ const lowerLinks = [
 const SideMenu = ({ open, onClose, isLoggedIn }) => {
   const navigate = useNavigate();
   const { categories, isLoading } = useCategories();
+
+  const manSubcategories = [
+    { label: "🎴 Urban Monk", slug: "urban-monk" },
+    { label: "🧱 Urban Streets", slug: "urban-streets" },
+    { label: "🐯 Urban Animals", slug: "urban-animals" },
+    { label: "🎸 Rockstar", slug: "rockstar" },
+    { label: "👖 Pants", slug: "pants" },
+  ];
+
+  const womenSubcategories = [
+    { label: "🎴 Urban Monk", slug: "urban-monk" },
+    { label: "🧱 Urban Streets", slug: "urban-streets" },
+    { label: "🐯 Urban Animals", slug: "urban-animals" },
+    { label: "🎸 Rockstar", slug: "rockstar" },
+    { label: "👖 Pants", slug: "pants" },
+  ];
 
   return (
     <Drawer
@@ -60,22 +77,69 @@ const SideMenu = ({ open, onClose, isLoggedIn }) => {
         <div className="p-4 border-b border-orange-100">
           <h3 className="font-semibold text-lg text-orange-700 mb-3">Shop</h3>
           <div className="space-y-2">
-            {[
-              { label: "Man", path: "/products?categories=man" },
-              { label: "Women", path: "/products?categories=women" },
-              { label: "Groovy Street", path: "/products?categories=groovy-street" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  onClose();
-                  navigate(item.path);
-                }}
-                className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
-              >
-                {item.label}
-              </div>
-            ))}
+            <Accordion type="multiple" className="w-full">
+              <AccordionItem value="man">
+                <AccordionTrigger className="px-2 py-2 rounded-md text-gray-700 hover:no-underline hover:bg-orange-50 hover:text-orange-800">Man</AccordionTrigger>
+                <AccordionContent>
+                  <div className="ml-2 pl-2 border-l border-orange-100 space-y-1">
+                    {manSubcategories.map((sub) => (
+                      <div
+                        key={sub.slug}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/products?categories=man&sub=${sub.slug}`);
+                        }}
+                        className="cursor-pointer px-2 py-1.5 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
+                      >
+                        {sub.label}
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="women">
+                <AccordionTrigger className="px-2 py-2 rounded-md text-gray-700 hover:no-underline hover:bg-orange-50 hover:text-orange-800">Women</AccordionTrigger>
+                <AccordionContent>
+                  <div className="ml-2 pl-2 border-l border-orange-100 space-y-1">
+                    {womenSubcategories.map((sub) => (
+                      <div
+                        key={sub.slug}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/products?categories=women&sub=${sub.slug}`);
+                        }}
+                        className="cursor-pointer px-2 py-1.5 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
+                      >
+                        {sub.label}
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            {/* Groovy Streetz */}
+            <div
+              onClick={() => {
+                onClose();
+                navigate("/products?categories=groovy-street");
+              }}
+              className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
+            >
+              Groovy Streetz
+            </div>
+
+            {/* Kidz */}
+            <div
+              onClick={() => {
+                onClose();
+                navigate("/products?categories=kidz");
+              }}
+              className="cursor-pointer px-2 py-2 rounded-md text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-all duration-200"
+            >
+              Kidz
+            </div>
           </div>
         </div>
 
