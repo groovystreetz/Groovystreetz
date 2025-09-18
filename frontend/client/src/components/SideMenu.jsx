@@ -2,7 +2,7 @@ import React from "react";
 import Drawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaUserAlt } from "react-icons/fa";
-import { useCategories } from "@/hooks/useCategories";
+// import { useCategories } from "@/hooks/useCategories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const lowerLinks = [
@@ -19,7 +19,7 @@ const lowerLinks = [
 
 const SideMenu = ({ open, onClose, isLoggedIn }) => {
   const navigate = useNavigate();
-  const { categories, isLoading } = useCategories();
+  // const { categories, isLoading } = useCategories();
 
   const manSubcategories = [
     { label: "🎴 Urban Monk", slug: "urban-monk" },
