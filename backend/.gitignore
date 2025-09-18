@@ -129,9 +129,9 @@ db.sqlite3
 /static/
 staticfiles/
 
-# Migration files (optional - uncomment if you don't want to track migrations)
-# */migrations/*.py
-# !*/migrations/__init__.py
+# Migration files - exclude to avoid conflicts between systems
+*/migrations/*.py
+!*/migrations/__init__.py
 
 # Environment variables
 .env
