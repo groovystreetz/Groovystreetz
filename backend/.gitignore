@@ -130,9 +130,8 @@ db.sqlite3
 staticfiles/
 
 # Migration files - exclude to avoid conflicts between systems
-*/migrations/*.py
-!*/migrations/__init__.py
-
+api/migrations/*.py
+!api/migrations/__init__.py
 # Environment variables
 .env
 .env.local
