@@ -81,6 +81,7 @@ pnpm-debug.log*
 /frontend/dist/
 /frontend/.next/
 /frontend/out/
+/backend/media/
 
 # Ignore Vite-specific cache directory
 /frontend/.vite/
