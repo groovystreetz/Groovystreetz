@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const DURATION = 5000;
 
 function HeroSlider() {
-  const { getHeroBanners, loading, error } = useBanners();
+  const { getHeroBanners, loading } = useBanners();
   const [banners, setBanners] = useState([]);
   const [current, setCurrent] = useState(0);
   const timeoutRef = useRef(null);
