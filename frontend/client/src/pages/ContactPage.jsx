@@ -20,7 +20,7 @@ const ContactPage = () => {
     subject: '',
     message: ''
   })
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  // const [isSubmitted, setIsSubmitted] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [dialogType, setDialogType] = useState('success') // 'success' or 'error'
   const [dialogMessage, setDialogMessage] = useState('')

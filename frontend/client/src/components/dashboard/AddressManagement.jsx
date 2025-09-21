@@ -18,7 +18,7 @@ const AddressManagement = () => {
     deleteAddress, 
     setDefaultAddress, 
     loading, 
-    error 
+    // error 
   } = useAddresses();
 
   const [addresses, setAddresses] = useState([]);

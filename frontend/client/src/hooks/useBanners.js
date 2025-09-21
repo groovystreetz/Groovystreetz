@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { getCookie } from '../lib/csrf';
+// import { getCookie } from '../lib/csrf';
 
 export const useBanners = () => {
   const [loading, setLoading] = useState(false);
