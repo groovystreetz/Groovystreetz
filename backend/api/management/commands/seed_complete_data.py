@@ -724,6 +724,17 @@ class Command(BaseCommand):
                 'is_active': True,
                 'order': 1
             },
+            
+            {
+                'title': 'Hoodies Collection Drop',
+                'subtitle': 'Fresh hoodies styles just arrived',
+                'banner_type': 'hero',
+                'link_url': '/products?category=hoodies',
+                'link_text': 'Shop Now',
+                'is_active': True,
+                'order': 2
+            },
+            
             {
                 'title': '20% Off All Hoodies',
                 'subtitle': 'Limited time offer on our best hoodies',
