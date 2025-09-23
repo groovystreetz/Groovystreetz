@@ -6,8 +6,8 @@ import { getCookie } from '../lib/csrf';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@groovystreetz.com');
+  const [password, setPassword] = useState('admin123');
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
@@ -126,12 +126,12 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white rounded-3xl shadow-lg flex w-full max-w-4xl overflow-hidden">
         {/* Left Side */}
-        <div className="w-1/2 bg-gradient-to-br from-blue-600 to-blue-700 p-10 flex flex-col justify-between relative">
+        <div className="w-1/2 bg-[#f59e42] p-10 flex flex-col justify-between relative">
           <div>
             <h2 className="text-white text-4xl font-bold mb-4 leading-tight">
               Admin<br />Dashboard<br />Access
             </h2>
-            <p className="text-blue-100 mb-8">
+            <p className="text-white mb-8">
               Secure access to the Groovystreetz admin panel for platform management and user oversight.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function Login() {
         <div className="w-1/2 p-10 flex flex-col justify-center">
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-blue-600 rounded-full w-12 h-12 flex items-center justify-center mr-3">
+            <div className="bg-[#f59e42] rounded-full w-12 h-12 flex items-center justify-center mr-3">
               <span className="text-white text-2xl font-bold">A</span>
             </div>
             <span className="font-bold text-xl">Admin Panel</span>
@@ -169,7 +169,7 @@ export default function Login() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 onBlur={handleBlur}
-                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${errors.email && touched.email ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-blue-600`}
+                className={`w-full px-4 py-3 rounded-lg focus:ring-[#f59e42] bg-gray-100 border ${errors.email && touched.email ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-blue-600`}
               />
               {errors.email && touched.email && (
                 <p className="text-red-500 text-xs mt-1 text-left">{errors.email}</p>
@@ -187,7 +187,7 @@ export default function Login() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onBlur={handleBlur}
-                className={`w-full px-4 py-3 rounded-lg bg-gray-100 border ${errors.password && touched.password ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-blue-600`}
+                className={`w-full px-4 py-3 rounded-lg focus:ring-[#f59e42] bg-gray-100 border ${errors.password && touched.password ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-blue-600`}
               />
               <span
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xl"
@@ -206,7 +206,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full bg-[#f59e42] hover:bg-[#f59e42] disabled:bg-[#f59e42] text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <>

@@ -19,4 +19,3 @@ export const getMockProducts = (count = 24) => {
 	})
 }
 
-

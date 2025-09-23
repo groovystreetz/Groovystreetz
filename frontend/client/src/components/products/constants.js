@@ -13,4 +13,3 @@ export const COLOR_PALETTES = [
 	["#8B5CF6", "#4C1D95", "#EDE9FE"],
 ]
 
-
