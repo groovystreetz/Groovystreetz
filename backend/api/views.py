@@ -1,7 +1,7 @@
 # backend/api/views.py
 
 from django.contrib.auth import login, logout, get_user_model
-from rest_framework import generics, views, response, status, permissions, viewsets, serializers
+from rest_framework import generics, views, response, status, permissions, viewsets, serializers, pagination
 from django.utils import timezone
 from django.db import models
 from .serializers import (
@@ -163,10 +163,24 @@ class ProductListView(generics.ListAPIView):
         if category_slug:
             queryset = queryset.filter(category__slug=category_slug)
         
-        # Gender filter
+        # Gender filter - include unisex products in both male and female filters
         gender = self.request.query_params.get('gender')
         if gender:
-            queryset = queryset.filter(gender=gender)
+            if gender in ['male', 'female']:
+                # Include both the specific gender and unisex products
+                queryset = queryset.filter(gender__in=[gender, 'unisex'])
+            else:
+                # For any other gender value, filter normally
+                queryset = queryset.filter(gender=gender)
+        
+        # Search - search in both name and description
+        search = self.request.query_params.get('search')
+        if search:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
         return queryset
 
 
@@ -1309,10 +1323,18 @@ class ContactMessageResolveView(views.APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 
+# Custom Pagination Class
+class CustomPageNumberPagination(pagination.PageNumberPagination):
+    page_size = 20  # Default page size
+    page_size_query_param = 'limit'  # Allow client to override page size
+    max_page_size = 100  # Maximum page size allowed
+    page_query_param = 'page'  # Page number parameter name
+
 # Enhanced Product Views with variants and images
 class EnhancedProductListView(generics.ListAPIView):
     serializer_class = EnhancedProductSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = CustomPageNumberPagination
     
     def get_queryset(self):
         queryset = Product.objects.prefetch_related('variants', 'images', 'reviews')
@@ -1323,15 +1345,23 @@ class EnhancedProductListView(generics.ListAPIView):
             category_list = categories.split(',')
             queryset = queryset.filter(category__slug__in=category_list)
         
-        # Gender filter
+        # Gender filter - include unisex products in both male and female filters
         gender = self.request.query_params.get('gender')
         if gender:
-            queryset = queryset.filter(gender=gender)
+            if gender in ['male', 'female']:
+                # Include both the specific gender and unisex products
+                queryset = queryset.filter(gender__in=[gender, 'unisex'])
+            else:
+                # For any other gender value, filter normally
+                queryset = queryset.filter(gender=gender)
         
-        # Search
+        # Search - search in both name and description
         search = self.request.query_params.get('search')
         if search:
-            queryset = queryset.filter(name__icontains=search)
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
         
         # Price range
         min_price = self.request.query_params.get('min_price')

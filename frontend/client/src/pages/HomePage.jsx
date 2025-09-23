@@ -21,18 +21,18 @@ const HomePage = () => {
       <Navbar />
         <HeroSlider />
         <NewArrivals />
-        <SpotlightProducts />
+        <ShopByGroovy />
+        {/* <SpotlightProducts /> */}
         <Categories />
-        <TopPicks />
+        {/* <TopPicks /> */}
         {/* {"asdssfsdf"} */}
 
-        <ShopByGroovy />
         {/* {"asdssfsdf"} */}
         <Banners />
         <VideoSection />
         {/* <ShopByGroovy/>  */}
-        <NoPrint />
-        <ShopFor />
+        {/* <NoPrint /> */}
+        {/* <ShopFor /> */}
         {/* <Slogan />     */}
         <Footer />
       {/* <SellingPartners />
