@@ -987,6 +987,38 @@ class WishlistCheckView(views.APIView):
 # ADMIN VIEWS
 # ==============================================================================
 
+class AdminCategoryViewSet(viewsets.ModelViewSet):
+    """
+    Admin endpoint for managing categories (CRUD operations)
+    Supports: GET, POST, PUT, PATCH, DELETE
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdminUser]
+
+    def get_queryset(self):
+        """Return all categories for admin users"""
+        return Category.objects.all()
+
+
+    def perform_create(self, serializer):
+        """Create a new category"""
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """Update an existing category"""
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """Delete a category - check for related products first"""
+        if instance.products.exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({
+                "detail": f"Cannot delete category '{instance.name}' because it has {instance.products.count()} associated products."
+            })
+        instance.delete()
+
+
 class AdminProductViewSet(viewsets.ModelViewSet):
     """
     Admin endpoint for managing products.

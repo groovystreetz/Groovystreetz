@@ -10,7 +10,7 @@ from .views import (
     WishlistView, WishlistAddView, WishlistRemoveView,
     WishlistToggleView, WishlistClearView, WishlistStatsView, WishlistCheckView,
     AdminUserListView, AdminUserDetailView, AdminOrderListView,
-    AdminSalesReportView, AdminProductViewSet,
+    AdminSalesReportView, AdminCategoryViewSet, AdminProductViewSet,
     # ShipRocket views
     ShippingRateCalculationView, PincodeServiceabilityView, ShipmentTrackingView,
     PublicTrackingView, AdminShipmentManagementView,
@@ -38,6 +38,7 @@ from .webhooks import ShipRocketWebhookView, ShipRocketWebhookTestView, shiprock
 router = DefaultRouter()
 router.register(r'addresses', AddressViewSet, basename='address')
 router.register(r'enhanced-addresses', EnhancedAddressViewSet, basename='enhanced-address')
+router.register(r'admin/categories', AdminCategoryViewSet, basename='admin-category')
 router.register(r'admin/products', AdminProductViewSet, basename='admin-product')
 router.register(r'admin/coupons', AdminCouponViewSet, basename='admin-coupon')
 router.register(r'admin/testimonials', AdminTestimonialViewSet, basename='admin-testimonial')

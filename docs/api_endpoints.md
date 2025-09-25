@@ -224,6 +224,43 @@ Query: ?resolved=false
 PATCH /api/admin/contacts/{message_id}/resolve/
 ```
 
+### ✅ **Category Management System**
+```http
+# Public category endpoints (no authentication required)
+GET /api/categories/
+GET /api/categories/{id}/
+
+# Admin category management (SuperAdmin only)
+GET /api/admin/categories/
+POST /api/admin/categories/
+{
+  "name": "Premium T-Shirts",
+  "slug": "premium-tshirts",  # Optional - auto-generated from name
+  "image": [file]             # Optional - category image
+}
+
+# Update category
+PUT /api/admin/categories/{id}/
+PATCH /api/admin/categories/{id}/
+{
+  "name": "Updated Category Name",
+  "image": [file]
+}
+
+# Delete category (protected - fails if has products)
+DELETE /api/admin/categories/{id}/
+Error Response: {
+  "detail": "Cannot delete category 'T-Shirts' because it has 15 associated products."
+}
+```
+
+**Category Management Features:**
+- ✅ **SuperAdmin access only**: Restricted to users with `role = 'superadmin'`
+- ✅ **Full CRUD operations**: Create, Read, Update, Delete categories
+- ✅ **Smart deletion protection**: Prevents deleting categories with products
+- ✅ **Image upload support**: Category images for better visual organization
+- ✅ **Auto-slug generation**: Automatic URL-friendly slug creation
+
 ### ✅ **Multiple Category Filtering**
 ```http
 # Filter products by multiple categories
@@ -519,12 +556,20 @@ Response: {
 - `PATCH /api/profile/edit/` - Edit user profile
 - `DELETE /api/user/delete/` - Delete user account
 
-### **Categories & Products** 
-- `GET /api/categories/` - List categories
-- `GET /api/categories/{id}/` - Get category by ID ✅
+### **Categories & Products**
+- `GET /api/categories/` - List categories (Public)
+- `GET /api/categories/{id}/` - Get category by ID (Public) ✅
 - `GET /api/enhanced-products/` - Enhanced product list ✅
 - `GET /api/enhanced-products/{id}/` - Enhanced product detail ✅
 - `GET /api/new-arrivals/` - New arrival products ✅
+
+### **Category Management (SuperAdmin)** ✅
+- `GET /api/admin/categories/` - List all categories
+- `POST /api/admin/categories/` - Create new category
+- `GET /api/admin/categories/{id}/` - Get category details
+- `PUT /api/admin/categories/{id}/` - Update category (full)
+- `PATCH /api/admin/categories/{id}/` - Update category (partial)
+- `DELETE /api/admin/categories/{id}/` - Delete category
 
 ### **Product Management (Admin)**
 - `GET/POST/PATCH/DELETE /api/admin/products/` - Full product CRUD
