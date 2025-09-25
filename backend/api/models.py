@@ -268,20 +268,39 @@ class OrderItem(models.Model):
 # ==============================================================================
 
 class Address(models.Model):
+    ADDRESS_TYPE_CHOICES = [
+        ('Home', 'Home'),
+        ('Work', 'Work'),
+        ('Other', 'Other'),
+    ]
+
     user = models.ForeignKey(CustomUser, related_name='addresses', on_delete=models.CASCADE)
-    address_line_1 = models.CharField(max_length=255)
-    address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    address_type = models.CharField(max_length=20, choices=ADDRESS_TYPE_CHOICES, default='Home')
+    full_name = models.CharField(max_length=255)
+    address_line_1 = models.CharField(max_length=255, verbose_name="Address Line 1")
+    address_line_2 = models.CharField(max_length=255, blank=True, null=True, verbose_name="Address Line 2")
+    landmark = models.CharField(max_length=255, blank=True, null=True, help_text="Nearby landmark for easy location")
     city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=20)
-    country = models.CharField(max_length=100)
+    state_province = models.CharField(max_length=100, verbose_name="State/Province")
+    zip_postal_code = models.CharField(max_length=20, verbose_name="ZIP/Postal Code")
+    country = models.CharField(max_length=100, default="India")
+    region = models.CharField(max_length=100, blank=True, null=True, help_text="Region or territory")
+    phone_number = models.CharField(max_length=20)
+    alternative_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Alternative contact number")
+    delivery_instructions = models.TextField(blank=True, null=True, help_text="Special instructions for delivery (Optional)")
     is_default = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.address_line_1}, {self.city}, {self.state}"
+        return f"{self.full_name} - {self.address_line_1}, {self.city}, {self.state_province}"
 
     class Meta:
         verbose_name_plural = 'Addresses'
+
+    def save(self, *args, **kwargs):
+        # If this address is being set as default, remove default from other addresses
+        if self.is_default:
+            Address.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
 
 
 class Wishlist(models.Model):
@@ -409,14 +428,16 @@ class Testimonial(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='testimonials')
     content = models.TextField(help_text="Testimonial content")
     rating = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)], help_text="Rating from 1 to 5")
+    user_image = models.ImageField(upload_to='testimonials/users/', blank=True, null=True,
+                                 help_text="User profile image for testimonial display")
     is_approved = models.BooleanField(default=False, help_text="Admin approval status")
     is_featured = models.BooleanField(default=False, help_text="Feature on homepage")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return f"Testimonial by {self.user.email} - {self.rating} stars"
 
@@ -462,53 +483,51 @@ class ProductVariant(models.Model):
         ('xxxl', 'XXXL'),
     )
     
-    COLOR_CHOICES = (
-        ('red', 'Red'),
-        ('blue', 'Blue'),
-        ('green', 'Green'),
-        ('black', 'Black'),
-        ('white', 'White'),
-        ('yellow', 'Yellow'),
-        ('pink', 'Pink'),
-        ('purple', 'Purple'),
-        ('orange', 'Orange'),
-        ('gray', 'Gray'),
-        ('brown', 'Brown'),
-        ('navy', 'Navy'),
-        ('maroon', 'Maroon'),
-        ('olive', 'Olive'),
-        ('turquoise', 'Turquoise'),
-    )
-    
     product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, blank=True)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    color_hex = models.CharField(max_length=7, blank=True, null=True,
+                               help_text="Hex color code (e.g., #37821B)")
+    color_name = models.CharField(max_length=50, blank=True,
+                                help_text="Display name for the color (e.g., Forest Green)")
     sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit")
     price_modifier = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="Price difference from base product")
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        unique_together = ['product', 'size', 'color']
+        unique_together = ['product', 'size', 'color_hex']
         
     def __str__(self):
         size_part = f"Size {self.size.upper()}" if self.size else ""
-        color_part = f"Color {self.color.title()}" if self.color else ""
+        color_part = f"Color {self.color_name}" if self.color_name else (f"Color {self.color_hex}" if self.color_hex else "")
         parts = [part for part in [size_part, color_part] if part]
         return f"{self.product.name} - {', '.join(parts)}" if parts else f"{self.product.name} - Variant"
-    
+
     @property
     def final_price(self):
         return self.product.price + self.price_modifier
-    
+
     @property
     def name(self):
         """Generate a name based on size and color for backward compatibility"""
         size_part = self.get_size_display() if self.size else ""
-        color_part = self.get_color_display() if self.color else ""
+        color_part = self.color_name if self.color_name else (self.color_hex if self.color_hex else "")
         parts = [part for part in [size_part, color_part] if part]
         return ", ".join(parts) if parts else "Default"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        import re
+        super().clean()
+
+        # Validate hex color format
+        if self.color_hex and not re.match(r'^#[0-9A-Fa-f]{6}$', self.color_hex):
+            raise ValidationError({'color_hex': 'Color must be a valid hex code (e.g., #37821B)'})
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
@@ -589,11 +608,19 @@ class Banner(models.Model):
         ('promotion', 'Promotional Banner'),
         ('category', 'Category Banner'),
     ]
-    
+
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unisex', 'Unisex'),
+    ]
+
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True)
     image = models.ImageField(upload_to='banners/')
     banner_type = models.CharField(max_length=20, choices=BANNER_TYPES, default='promotion')
+    target_gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='unisex',
+                                   help_text="Target audience gender for this banner")
     link_url = models.URLField(blank=True, help_text="Optional link for banner")
     link_text = models.CharField(max_length=50, blank=True, help_text="Button text")
     is_active = models.BooleanField(default=True)
@@ -601,12 +628,12 @@ class Banner(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['order', '-created_at']
-        
+
     def __str__(self):
-        return f"{self.banner_type.title()} Banner: {self.title}"
+        return f"{self.banner_type.title()} Banner: {self.title} ({self.get_target_gender_display()})"
 
 
 class Spotlight(models.Model):
@@ -614,9 +641,8 @@ class Spotlight(models.Model):
     SPOTLIGHT_TYPES = [
         ('product', 'Product'),
         ('category', 'Category'),
-        ('collection', 'Collection'),
     ]
-    
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     spotlight_type = models.CharField(max_length=20, choices=SPOTLIGHT_TYPES)
@@ -626,11 +652,35 @@ class Spotlight(models.Model):
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['order', '-created_at']
-        
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        super().clean()
+
+        if self.spotlight_type == 'product' and not self.product:
+            raise ValidationError({'product': 'Product is required when spotlight type is "product".'})
+
+        if self.spotlight_type == 'category' and not self.category:
+            raise ValidationError({'category': 'Category is required when spotlight type is "category".'})
+
+        if self.spotlight_type == 'product' and self.category:
+            raise ValidationError({'category': 'Category should not be set when spotlight type is "product".'})
+
+        if self.spotlight_type == 'category' and self.product:
+            raise ValidationError({'product': 'Product should not be set when spotlight type is "category".'})
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
+        if self.spotlight_type == 'product' and self.product:
+            return f"Spotlight: {self.title} (Product: {self.product.name})"
+        elif self.spotlight_type == 'category' and self.category:
+            return f"Spotlight: {self.title} (Category: {self.category.name})"
         return f"Spotlight: {self.title}"
 
 

@@ -71,7 +71,7 @@ class Product(models.Model):
 
 ## New Advanced Models
 
-### ProductVariant Model (Updated)
+### ProductVariant Model (Updated - Hexadecimal Colors)
 ```python
 class ProductVariant(models.Model):
     SIZE_CHOICES = (
@@ -79,17 +79,12 @@ class ProductVariant(models.Model):
         ('xl', 'XL'), ('xxl', 'XXL'), ('xxxl', 'XXXL'),
     )
 
-    COLOR_CHOICES = (
-        ('red', 'Red'), ('blue', 'Blue'), ('green', 'Green'),
-        ('black', 'Black'), ('white', 'White'), ('yellow', 'Yellow'),
-        ('pink', 'Pink'), ('purple', 'Purple'), ('orange', 'Orange'),
-        ('gray', 'Gray'), ('brown', 'Brown'), ('navy', 'Navy'),
-        ('maroon', 'Maroon'), ('olive', 'Olive'), ('turquoise', 'Turquoise'),
-    )
-
     product = ForeignKey(Product, related_name='variants', on_delete=CASCADE)
-    size = CharField(max_length=10, choices=SIZE_CHOICES, blank=True)  # NEW: Separate field
-    color = CharField(max_length=20, choices=COLOR_CHOICES, blank=True)  # NEW: Separate field
+    size = CharField(max_length=10, choices=SIZE_CHOICES, blank=True)
+    color_hex = CharField(max_length=7, blank=True, null=True,
+                         help_text="Hex color code (e.g., #37821B)")  # NEW: Hex colors
+    color_name = CharField(max_length=50, blank=True,
+                          help_text="Display name for the color (e.g., Forest Green)")  # NEW
     sku = CharField(max_length=50, unique=True)
     price_modifier = DecimalField(max_digits=8, decimal_places=2, default=0)
     stock = PositiveIntegerField(default=0)
@@ -97,7 +92,12 @@ class ProductVariant(models.Model):
     created_at = DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['product', 'size', 'color']  # NEW: Prevent duplicates
+        unique_together = ['product', 'size', 'color_hex']  # Updated constraint
+
+    def clean(self):
+        # Validates hex color format (#37821B)
+        if self.color_hex and not re.match(r'^#[0-9A-Fa-f]{6}$', self.color_hex):
+            raise ValidationError({'color_hex': 'Color must be a valid hex code'})
 
     @property
     def final_price(self):
@@ -198,17 +198,23 @@ class RewardTransaction(models.Model):
 
 ## Content Management Models
 
-### Testimonial Model
+### Testimonial Model (Enhanced)
 ```python
 class Testimonial(models.Model):
     user = ForeignKey(CustomUser, on_delete=CASCADE, related_name='testimonials')
-    content = TextField()
+    content = TextField(help_text="Testimonial content")
     rating = PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
-    is_approved = BooleanField(default=False)
-    is_featured = BooleanField(default=False)
+    user_image = ImageField(upload_to='testimonials/users/', blank=True, null=True,
+                           help_text="User profile image for testimonial display")  # NEW
+    is_approved = BooleanField(default=False, help_text="Admin approval status")
+    is_featured = BooleanField(default=False, help_text="Feature on homepage")
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 ```
+
+**New Features:**
+- **User profile images**: Display user photos alongside testimonials
+- Enhanced admin controls for approval and featuring
 
 ### ContactMessage Model
 ```python
@@ -234,7 +240,7 @@ class ContactMessage(models.Model):
     resolved_at = DateTimeField(null=True, blank=True)
 ```
 
-### Banner Model
+### Banner Model (Enhanced - Gender Targeting)
 ```python
 class Banner(models.Model):
     BANNER_TYPES = [
@@ -242,11 +248,19 @@ class Banner(models.Model):
         ('promotion', 'Promotional Banner'),
         ('category', 'Category Banner'),
     ]
-    
+
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unisex', 'Unisex'),
+    ]
+
     title = CharField(max_length=200)
     subtitle = CharField(max_length=300, blank=True)
     image = ImageField(upload_to='banners/')
     banner_type = CharField(max_length=20, choices=BANNER_TYPES)
+    target_gender = CharField(max_length=10, choices=GENDER_CHOICES, default='unisex',
+                             help_text="Target audience gender for this banner")  # NEW
     link_url = URLField(blank=True)
     link_text = CharField(max_length=50, blank=True)
     is_active = BooleanField(default=True)
@@ -256,15 +270,15 @@ class Banner(models.Model):
     created_at = DateTimeField(auto_now_add=True)
 ```
 
-### Spotlight Model
+### Spotlight Model (Enhanced - Real Product/Category Links)
 ```python
 class Spotlight(models.Model):
     SPOTLIGHT_TYPES = [
         ('product', 'Product'),
         ('category', 'Category'),
-        ('collection', 'Collection'),
+        # Removed 'collection' - only real products/categories allowed
     ]
-    
+
     title = CharField(max_length=200)
     description = TextField(blank=True)
     spotlight_type = CharField(max_length=20, choices=SPOTLIGHT_TYPES)
@@ -274,7 +288,24 @@ class Spotlight(models.Model):
     is_active = BooleanField(default=True)
     order = PositiveIntegerField(default=0)
     created_at = DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        # Validation: ensures real product/category references
+        if self.spotlight_type == 'product' and not self.product:
+            raise ValidationError({'product': 'Product is required when spotlight type is "product".'})
+        if self.spotlight_type == 'category' and not self.category:
+            raise ValidationError({'category': 'Category is required when spotlight type is "category".'})
+        # Prevents cross-linking
+        if self.spotlight_type == 'product' and self.category:
+            raise ValidationError({'category': 'Category should not be set when spotlight type is "product".'})
+        if self.spotlight_type == 'category' and self.product:
+            raise ValidationError({'product': 'Product should not be set when spotlight type is "category".'})
 ```
+
+**Enhanced Features:**
+- **Real references only**: Removes generic 'collection' type, requires actual product/category links
+- **Validation logic**: Ensures spotlight always points to real content
+- **Cross-link prevention**: Prevents conflicting product/category assignments
 
 ## Advanced Permission System
 
@@ -360,19 +391,48 @@ class Order(models.Model):
     def discount_percentage(self) -> float
 ```
 
-### Address Model (Enhanced)  
+### Address Model (Comprehensive Enhancement)
 ```python
 class Address(models.Model):
+    ADDRESS_TYPE_CHOICES = [
+        ('Home', 'Home'),
+        ('Work', 'Work'),
+        ('Other', 'Other'),
+    ]
+
     user = ForeignKey(CustomUser, related_name='addresses', on_delete=CASCADE)
-    address_line_1 = CharField(max_length=255)
-    address_line_2 = CharField(max_length=255, blank=True, null=True)
+    address_type = CharField(max_length=20, choices=ADDRESS_TYPE_CHOICES, default='Home')  # NEW
+    full_name = CharField(max_length=255)  # NEW
+    address_line_1 = CharField(max_length=255, verbose_name="Address Line 1")
+    address_line_2 = CharField(max_length=255, blank=True, null=True, verbose_name="Address Line 2")
+    landmark = CharField(max_length=255, blank=True, null=True,
+                        help_text="Nearby landmark for easy location")  # NEW
     city = CharField(max_length=100)
-    state = CharField(max_length=100)
-    postal_code = CharField(max_length=20)
-    country = CharField(max_length=100)
-    is_default = BooleanField(default=False)  # Enhanced logic
-    
-    # Auto-manages default setting in serializer
+    state_province = CharField(max_length=100, verbose_name="State/Province")  # RENAMED
+    zip_postal_code = CharField(max_length=20, verbose_name="ZIP/Postal Code")  # RENAMED
+    country = CharField(max_length=100, default="India")
+    region = CharField(max_length=100, blank=True, null=True,
+                      help_text="Region or territory")  # NEW
+    phone_number = CharField(max_length=20)  # NEW
+    alternative_phone = CharField(max_length=20, blank=True, null=True,
+                                 help_text="Alternative contact number")  # NEW
+    delivery_instructions = TextField(blank=True, null=True,
+                                    help_text="Special instructions for delivery")  # NEW
+    is_default = BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Auto-manages default setting - ensures only one default per user
+        if self.is_default:
+            Address.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+```
+
+**New Features:**
+- **Address types**: Home, Work, Other categorization
+- **Full contact details**: Full name and dual phone numbers
+- **Delivery optimization**: Landmarks and special delivery instructions
+- **Enhanced addressing**: Region support and better field naming
+- **Smart default management**: Automatic single-default enforcement
 ```
 
 ## Database Relationships

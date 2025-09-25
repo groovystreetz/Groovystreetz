@@ -13,7 +13,7 @@ from .serializers import (
     TestimonialSerializer, AdminTestimonialSerializer, ContactMessageSerializer,
     AdminContactMessageSerializer, ProductVariantSerializer, ProductImageSerializer,
     ReviewSerializer, AdminReviewSerializer, RewardPointsSerializer, RewardTransactionSerializer,
-    BannerSerializer, SpotlightSerializer, EnhancedProductSerializer, EnhancedAddressSerializer,
+    BannerSerializer, SpotlightSerializer, EnhancedProductSerializer, NewArrivalProductSerializer, EnhancedAddressSerializer,
     PermissionSerializer, RoleSerializer, AdminRoleSerializer, UserRoleSerializer,
     UserRoleAssignmentSerializer, EnhancedUserSerializer
 )
@@ -28,7 +28,7 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Avg, Q
 
 User = get_user_model()
 
@@ -1517,21 +1517,30 @@ class RedeemRewardPointsView(views.APIView):
 class BannerListView(generics.ListAPIView):
     serializer_class = BannerSerializer
     permission_classes = [permissions.AllowAny]
-    
+
     def get_queryset(self):
         queryset = Banner.objects.filter(is_active=True)
         now = timezone.now()
-        
+
         # Filter by date range
         queryset = queryset.filter(
             models.Q(start_date__isnull=True) | models.Q(start_date__lte=now),
             models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
         )
-        
+
+        # Filter by banner type
         banner_type = self.request.query_params.get('type')
         if banner_type:
             queryset = queryset.filter(banner_type=banner_type)
-        
+
+        # Filter by gender - NEW FEATURE
+        gender = self.request.query_params.get('gender')
+        if gender:
+            # Show banners for the specific gender AND unisex banners
+            queryset = queryset.filter(
+                models.Q(target_gender=gender) | models.Q(target_gender='unisex')
+            )
+
         return queryset.order_by('order', '-created_at')
 
 
@@ -1582,6 +1591,42 @@ class AddressDeleteView(views.APIView):
             return response.Response({
                 'error': 'Address not found'
             }, status=status.HTTP_404_NOT_FOUND)
+
+
+class SetDefaultAddressView(views.APIView):
+    """
+    API endpoint to set an address as default.
+    POST /api/addresses/{address_id}/set-default/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, address_id):
+        try:
+            # Get the address and verify it belongs to the user
+            address = Address.objects.get(id=address_id, user=request.user)
+
+            # Remove default from all other addresses for this user
+            Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+
+            # Set this address as default
+            address.is_default = True
+            address.save()
+
+            # Serialize and return the updated address
+            serializer = EnhancedAddressSerializer(address)
+            return response.Response({
+                'message': 'Address set as default successfully',
+                'address': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Address.DoesNotExist:
+            return response.Response({
+                'error': 'Address not found or does not belong to you'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response({
+                'error': f'Failed to set default address: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # User Delete View
@@ -1653,15 +1698,18 @@ class EnhancedOrderSerializer(OrderSerializer):
 
 # New Arrival Products View
 class NewArrivalProductsView(generics.ListAPIView):
-    serializer_class = EnhancedProductSerializer
+    serializer_class = NewArrivalProductSerializer
     permission_classes = [permissions.AllowAny]
-    
+
     def get_queryset(self):
         from datetime import timedelta
         thirty_days_ago = timezone.now() - timedelta(days=30)
         return Product.objects.filter(
             created_at__gte=thirty_days_ago
-        ).prefetch_related('variants', 'images', 'reviews').order_by('-created_at')[:20]
+        ).select_related('category').annotate(
+            average_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True)),
+            review_count=Count('reviews', filter=Q(reviews__is_approved=True))
+        ).order_by('-created_at')[:20]
 
 
 # Reward Point Utility Function

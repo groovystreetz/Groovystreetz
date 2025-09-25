@@ -325,18 +325,18 @@ from .models import (
 class TestimonialSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = Testimonial
-        fields = ['id', 'user', 'user_name', 'user_email', 'content', 'rating', 
-                 'is_approved', 'is_featured', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'user_name', 'user_email', 'content', 'rating',
+                 'user_image', 'is_approved', 'is_featured', 'created_at', 'updated_at']
         read_only_fields = ['user', 'created_at', 'updated_at']
 
 
 class AdminTestimonialSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = Testimonial
         fields = '__all__'
@@ -363,13 +363,19 @@ class AdminContactMessageSerializer(serializers.ModelSerializer):
 class ProductVariantSerializer(serializers.ModelSerializer):
     final_price = serializers.ReadOnlyField()
     size_display = serializers.CharField(source='get_size_display', read_only=True)
-    color_display = serializers.CharField(source='get_color_display', read_only=True)
-    
+
     class Meta:
         model = ProductVariant
-        fields = ['id', 'size', 'color', 'size_display', 'color_display', 'sku', 'price_modifier', 'final_price', 
-                 'stock', 'is_active', 'created_at']
+        fields = ['id', 'size', 'size_display', 'color_hex', 'color_name', 'sku',
+                 'price_modifier', 'final_price', 'stock', 'is_active', 'created_at']
         read_only_fields = ['created_at']
+
+    def validate_color_hex(self, value):
+        if value:
+            import re
+            if not re.match(r'^#[0-9A-Fa-f]{6}$', value):
+                raise serializers.ValidationError("Color must be a valid hex code (e.g., #37821B)")
+        return value
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -417,10 +423,13 @@ class RewardTransactionSerializer(serializers.ModelSerializer):
 
 
 class BannerSerializer(serializers.ModelSerializer):
+    target_gender_display = serializers.CharField(source='get_target_gender_display', read_only=True)
+
     class Meta:
         model = Banner
-        fields = ['id', 'title', 'subtitle', 'image', 'banner_type', 'link_url', 
-                 'link_text', 'is_active', 'order', 'start_date', 'end_date', 'created_at']
+        fields = ['id', 'title', 'subtitle', 'image', 'banner_type', 'target_gender',
+                 'target_gender_display', 'link_url', 'link_text', 'is_active', 'order',
+                 'start_date', 'end_date', 'created_at']
         read_only_fields = ['created_at']
 
 
@@ -462,32 +471,53 @@ class EnhancedProductSerializer(serializers.ModelSerializer):
         return obj.reviews.filter(is_approved=True).count()
 
 
+class NewArrivalProductSerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer optimized for new arrivals listing.
+    Only includes essential data to minimize response size and improve performance.
+    """
+    category = serializers.StringRelatedField()
+    average_rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
+    review_count = serializers.IntegerField(read_only=True)
+    gender_display = serializers.CharField(source='get_gender_display', read_only=True)
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'image', 'category', 'stock',
+                 'gender', 'gender_display', 'average_rating', 'review_count', 'created_at']
+
+
 # Update Address model to include default functionality
 class EnhancedAddressSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
+
     class Meta:
         model = Address
-        fields = '__all__'
-    
+        fields = [
+            'id', 'user', 'address_type', 'full_name', 'address_line_1', 'address_line_2',
+            'landmark', 'city', 'state_province', 'zip_postal_code', 'country',
+            'region', 'phone_number', 'alternative_phone', 'delivery_instructions',
+            'is_default'
+        ]
+
     def create(self, validated_data):
         # If this is set as default, remove default from other addresses
         if validated_data.get('is_default', False):
             Address.objects.filter(
-                user=validated_data['user'], 
+                user=validated_data['user'],
                 is_default=True
             ).update(is_default=False)
-        
+
         return super().create(validated_data)
-    
+
     def update(self, instance, validated_data):
         # If setting as default, remove default from other addresses
         if validated_data.get('is_default', False):
             Address.objects.filter(
-                user=instance.user, 
+                user=instance.user,
                 is_default=True
             ).exclude(id=instance.id).update(is_default=False)
-        
+
         return super().update(instance, validated_data)
 
 

@@ -24,7 +24,7 @@ from .views import (
     ProductVariantViewSet, ProductImageViewSet, ReviewListCreateView,
     AdminReviewViewSet, ReviewHelpfulView, RewardPointsView, RedeemRewardPointsView,
     BannerListView, AdminBannerViewSet, SpotlightListView, AdminSpotlightViewSet,
-    EnhancedAddressViewSet, AddressDeleteView, UserDeleteView,
+    EnhancedAddressViewSet, AddressDeleteView, SetDefaultAddressView, UserDeleteView,
     AdminUserContactUpdateView, NewArrivalProductsView,
     # Permission system views
     PermissionListView, RoleViewSet, UserRoleViewSet, AssignUserRolesView,
@@ -116,6 +116,7 @@ urlpatterns = [
 
     # Address management
     path('addresses/<int:address_id>/delete/', AddressDeleteView.as_view(), name='address-delete'),
+    path('addresses/<int:address_id>/set-default/', SetDefaultAddressView.as_view(), name='address-set-default'),
     path('user/delete/', UserDeleteView.as_view(), name='user-delete'),
 
     # Admin endpoints

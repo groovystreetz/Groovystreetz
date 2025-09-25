@@ -30,16 +30,34 @@ GET /api/orders/{id}/
 Response includes: { "user_details": { "name": "John Doe", "email": "john@example.com", "phone": "+1234567890" } }
 ```
 
-### ✅ **User Profile & Address Management**
+### ✅ **User Profile & Comprehensive Address Management**
 ```http
 # Enhanced profile editing
 PATCH /api/profile/edit/
 { "first_name": "John", "last_name": "Doe", "phone": "+1234567890", "email": "new@email.com" }
 
-# Multiple addresses with default setting
+# Multiple addresses with comprehensive details
 GET /api/enhanced-addresses/
 POST /api/enhanced-addresses/
-{ "address_line_1": "123 Main St", "city": "NYC", "is_default": true }
+{
+  "address_type": "Home",  # Home, Work, Other
+  "full_name": "John Doe",
+  "address_line_1": "123 Main St",
+  "address_line_2": "Apt 4B",
+  "landmark": "Near Central Park",
+  "city": "NYC",
+  "state_province": "New York",
+  "zip_postal_code": "10001",
+  "country": "India",
+  "region": "North",
+  "phone_number": "+1234567890",
+  "alternative_phone": "+0987654321",
+  "delivery_instructions": "Ring twice, leave at door",
+  "is_default": true
+}
+
+# Set address as default (NEW!)
+POST /api/addresses/{address_id}/set-default/
 
 # Delete address
 DELETE /api/addresses/{address_id}/delete/
@@ -52,6 +70,12 @@ PATCH /api/admin/users/{user_id}/contact/
 { "phone": "+9876543210", "email": "support@email.com" }
 ```
 
+**New Address Features:**
+- **Address types**: Home, Work, Other categorization
+- **Complete contact info**: Full name, dual phone numbers
+- **Delivery optimization**: Landmarks and special instructions
+- **Smart default management**: One-click default switching
+
 ### ✅ **Enhanced Product Variants & Gender Filtering**
 ```http
 # Product gender filtering (NEW!)
@@ -59,15 +83,16 @@ GET /api/products/?gender=male
 GET /api/products/?gender=female
 GET /api/products/?gender=unisex
 
-# Enhanced product variants with separate color and size fields
+# Enhanced product variants with hexadecimal colors (UPDATED!)
 GET /api/product-variants/?product={product_id}
 POST /api/product-variants/
 {
   "product": 1,
-  "size": "l",           # xs, s, m, l, xl, xxl, xxxl
-  "color": "red",        # red, blue, green, black, white, etc.
-  "sku": "TSHIRT-RED-L",
-  "price_modifier": "5.00",  # Extra ₹5 for this variant
+  "size": "l",                    # xs, s, m, l, xl, xxl, xxxl
+  "color_hex": "#37821B",         # NEW: Hex color code (e.g., #37821B)
+  "color_name": "Forest Green",   # NEW: Display name for the color
+  "sku": "TSHIRT-GREEN-L",
+  "price_modifier": "5.00",       # Extra ₹5 for this variant
   "stock": 50,
   "is_active": true
 }
@@ -76,7 +101,8 @@ Response:
 {
   "id": 1,
   "size": "l",
-  "color": "red",
+  "color_hex": "#37821B",
+  "color_name": "Forest Green",
   "size_display": "L",
   "color_display": "Red",
   "sku": "TSHIRT-RED-L",
@@ -142,21 +168,41 @@ Response: {
 }
 ```
 
-### ✅ **Testimonials System**
+### ✅ **Testimonials System (Enhanced with User Images)**
 ```http
-# Public testimonials
+# Public testimonials with user images
 GET /api/testimonials/
 Query: ?featured=true
+Response:
+{
+  "id": 1,
+  "content": "Amazing service and products!",
+  "rating": 5,
+  "user_image": "/media/testimonials/users/user1.jpg",  # NEW!
+  "user": "John D.",
+  "is_featured": true,
+  "created_at": "2024-01-15T10:00:00Z"
+}
 
-# Submit testimonial
+# Submit testimonial with user image (NEW!)
 POST /api/testimonials/
-{ "content": "Amazing service and products!", "rating": 5 }
+Content-Type: multipart/form-data
+{
+  "content": "Amazing service and products!",
+  "rating": 5,
+  "user_image": [file]  # NEW: Optional user profile image
+}
 
 # Admin testimonial management
 GET /api/admin/testimonials/
 PATCH /api/admin/testimonials/{id}/
 { "is_approved": true, "is_featured": true }
 ```
+
+**New Testimonial Features:**
+- **User profile images**: Users can upload photos alongside testimonials
+- **Enhanced display**: Better visual testimonials with user photos
+- **Improved credibility**: Real faces behind testimonials
 
 ### ✅ **Contact Us System**
 ```http
@@ -188,23 +234,24 @@ GET /api/enhanced-products/?categories=tshirts,hoodies,jeans
 GET /api/enhanced-products/?categories=tshirts&min_price=10&max_price=50&search=cotton&new_arrivals=true
 ```
 
-### ✅ **Homepage Content Management**
+### ✅ **Homepage Content Management (Enhanced)**
 ```http
-# Banners
+# Banners with gender targeting (NEW!)
 GET /api/banners/
-Query: ?type=hero  # hero, promotion, category
+Query: ?type=hero&gender=male  # hero, promotion, category + male, female, unisex
 
-# Spotlight content
+# Spotlight content with real product/category links (ENHANCED!)
 GET /api/spotlights/
 
-# Admin banner management
+# Admin banner management with gender targeting
 GET /api/admin/banners/
 POST /api/admin/banners/
 {
-  "title": "Summer Sale",
-  "subtitle": "Up to 50% off!",
+  "title": "Men's Summer Sale",
+  "subtitle": "Up to 50% off men's collection!",
   "image": [file],
   "banner_type": "promotion",
+  "target_gender": "male",         # NEW: male, female, unisex
   "link_url": "/products/sale",
   "link_text": "Shop Now",
   "start_date": "2024-06-01T00:00:00Z",
@@ -212,14 +259,15 @@ POST /api/admin/banners/
   "order": 1
 }
 
-# Admin spotlight management
+# Admin spotlight management with validation (ENHANCED!)
 GET /api/admin/spotlights/
 POST /api/admin/spotlights/
 {
   "title": "Featured Product",
   "description": "Check out our best seller!",
-  "spotlight_type": "product",
-  "product": 1,
+  "spotlight_type": "product",     # product or category (no generic collections)
+  "product": 1,                    # Required when spotlight_type is "product"
+  "category": null,                # Must be null when product is specified
   "image": [file],
   "order": 1
 }
