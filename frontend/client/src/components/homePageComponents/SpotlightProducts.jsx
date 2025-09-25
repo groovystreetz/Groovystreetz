@@ -176,13 +176,26 @@ const SpotlightProducts = () => {
                             e.stopPropagation();
                             setColor(product.id, colorObj);
                           }}
-                          className={`w-[30px] h-[30px] rounded-full border-2 transition-all ${
+                          
+                          className={` rounded-full border-2 transition-all ${
                             selectedOptions[product.id]?.color?.hex ===
                             colorObj.hex
                               ? "border-orange-400 scale-105"
                               : "border-white/60"
                           }`}
-                          style={{ backgroundColor: colorObj.hex }}
+                          style={{ backgroundColor: colorObj.hex,
+                                  height: '30px',
+                            width: '30px',
+                            borderRadius: '50%',
+                            borderColor: colorObj.hex,
+                            display: "inline-block",
+                            margin: "0px",
+                            padding: "0px",
+                            marginRight: "1px",
+                            marginLeft: "1px",
+                            marginTop: "1px",
+                            marginBottom: "1px",
+                          }}
                           aria-label={`Select color ${colorObj.hex}`}
                         />
                       ))}
