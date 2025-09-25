@@ -68,7 +68,7 @@ const TopPicks = () => {
   return (
     <div className="w-full max-w-[95%] mx-auto py-4 sm:py-8 px-4 sm:px-0">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-black">
-        TOP PICKS OF THE WEEKS
+        TOP PICKS OF THE WEEKSs
       </h2>
       <div className="relative flex items-center overflow-hidden">
         {/* Left Arrow - Hidden on mobile */}

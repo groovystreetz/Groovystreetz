@@ -61,10 +61,17 @@ const picks = [
 
 function VideoSection() {
   return (
-    <div className="w-full max-w-[95%] mx-auto py-12 px-2">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-10">
-        TOP  PICKS OF THE WEEK
-      </h2>
+    <div className="w-full max-w-[95%] mx-auto py-12 px-2 bg-gradient-to-b from-orange-50 to-white">
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-3 mb-4">
+          <div className="w-8 h-1 bg-gradient-to-r from-[#F57C26] to-[#d86a1f] rounded-full"></div>
+          <h2 className="text-2xl font-bold text-[#F57C26]">
+            TOP PICKS OF THE WEEK
+          </h2>
+          <div className="w-8 h-1 bg-gradient-to-r from-[#d86a1f] to-[#F57C26] rounded-full"></div>
+        </div>
+        <p className="text-gray-600 text-sm">Our most popular items this week</p>
+      </div>
       <div className="relative">
         <div className="flex items-center">
           <div className="flex gap-3 overflow-x-auto w-full px-2 pl-9" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
@@ -77,11 +84,11 @@ function VideoSection() {
                 className="relative flex-shrink-0 w-64 group"
               >
                 <div className="absolute inset-0 flex items-center">
-                  <span className="text-9xl font-bold text-gray-300 opacity-80 -ml-11">
+                  <span className="text-9xl font-bold text-[#F57C26] opacity-20 -ml-11">
                     {item.rank}
                   </span>
                 </div>
-                <div className="relative bg-gray-100 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out group-hover:shadow-xl">
+                <div className="relative bg-orange-50 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out group-hover:shadow-xl border-2 border-orange-100 group-hover:border-[#F57C26]">
                   <img
                     alt={item.alt}
                     className="w-full h-80 object-cover"
@@ -89,9 +96,9 @@ function VideoSection() {
                   />
                 </div>
                 <div className="pt-4">
-                  <h3 className="font-semibold text-gray-800">{item.title}</h3>
+                  <h3 className="font-semibold text-gray-800 group-hover:text-[#F57C26] transition-colors duration-300">{item.title}</h3>
                   <p className="text-gray-500 text-sm">{item.category}</p>
-                  <p className="text-gray-800 font-medium mt-1">{item.price}</p>
+                  <p className="text-[#F57C26] font-medium mt-1">{item.price}</p>
                 </div>
               </div>
             ))}

@@ -135,15 +135,22 @@ const styles = `
 
 function NewArrivals() {
   return (
-    <div className="mt-20 w-screen bg-white">
+    <div className="pt-20 w-screen bg-gradient-to-b from-orange-50 to-white">
       {/* Inject styles */}
       <style>{styles}</style>
 
       <div className="mx-auto px-4 relative">
         {/* Heading */}
-        <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 tracking-wide">
-          NEW ARRIVALS
-        </h2>
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="w-8 h-1 bg-gradient-to-r from-[#F57C26] to-[#d86a1f] rounded-full"></div>
+            <h2 className="text-3xl font-bold text-[#F57C26] tracking-wide">
+              NEW ARRIVALS
+            </h2>
+            <div className="w-8 h-1 bg-gradient-to-r from-[#d86a1f] to-[#F57C26] rounded-full"></div>
+          </div>
+          <p className="text-gray-600 text-sm">Discover the latest trends in fashion</p>
+        </div>
 
         {/* Infinite Scroll Container */}
         <div className="relative w-full overflow-hidden">
@@ -153,7 +160,7 @@ function NewArrivals() {
                 key={`${item.id}-${index}`}
                 className="group cursor-pointer min-w-[280px] sm:min-w-[320px]"
               >
-                <div className="relative w-full h-80 overflow-hidden rounded-none shadow-md group-hover:shadow-xl transition duration-300">
+                <div className="relative w-full h-80 overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl transition duration-300 border-2 border-orange-100 group-hover:border-[#F57C26]">
                   {/* Default Image */}
                   <img
                     src={item.image}
@@ -173,7 +180,7 @@ function NewArrivals() {
                     {item.labels.map((label, idx) => (
                       <span
                         key={idx}
-                        className="bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide"
+                        className="bg-[#F57C26] text-white text-[10px] px-2 py-0.5 rounded-full font-medium tracking-wide shadow-md"
                       >
                         {label}
                       </span>
@@ -183,11 +190,11 @@ function NewArrivals() {
 
                 {/* Text */}
                 <div className="mt-4 text-left px-1">
-                  <h3 className="text-base text-gray-900 font-semibold line-clamp-1">
+                  <h3 className="text-base text-gray-900 font-semibold line-clamp-1 group-hover:text-[#F57C26] transition-colors duration-300">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-500">{item.category}</p>
-                  <p className="text-base text-gray-800 font-bold mt-1">
+                  <p className="text-sm text-gray-600">{item.category}</p>
+                  <p className="text-base text-[#F57C26] font-bold mt-1">
                     {item.price}
                   </p>
                 </div>
