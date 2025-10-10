@@ -3,7 +3,8 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useProducts } from "../../hooks/useProducts";
 
 const TopPicks = () => {
-  const { products, isLoading, isError } = useProducts();
+  const { getProducts, loading, error } = useProducts();
+  const [products, setProducts] = useState([]);
   const [startIdx, setStartIdx] = useState(0);
   const [cardCount, setCardCount] = useState(5);
 
@@ -25,11 +26,29 @@ const TopPicks = () => {
     return () => window.removeEventListener("resize", updateCardCount);
   }, []);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Failed to load products.</div>;
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await getProducts({ limit: 10 });
+        const list = Array.isArray(data)
+          ? data
+          : data?.results || data?.products || [];
+        if (isMounted) setProducts(Array.isArray(list) ? list : []);
+      } catch {
+        if (isMounted) setProducts([]);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [getProducts]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Failed to load products.</div>;
 
   // Only use the first 4 products for the carousel
-  const displayProducts = products.slice(0, 10);
+  const displayProducts = (products || []).slice(0, 10);
 
   const handlePrev = () => {
     setStartIdx((prev) => Math.max(prev - cardCount, 0));
@@ -49,7 +68,7 @@ const TopPicks = () => {
   return (
     <div className="w-full max-w-[95%] mx-auto py-4 sm:py-8 px-4 sm:px-0">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-black">
-        TOP PICKS OF THE WEEKS
+        TOP PICKS OF THE WEEKSs
       </h2>
       <div className="relative flex items-center overflow-hidden">
         {/* Left Arrow - Hidden on mobile */}

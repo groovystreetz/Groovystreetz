@@ -53,10 +53,17 @@ const ShopByGroovy = () => {
   };
 
   return (
-    <div className="w-full max-w-[95%] mx-auto py-6 sm:py-12 px-4 sm:px-0">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-10 text-center text-gray-900 tracking-tight">
-        Shop by Groovy
-      </h2>
+    <div className="w-full max-w-[95%] mx-auto py-6 sm:py-12 px-4 sm:px-0 bg-gradient-to-b from-white to-orange-50">
+      <div className="text-center mb-6 sm:mb-10">
+        <div className="inline-flex items-center gap-3 mb-4">
+          <div className="w-8 h-1 bg-gradient-to-r from-[#F57C26] to-[#d86a1f] rounded-full"></div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#F57C26] tracking-tight">
+            Shop by Groovy
+          </h2>
+          <div className="w-8 h-1 bg-gradient-to-r from-[#d86a1f] to-[#F57C26] rounded-full"></div>
+        </div>
+        <p className="text-gray-600 text-sm">Explore our curated collections</p>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {categories.map((category, index) => (
           <div key={category.slug} className="w-full">
@@ -65,10 +72,10 @@ const ShopByGroovy = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
               whileHover={{ scale: 1.02 }}
-              className="relative rounded-none shadow-lg hover:shadow-2xl transition overflow-hidden cursor-pointer w-full"
+              className="relative rounded-lg shadow-lg hover:shadow-2xl transition overflow-hidden cursor-pointer w-full border-2 border-orange-100 hover:border-[#F57C26]"
               onClick={() => handleCardClick(category)}
             >
-              <div className="overflow-hidden rounded-t-none">
+              <div className="overflow-hidden rounded-t-lg">
                 <Motion.img
                   src={category.image || "/images/groovy1.jpg"}
                   alt={category.title}
@@ -77,9 +84,9 @@ const ShopByGroovy = () => {
                   transition={{ duration: 0.4 }}
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-white">
-                <h3 className="text-lg sm:text-xl font-semibold drop-shadow">{category.title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold drop-shadow group-hover:text-[#F57C26] transition-colors duration-300">{category.title}</h3>
               </div>
             </Motion.div>
           </div>
@@ -100,7 +107,7 @@ const ShopByGroovy = () => {
               const selected = categories.find((c) => c.slug === expandedSlug);
               if (!selected || !selected.subcategories) return null;
               return (
-                <div className=" rounded-md p-3 sm:p-1">
+                <div className="rounded-lg p-3 sm:p-1 bg-gradient-to-r from-orange-50 to-white border border-orange-100">
                   <div className="flex gap-4 overflow-x-auto justify-between no-scrollbar py-1 "
                   
                   style={
@@ -119,7 +126,7 @@ const ShopByGroovy = () => {
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: i * 0.05, duration: 0.25 }}
-                        className="min-w-[220px] sm:min-w-[260px] h-40 sm:h-48  overflow-hidden shadow bg-white cursor-pointer snap-start"
+                        className="min-w-[220px] sm:min-w-[260px] h-40 sm:h-48 overflow-hidden shadow-lg bg-white cursor-pointer snap-start rounded-lg border-2 border-orange-100 hover:border-[#F57C26] transition-all duration-300"
                         onClick={() => navigate(`/products?categories=${selected.slug}&sub=${sub.slug}`)}
                       >
                         <div className="relative w-full h-full">
@@ -128,9 +135,9 @@ const ShopByGroovy = () => {
                             alt={sub.label}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                           <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                            <div className="text-sm sm:text-base font-semibold line-clamp-1">{sub.label}</div>
+                            <div className="text-sm sm:text-base font-semibold line-clamp-1 group-hover:text-[#F57C26] transition-colors duration-300">{sub.label}</div>
                           </div>
                         </div>
                       </Motion.div>
