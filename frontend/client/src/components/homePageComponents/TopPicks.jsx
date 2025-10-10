@@ -20,6 +20,7 @@ const TopPicks = () => {
       }
       setStartIdx(0);
     };
+
     updateCardCount();
     window.addEventListener("resize", updateCardCount);
     return () => window.removeEventListener("resize", updateCardCount);
@@ -28,8 +29,8 @@ const TopPicks = () => {
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Failed to load products.</div>;
 
-  // Only use the first 4 products for the carousel
-  const displayProducts = products.slice(0, 10);
+  // Show first 10 products in carousel
+  const displayProducts = Array.isArray(products) ? products.slice(0, 10) : [];
 
   const handlePrev = () => {
     setStartIdx((prev) => Math.max(prev - cardCount, 0));
@@ -37,7 +38,7 @@ const TopPicks = () => {
 
   const handleNext = () => {
     setStartIdx((prev) =>
-      Math.min(prev + cardCount, displayProducts.length - 1)
+      Math.min(prev + cardCount, displayProducts.length - cardCount)
     );
   };
 
@@ -49,10 +50,11 @@ const TopPicks = () => {
   return (
     <div className="w-full max-w-[95%] mx-auto py-4 sm:py-8 px-4 sm:px-0">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-black">
-        TOP PICKS OF THE WEEKS
+        TOP PICKS OF THE WEEK
       </h2>
+
       <div className="relative flex items-center overflow-hidden">
-        {/* Left Arrow - Hidden on mobile */}
+        {/* Left Arrow (hidden on mobile) */}
         <button
           onClick={handlePrev}
           disabled={startIdx === 0}
@@ -63,14 +65,14 @@ const TopPicks = () => {
           <FiChevronLeft className="text-xl sm:text-2xl" />
         </button>
 
-        {/* Cards */}
+        {/* Product Cards */}
         <div className="flex gap-2 sm:gap-5 w-full justify-center sm:justify-between transition-transform duration-500 ease-out">
           {visibleProducts.map((product, index) => (
             <div
               key={product.id}
               className="relative flex flex-col items-center sm:items-start overflow-visible w-full sm:w-auto"
             >
-              {/* Number behind - Hidden on mobile */}
+              {/* Background Number (desktop only) */}
               <span
                 className="hidden sm:block absolute bg-black -left-8 top-32 text-7xl font-extrabold text-white select-none pointer-events-none"
                 style={{
@@ -81,7 +83,7 @@ const TopPicks = () => {
                 {startIdx + index + 1}
               </span>
 
-              {/* Premium Card */}
+              {/* Image Card */}
               <div className="bg-white rounded-none shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:shadow-2xl w-full sm:w-auto">
                 <img
                   src={product.image || "/images/product1.jpg"}
@@ -90,12 +92,12 @@ const TopPicks = () => {
                 />
               </div>
 
-              {/* Text */}
+              {/* Product Details */}
               <div className="mt-3 w-full text-center sm:text-left">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   {product.name}
                 </h3>
-                <span className="text-xs sm:text-sm text-gray-500 font-medium">
+                <span className="text-xs sm:text-sm text-gray-500 font-medium block">
                   {product.category}
                 </span>
                 <span className="text-gray-800 font-bold block text-sm sm:text-base">
@@ -106,12 +108,12 @@ const TopPicks = () => {
           ))}
         </div>
 
-        {/* Right Arrow - Hidden on mobile */}
+        {/* Right Arrow (hidden on mobile) */}
         <button
           onClick={handleNext}
-          disabled={startIdx >= displayProducts.length - 1}
+          disabled={startIdx >= displayProducts.length - cardCount}
           className={`hidden sm:block absolute right-2 sm:right-10 z-10 p-2 hover:text-orange-600 bg-white rounded-full shadow-md transition ${
-            startIdx >= displayProducts.length - 1
+            startIdx >= displayProducts.length - cardCount
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}
