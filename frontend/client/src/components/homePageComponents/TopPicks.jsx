@@ -35,7 +35,7 @@ const TopPicks = () => {
           ? data
           : data?.results || data?.products || [];
         if (isMounted) setProducts(Array.isArray(list) ? list : []);
-      } catch (_) {
+      } catch {
         if (isMounted) setProducts([]);
       }
     })();
